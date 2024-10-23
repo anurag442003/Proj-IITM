@@ -3,6 +3,8 @@
         <section class="single-container">
             <div class="wrapper" v-for="section in sections" :key="section.id">
                 <h2 class="my2">{{ section.name }}</h2>
+                <h4 class="my3">Time required : {{ section.time }} hours</h4>
+                <h4 class="my3">Base Price : {{ section.baseprice }} Rs.</h4>
                 <div class="slider-content">
                     <content-card v-for="content in filteredContents(section.id)" :key="content.id" :content="content"
                         :decodedImage="content.decodedImage" :isRead="false"></content-card>
