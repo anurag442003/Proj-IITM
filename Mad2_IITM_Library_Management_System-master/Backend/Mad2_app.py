@@ -564,7 +564,7 @@ def get_all_sections():
 
 
         sections_list = [
-            {"id": section.id, "name": section.name, "base-price": section.baseprice, "time": section.time, "Desc": section.desc} for section in sections
+            {"id": section.id, "name": section.name, "baseprice": section.baseprice, "time": section.time, "Desc": section.desc} for section in sections
         ]
 
         app.logger.info("Fetched Sections")
@@ -590,6 +590,7 @@ def fetch_content():
                 "author": content.author,
                 "rating": average_rating,
                 "section": content.section,
+                "price": content.price,
                 "imageType": content.imageType,
                 "image": base64.b64encode(content.image).decode("utf-8"),
                 "ratings": [
@@ -1642,8 +1643,10 @@ def detailed_view(content_id, user_id):
             return jsonify({'error': 'User or content not found'}), 404
 
         response_data = {
+            'userid': user.id,
             'username': user.uname,
-            'contentName': content.title,
+            'pin': user.pin,
+            'phno': user.phNumber,
             'sectionName': Section.query.get(content.section).name
         }
         

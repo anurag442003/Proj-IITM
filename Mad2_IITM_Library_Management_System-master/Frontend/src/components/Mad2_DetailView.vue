@@ -1,8 +1,10 @@
 <template>
     <div class="custom-container">
         <h2>Details</h2>
+        <p><strong>UserId:</strong> {{ userDetails.userid }}</p>
         <p><strong>Username:</strong> {{ userDetails.username }}</p>
-        <p><strong>Content Name:</strong> {{ contentDetails.contentName }}</p>
+        <p><strong>Phone Number:</strong> {{ userDetails.phno }}</p>
+        <p><strong>Pincode:</strong> {{ userDetails.pin }}</p>
         <p><strong>Section Name:</strong> {{ contentDetails.sectionName }}</p>
         <div class="d-flex">
             <button class="btn btn-success mx-4" @click="acceptRequest(contentId, userId)">Accept</button>
