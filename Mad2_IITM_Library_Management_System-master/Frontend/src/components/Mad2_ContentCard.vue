@@ -8,6 +8,8 @@
             <div class="title-holder">
                 <!-- <p>Title</p> -->
                 <h3>{{ content.title }}</h3>
+                <p>Service Charge: {{ content.price }} </p>
+
             </div>
             <div class="bottom-area">
                 <p>Rating: {{ !content.rating || isNaN(content.rating) ? 'N/A' : `${content.rating.toFixed(2)} / 5` }}</p>
@@ -24,11 +26,11 @@
                 <div v-if="content.isRequested && !content.isIssued" class="btn btn-secondary btn-sm">
                     <i class="fa-solid fa-hourglass-start"></i> Waiting
                 </div>
-                <button v-show="content.isIssued" class="btn btn-primary btn-sm" @click="openContent(content.id)">
+                <!-- <button v-show="content.isIssued" class="btn btn-primary btn-sm" @click="openContent(content.id)">
                     <i class="fa-brands fa-readme"></i> Read
-                </button>
+                </button> -->
                 <button v-show="content.isIssued" class="btn btn-danger btn-sm" @click="returnContent(content.id)">
-                    <i class="fa-solid fa-rotate-left"></i> Return
+                    <i class="fa-solid fa-rotate-left"></i> End service
                 </button>
                 <!--<button class="btn btn-light btn-sm"
                         @click="toggleWishlist(content.id, content.isWishlisted)"
