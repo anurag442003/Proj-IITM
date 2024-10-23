@@ -3,7 +3,11 @@
         <div class="data d-flex justify-content-between">
             <h2>Current Reader Count: {{ currentReaderCount }}</h2>
             <h2>Total Reader Count: {{ totalReaderCount }}</h2>
+<<<<<<< Updated upstream
             <!--<h2>Wishlist Count: {{ wishlistCount }}</h2>-->
+=======
+        <!--<h2>Wishlist Count: {{ wishlistCount }}</h2>-->
+>>>>>>> Stashed changes
         </div>
         <table class="table table-striped table-bordered">
             <thead class="thead-dark">
@@ -52,7 +56,7 @@ export default {
             tableData: [],
             currentReaderCount: 0,
             totalReaderCount: 0,
-            wishlistCount: 0
+            // wishlistCount: 0
         };
     },
     mounted() {
@@ -120,17 +124,17 @@ export default {
                 });
 
 
-            axios.get(`http://127.0.0.1:5000/wishlist-count/${contentId}`, {
-                headers: {
-                    Authorization: `Bearer ${sessionStorage.getItem('token')}`,
-                }
-            })
-                .then(response => {
-                    this.wishlistCount = response.data.wishlistCount;
-                })
-                .catch(error => {
-                    console.error('Error fetching wishlist count:', error);
-                });
+            // axios.get(`http://127.0.0.1:5000/wishlist-count/${contentId}`, {
+            //     headers: {
+            //         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+            //     }
+            // })
+            //     .then(response => {
+            //         this.wishlistCount = response.data.wishlistCount;
+            //     })
+            //     .catch(error => {
+            //         console.error('Error fetching wishlist count:', error);
+            //     });
         },
     },
 };
