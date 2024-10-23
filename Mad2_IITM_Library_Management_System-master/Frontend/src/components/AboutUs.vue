@@ -1,33 +1,33 @@
 <template>
     <div class="about-container">
-        <h2>About The Wisdom</h2>
-        <p>Your ultimate destination for seamless library management!</p>
+        <h2>HH Services</h2>
+        <p>Your ultimate destination for household services!</p>
 
         <section>
             <h3>Our Vision</h3>
             <p>
-                At The Wisdom, we strive to deliver an intuitive and effective library management system that caters to both librarians and book lovers.
+                At HH Services, we strive to deliver the best experience for service professionals and customers.
             </p>
         </section>
 
         <section>
             <h3>Founder</h3>
             <ul>
-                <li><strong>Vikas Jha</strong> - 23f1001674@ds.study.iitm.ac.in</li>
+                <li>22f1000362@ds.study.iitm.ac.in</li>
             </ul>
         </section>
 
         <section>
             <h3>Get in Touch</h3>
             <p>If you have any inquiries or feedback, we’d love to hear from you:</p>
-            <p>Email: support@thewisdom.com</p>
+            <p>Email: support@hhservices.com</p>
         </section>
     </div>
 </template>
   
 <script>
 export default {
-    name: 'Mad2_AboutUs',
+    name: 'AboutUs',
 };
 </script>
   

@@ -1,5 +1,5 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
-import AboutUs from '../components/Mad2_AboutUs.vue';
+import AboutUs from '../components/AboutUs.vue';
 import ReaderHome from '../components/Mad2_ReaderHome.vue';
 import LibrarianHome from '../components/Mad2_LibrarianHome.vue';
 import AdminHome from '../components/AdminHome.vue';
@@ -15,7 +15,7 @@ import UpdateSection from '../components/Mad2_UpdateSection.vue';
 import UploadContent from '../components/Mad2_UploadContent.vue';
 import HomePage from '../components/Mad2_HomePage.vue';
 import UserProfile from '../components/Mad2_UserProfile.vue';
-import ReaderWishlist from '../components/Mad2_ReaderWishlist.vue';
+// import ReaderWishlist from '../components/Mad2_ReaderWishlist.vue';
 import RateContent from '../components/Mad2_RateContent.vue';
 import SummaryGraph from '../components/Mad2_SummaryGraph.vue';
 import ActivityPage from '../components/Mad2_ActivityPage.vue';
@@ -26,7 +26,7 @@ const routes = [
   { path: '/', name: 'home', component: HomePage },
   { path: '/userprofile/:userId', name: 'UserProfile', component: UserProfile, meta: { requiresAuth: true } },
   { path: '/rate/:contentId', name: 'RateContent', component: RateContent, props: true, meta: { requiresAuth: true } },
-  { path: '/wishlist/:userId', name: 'ReaderWishlist', component: ReaderWishlist, meta: { requiresAuth: true } },
+  // { path: '/wishlist/:userId', name: 'ReaderWishlist', component: ReaderWishlist, meta: { requiresAuth: true } },
   { path: '/reader-home', name: 'ReaderHome', component: ReaderHome, meta: { requiresAuth: true } },
   { path: '/detail_view/:contentId/:userId', name: 'DetailView', component: DetailView, meta: { requiresAuth: true } },
   { path: '/librarian-home', name: 'LibrarianHome', component: LibrarianHome, meta: { requiresAuth: true } },

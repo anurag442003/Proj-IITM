@@ -43,33 +43,47 @@ class User(db.Model):
         if re.search("[^a-zA-Z\s]", state):
             raise ValueError("State name can only contain alphabets and spaces.")
 
+# class ProfeshionalsDetails(db.Model):
+#     pid = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+#     service_type_id = db.Column(db.Integer, db.ForeignKey('service.id'))
+#     experience_years = db.Column(db.Integer)
+#     is_verified = db.Column(db.Boolean, default=False)
+#     additional_charges=db.Column(db.Float,default=0.00)
+    
 class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.String(255), nullable=False)
     content_id = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)
+    # profeshional_id = db.Column(db.Integer, db.ForeignKey('profeshionalsdetails.pid'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
 class Section(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
 
+# class Service(db.Model):
+#     id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(50), unique=True, nullable=False)
+
 class Content(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(100), nullable=False)
-    author = db.Column(db.String(50), nullable=False)
-    image = db.Column(db.LargeBinary)
-    imageType = db.Column(db.String(10))
-    uploaded_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    ratings = db.relationship('Review', backref='content', lazy=True)
-    no_of_pages = db.Column(db.Integer, nullable=False)
-    publish_year = db.Column(db.Integer, nullable=False)
-    file = db.Column(db.LargeBinary, nullable=False)
-    pdf_file_name = db.Column(db.String(250), nullable=True)
-    price = db.Column(db.Float, nullable=False)
-    section = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
-    borrowings = db.relationship('Borrowing', backref='borrowed_content',  cascade="all, delete-orphan")
-    wishlists = db.relationship('Wishlist', backref='wishlisted_content',  cascade="all, delete-orphan")
+    id = db.Column(db.Integer, primary_key=True) #prof ka id
+    title = db.Column(db.String(100), nullable=False) #prof ka name
+    author = db.Column(db.String(50), nullable=False) #wont exist anymore, can be desc
+    image = db.Column(db.LargeBinary) #prof ka profile photo
+    imageType = db.Column(db.String(10)) #idec
+    uploaded_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # userid
+    ratings = db.relationship('Review', backref='content', lazy=True) #exists
+    no_of_pages = db.Column(db.Integer, nullable=False) #experience no of years
+    publish_year = db.Column(db.Integer, nullable=False) #birthday
+    file = db.Column(db.LargeBinary, nullable=False) #resume
+    pdf_file_name = db.Column(db.String(250), nullable=True) #not needed
+    #is_verified = db.Column(db.Boolean, default=False)
+    price = db.Column(db.Float, nullable=False) #additional charge
+    section = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False) #servicetype
+    borrowings = db.relationship('Borrowing', backref='borrowed_content',  cascade="all, delete-orphan") #service request backref to request
+    # wishlists = db.relationship('Wishlist', backref='wishlisted_content',  cascade="all, delete-orphan") #not needed
 
 class TransactionsLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -89,26 +103,27 @@ class Borrowing(db.Model):
     reissue_count = db.Column(db.Integer, default=0)
     is_read = db.Column(db.Boolean, default=False)
 
-class Wishlist(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    content_id = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)
-    user = db.relationship('User', backref='wishlist_items', lazy=True)
-    content = db.relationship('Content', back_populates='wishlists', lazy=True, overlaps="wishlisted_content")
-
-class Login(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    last_login_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
-
-class Purchase(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    amount = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    content_id = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)
 
 class Requests(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     contentId = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)
     userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     response = db.Column(db.String(10), default='Pending')
+
+# class Wishlist(db.Model): #not needed
+#     id = db.Column(db.Integer, primary_key=True)
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+#     content_id = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)
+#     user = db.relationship('User', backref='wishlist_items', lazy=True)
+#     content = db.relationship('Content', back_populates='wishlists', lazy=True, overlaps="wishlisted_content")
+
+class Login(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    last_login_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
+
+class Purchase(db.Model): 
+    id = db.Column(db.Integer, primary_key=True)
+    amount = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    content_id = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)

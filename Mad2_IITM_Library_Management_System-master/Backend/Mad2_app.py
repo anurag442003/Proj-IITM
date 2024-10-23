@@ -73,7 +73,7 @@ stream_handler.setFormatter(formatter)
 logging.getLogger().addHandler(stream_handler)
 
 
-from Mad2_Models import db, User, Section, Content, Borrowing, TransactionsLog, Review, Wishlist, Login, Purchase, Requests
+from Mad2_Models import db, User, Section, Content, Borrowing, TransactionsLog, Review, Login, Purchase, Requests
 db.init_app(app)
 api = Api(app)
 excel.init_excel(app)
@@ -142,13 +142,13 @@ def monthly_report():
         all_users = User.query.all()
         for user in all_users:
             active_borrowings_count = Borrowing.query.filter_by(member_id=user.id, returned=False).count()
-            wishlist_items_count = len(user.wishlist_items)
+            # wishlist_items_count = len(user.wishlist_items)
 
             pdf_buffer = BytesIO()
             c = canvas.Canvas(pdf_buffer)
             c.drawString(100, 750, "Monthly Report for User: {}".format(user.uname))
             c.drawString(100, 730, "Active Borrowings: {}".format(active_borrowings_count))
-            c.drawString(100, 710, "Wishlist Items Count: {}".format(wishlist_items_count))
+            # c.drawString(100, 710, "Wishlist Items Count: {}".format(wishlist_items_count))
             c.save()
 
             sender = "noreply@app.com"
@@ -517,41 +517,41 @@ def add_content(section_id, user_id):
         return jsonify({"message": f"Error adding content: {str(e)}"}), 500
 
 # 3. Wishlist
-@app.route("/wishlist/add/<int:content_id>", methods=["POST"])
-@jwt_required()
-def add_to_wishlist(content_id):
-    try:
-        current_user_id = get_jwt_identity()
+# @app.route("/wishlist/add/<int:content_id>", methods=["POST"])
+# @jwt_required()
+# def add_to_wishlist(content_id):
+#     try:
+#         current_user_id = get_jwt_identity()
 
-        existing_wishlist_item = Wishlist.query.filter_by(
-            content_id=content_id, user_id=current_user_id
-        ).first()
+#         existing_wishlist_item = Wishlist.query.filter_by(
+#             content_id=content_id, user_id=current_user_id
+#         ).first()
 
-        if existing_wishlist_item:
-            app.logger.warn("Content Already In Wishlist")
-            return jsonify({"error": "Content is already in the wishlist"}), 400
+#         if existing_wishlist_item:
+#             app.logger.warn("Content Already In Wishlist")
+#             return jsonify({"error": "Content is already in the wishlist"}), 400
 
-        new_wishlist_item = Wishlist(content_id=content_id, user_id=current_user_id)
-        db.session.add(new_wishlist_item)
+#         new_wishlist_item = Wishlist(content_id=content_id, user_id=current_user_id)
+#         db.session.add(new_wishlist_item)
 
-        new_transaction_log = TransactionsLog(
-            user_id=current_user_id,
-            action="+ Wishlist",
-            content_id=content_id,
-            timestamp=datetime.now(),
-        )
-        db.session.add(new_transaction_log)
+#         new_transaction_log = TransactionsLog(
+#             user_id=current_user_id,
+#             action="+ Wishlist",
+#             content_id=content_id,
+#             timestamp=datetime.now(),
+#         )
+#         db.session.add(new_transaction_log)
 
-        db.session.commit()
+#         db.session.commit()
 
-        app.logger.info("Content Wishlisted Successfully")
-        return jsonify({"message": "Content added to wishlist successfully"}), 200
-    except Exception as e:
-        app.logger.error("Content Wishlisting Failed", str(e))
-        return (
-            jsonify({"error": "Failed to add content to wishlist", "details": str(e)}),
-            500,
-        )
+#         app.logger.info("Content Wishlisted Successfully")
+#         return jsonify({"message": "Content added to wishlist successfully"}), 200
+#     except Exception as e:
+#         app.logger.error("Content Wishlisting Failed", str(e))
+#         return (
+#             jsonify({"error": "Failed to add content to wishlist", "details": str(e)}),
+#             500,
+#         )
 
 
 
@@ -650,10 +650,10 @@ def fetch_user_content(user_id):
                 Borrowing,
                 (Borrowing.content_id == Content.id) & (Borrowing.member_id == user_id),
             )
-            .outerjoin(
-                Wishlist,
-                (Wishlist.content_id == Content.id) & (Wishlist.user_id == user_id),
-            )
+            # .outerjoin(
+            #     Wishlist,
+            #     (Wishlist.content_id == Content.id) & (Wishlist.user_id == user_id),
+            # )
             .outerjoin(Review, Review.content_id == Content.id)
             .outerjoin(
                 Requests,
@@ -669,7 +669,7 @@ def fetch_user_content(user_id):
                 Content.image,
                 Borrowing.returned.label("returned"),
                 Borrowing.id.label("borrowing_id"),
-                Wishlist.id.label("wishlist_id"),
+                # Wishlist.id.label("wishlist_id"),
                 Requests.response.label("isRequested"),
             )
             .group_by(Content.id)
@@ -686,7 +686,7 @@ def fetch_user_content(user_id):
                 "imageType": content.imageType,
                 "image": base64.b64encode(content.image).decode("utf-8"),
                 "isIssued": content.borrowing_id is not None and not content.returned,
-                "isWishlisted": content.wishlist_id is not None,
+                # "isWishlisted": content.wishlist_id is not None,
                 "isRead": content.borrowing_id is not None,
                 "isRequested": content.isRequested == 'Pending' if content.isRequested else False
             }
@@ -763,14 +763,14 @@ def delete_content(content_id):
 
         app.logger.info("Content found: %s", content_id)
 
-        try:
-            related_wishlist_items = Wishlist.query.filter_by(content_id=content_id).all()
-            app.logger.info("Found %d related wishlist items", len(related_wishlist_items))
-            for wishlist_item in related_wishlist_items:
-                db.session.delete(wishlist_item)
-        except Exception as e:
-            app.logger.error("Error deleting wishlist items: %s", str(e))
-            return jsonify({"error": "Failed to delete wishlist items", "details": str(e)}), 500
+        # try:
+        #     related_wishlist_items = Wishlist.query.filter_by(content_id=content_id).all()
+        #     app.logger.info("Found %d related wishlist items", len(related_wishlist_items))
+        #     for wishlist_item in related_wishlist_items:
+        #         db.session.delete(wishlist_item)
+        # except Exception as e:
+        #     app.logger.error("Error deleting wishlist items: %s", str(e))
+        #     return jsonify({"error": "Failed to delete wishlist items", "details": str(e)}), 500
 
         try:
             related_review_items = Review.query.filter_by(content_id=content_id).all()
@@ -804,42 +804,42 @@ def delete_content(content_id):
         return jsonify({"error": "Content deletion failed", "details": str(e)}), 500
 
 # 3. Wishlist
-@app.route("/wishlist/remove/<int:content_id>", methods=["POST"])
-@jwt_required()
-def remove_from_wishlist(content_id):
-    try:
-        current_user_id = get_jwt_identity()
+# @app.route("/wishlist/remove/<int:content_id>", methods=["POST"])
+# @jwt_required()
+# def remove_from_wishlist(content_id):
+#     try:
+#         current_user_id = get_jwt_identity()
 
-        wishlist_item = Wishlist.query.filter_by(
-            content_id=content_id, user_id=current_user_id
-        ).first()
+#         wishlist_item = Wishlist.query.filter_by(
+#             content_id=content_id, user_id=current_user_id
+#         ).first()
 
-        if not wishlist_item:
-            app.logger.warn("Content Not Found In Wishlisted")
-            return jsonify({"error": "Content not found in the wishlist"}), 404
+#         if not wishlist_item:
+#             app.logger.warn("Content Not Found In Wishlisted")
+#             return jsonify({"error": "Content not found in the wishlist"}), 404
 
-        db.session.delete(wishlist_item)
+#         db.session.delete(wishlist_item)
 
-        new_transaction_log = TransactionsLog(
-            user_id=current_user_id,
-            action="- Wishlist",
-            content_id=content_id,
-            timestamp=datetime.now(),
-        )
-        db.session.add(new_transaction_log)
+#         new_transaction_log = TransactionsLog(
+#             user_id=current_user_id,
+#             action="- Wishlist",
+#             content_id=content_id,
+#             timestamp=datetime.now(),
+#         )
+#         db.session.add(new_transaction_log)
 
-        db.session.commit()
+#         db.session.commit()
 
-        app.logger.info("Content Removed From Wishlist Successfully")
-        return jsonify({"message": "Content removed from wishlist successfully"}), 200
-    except Exception as e:
-        app.logger.error("Error Removing Content From Wishlist", str(e))
-        return (
-            jsonify(
-                {"error": "Failed to remove content from wishlist", "details": str(e)}
-            ),
-            500,
-        )
+#         app.logger.info("Content Removed From Wishlist Successfully")
+#         return jsonify({"message": "Content removed from wishlist successfully"}), 200
+#     except Exception as e:
+#         app.logger.error("Error Removing Content From Wishlist", str(e))
+#         return (
+#             jsonify(
+#                 {"error": "Failed to remove content from wishlist", "details": str(e)}
+#             ),
+#             500,
+#         )
 
 
 #GET
@@ -1073,16 +1073,16 @@ def total_reader_count(content_id):
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/wishlist-count/<int:content_id>', methods=['GET'])
-@jwt_required()
-def wishlist_count(content_id):
-    try:
-        count = Wishlist.query.filter_by(content_id=content_id).count()
-        app.logger.info("Wishlist Count Fetched")
-        return jsonify({'wishlistCount': count}), 200
-    except Exception as e:
-        app.logger.error("Error Fetching WC", str(e))
-        return jsonify({'error': str(e)}), 500
+# @app.route('/wishlist-count/<int:content_id>', methods=['GET'])
+# @jwt_required()
+# def wishlist_count(content_id):
+#     try:
+#         count = Wishlist.query.filter_by(content_id=content_id).count()
+#         app.logger.info("Wishlist Count Fetched")
+#         return jsonify({'wishlistCount': count}), 200
+#     except Exception as e:
+#         app.logger.error("Error Fetching WC", str(e))
+#         return jsonify({'error': str(e)}), 500
 
 @app.route("/accept_request/<int:content_id>/<int:user_id>", methods=["POST"])
 @jwt_required()
@@ -1450,15 +1450,15 @@ def search_result():
         is_issued = False
         is_read = False
         is_requested = False
-        is_wishlisted = False
+        # is_wishlisted = False
         if current_user_id:
             borrowing = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id, returned=False).first()
             if borrowing:
                 is_issued = True
 
-            wishlist_item = Wishlist.query.filter_by(content_id=content.id, user_id=current_user_id).first()
-            if wishlist_item:
-                is_wishlisted = True
+            # wishlist_item = Wishlist.query.filter_by(content_id=content.id, user_id=current_user_id).first()
+            # if wishlist_item:
+            #     is_wishlisted = True
 
             read = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id, returned=False).first()
             if read:
@@ -1478,7 +1478,7 @@ def search_result():
             'image': image_base64,
             'isRead': is_read,
             'isIssued': is_issued,
-            'isWishlisted': is_wishlisted,
+            # 'isWishlisted': is_wishlisted,
             'isRequested': is_requested
         }
 
@@ -1488,59 +1488,59 @@ def search_result():
     return jsonify({'results': formatted_content_results})
 
 
-@app.route('/wishlist/<int:user_id>', methods=['GET'])
-@jwt_required()
-def get_user_wishlist(user_id):
-    try:
-        current_user_id = get_jwt_identity()
+# @app.route('/wishlist/<int:user_id>', methods=['GET'])
+# @jwt_required()
+# def get_user_wishlist(user_id):
+#     try:
+#         current_user_id = get_jwt_identity()
         
-        wishlist_items = Wishlist.query.filter_by(user_id=user_id).all()
-        wishlist = []
+#         wishlist_items = Wishlist.query.filter_by(user_id=user_id).all()
+#         wishlist = []
 
-        for item in wishlist_items:
-            content = Content.query.get(item.content_id)
+#         for item in wishlist_items:
+#             content = Content.query.get(item.content_id)
 
-            image_data = content.image
-            image_base64 = base64.b64encode(image_data).decode('utf-8') if image_data else None
+#             image_data = content.image
+#             image_base64 = base64.b64encode(image_data).decode('utf-8') if image_data else None
 
-            is_read = False
-            if current_user_id:
-                borrowing = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id).first()
-                is_read = bool(borrowing)
+#             is_read = False
+#             if current_user_id:
+#                 borrowing = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id).first()
+#                 is_read = bool(borrowing)
 
-            is_wishlisted = False
-            if current_user_id:
-                wishlist_item = Wishlist.query.filter_by(user_id=current_user_id, content_id=content.id).first()
-                is_wishlisted = bool(wishlist_item)
+#             is_wishlisted = False
+#             if current_user_id:
+#                 wishlist_item = Wishlist.query.filter_by(user_id=current_user_id, content_id=content.id).first()
+#                 is_wishlisted = bool(wishlist_item)
 
-            is_issued = False
-            if current_user_id:
-                issued = Borrowing.query.filter_by(member_id=current_user_id, content_id=content.id, returned=False).first()
-                is_issued = bool(issued)
+#             is_issued = False
+#             if current_user_id:
+#                 issued = Borrowing.query.filter_by(member_id=current_user_id, content_id=content.id, returned=False).first()
+#                 is_issued = bool(issued)
 
-            is_requested = False
-            if current_user_id:
-                request = Requests.query.filter_by(contentId=content.id, userId=current_user_id, response='Pending').first()
-                is_requested = bool(request)
+#             is_requested = False
+#             if current_user_id:
+#                 request = Requests.query.filter_by(contentId=content.id, userId=current_user_id, response='Pending').first()
+#                 is_requested = bool(request)
 
-            wishlist.append({
-                'id': content.id,
-                'title': content.title,
-                'author': content.author,
-                'image': image_base64,
-                'number_of_pages': content.no_of_pages,
-                'publish_year': content.publish_year,
-                'isRead': is_read,
-                'isIssued': is_issued,
-                'isWishlisted': is_wishlisted,
-                'isRequested': is_requested
-            })
+#             wishlist.append({
+#                 'id': content.id,
+#                 'title': content.title,
+#                 'author': content.author,
+#                 'image': image_base64,
+#                 'number_of_pages': content.no_of_pages,
+#                 'publish_year': content.publish_year,
+#                 'isRead': is_read,
+#                 'isIssued': is_issued,
+#                 'isWishlisted': is_wishlisted,
+#                 'isRequested': is_requested
+#             })
 
-        app.logger.info("User Wishlist Fetched")
-        return jsonify({'wishlist': wishlist}), 200
-    except Exception as e:
-        app.logger.error("Error Fetching User Wishlist: %s", str(e))
-        return jsonify({'error': str(e)}), 500
+#         app.logger.info("User Wishlist Fetched")
+#         return jsonify({'wishlist': wishlist}), 200
+#     except Exception as e:
+#         app.logger.error("Error Fetching User Wishlist: %s", str(e))
+#         return jsonify({'error': str(e)}), 500
     
 @app.route('/fetch_requests', methods=['GET'])
 @jwt_required()

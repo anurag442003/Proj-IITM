@@ -10,7 +10,6 @@
                 <h3>{{ content.title }}</h3>
             </div>
             <div class="bottom-area">
-                <p>Author: {{ content.author }}</p>
                 <p>Rating: {{ !content.rating || isNaN(content.rating) ? 'N/A' : `${content.rating.toFixed(2)} / 5` }}</p>
             </div>
             <div class="text-center" v-if="content.isRead">
@@ -31,11 +30,11 @@
                 <button v-show="content.isIssued" class="btn btn-danger btn-sm" @click="returnContent(content.id)">
                     <i class="fa-solid fa-rotate-left"></i> Return
                 </button>
-                <button class="btn btn-light btn-sm"
+                <!--<button class="btn btn-light btn-sm"
                         @click="toggleWishlist(content.id, content.isWishlisted)"
                         :class="{ 'btn-danger': content.isWishlisted, 'btn-warning': !content.isWishlisted }">
                     <i class="fa-regular fa-heart" :class="{ 'fas': content.isWishlisted }"></i> Wishlist
-                </button>
+                </button>-->
             </div>
         </div>
     </div>
@@ -105,27 +104,27 @@ export default {
                 console.error('Error returning content:', error);
             }
         },
-        async toggleWishlist(contentId, isInWishlist) {
-            if (!this.isLoggedIn()) {
-                this.$router.push('/login');
-                return;
-            }
+        // async toggleWishlist(contentId, isInWishlist) {
+        //     if (!this.isLoggedIn()) {
+        //         this.$router.push('/login');
+        //         return;
+        //     }
 
-            try {
-                const endpoint = isInWishlist ? 'remove' : 'add';
-                const response = await this.$axios.post(`http://127.0.0.1:5000/wishlist/${endpoint}/${contentId}`, null, {
-                    headers: {
-                        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
-                    },
-                });
+        //     try {
+        //         const endpoint = isInWishlist ? 'remove' : 'add';
+        //         const response = await this.$axios.post(`http://127.0.0.1:5000/wishlist/${endpoint}/${contentId}`, null, {
+        //             headers: {
+        //                 Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+        //             },
+        //         });
 
-                this.$emit('contentUpdated');
+        //         this.$emit('contentUpdated');
 
-                console.log(response.data);
-            } catch (error) {
-                console.error('Error toggling wishlist:', error);
-            }
-        },
+        //         console.log(response.data);
+        //     } catch (error) {
+        //         console.error('Error toggling wishlist:', error);
+        //     }
+        // },
         async buyDownload(contentId) {
             if (!this.isLoggedIn()) {
                 this.$router.push('/login');

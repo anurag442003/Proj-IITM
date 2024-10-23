@@ -1,7 +1,7 @@
 <template>
   <div class="custom-container">
     <section class="single-container">
-      <h3 class="mb-4">Wishlist</h3>
+      <!--<h3 class="mb-4">Wishlist</h3>
       <div v-if="wishlist.length > 0">
         <div class="slider-content">
           <content-card v-for="(result, index) in wishlist"

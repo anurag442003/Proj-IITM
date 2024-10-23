@@ -29,9 +29,9 @@
             <i class="fa-regular fa-comment-dots px-3 py-2 profile-link"></i>
           </router-link>
         </div>
-        <router-link :to="{ name: 'ReaderWishlist', params: { userId: userId } }" v-if="loggedIn && role === 'READER'">
+        <!--<router-link :to="{ name: 'ReaderWishlist', params: { userId: userId } }" v-if="loggedIn && role === 'READER'">
           <i class="fa-solid fa-clipboard-list px-3 py-2 profile-link"></i>
-        </router-link>
+        </router-link>-->
         <router-link :to="{ name: 'UserProfile', params: { userId: userId } }" v-if="loggedIn">
           <i class="fa-regular fa-user mx-4 px-2 py-2 profile-link"></i>
         </router-link>

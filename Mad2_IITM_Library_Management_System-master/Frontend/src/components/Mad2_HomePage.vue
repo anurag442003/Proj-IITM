@@ -1,13 +1,6 @@
 <template>
     <div class="custom-container">
         <section class="single-container">
-            <div class="wrapper">
-                <h2 class="my2" v-if="InDemand.length !== 0">People's Favourite</h2>
-                <div class="slider-content">
-                    <content-card v-for="content in InDemand" :key="content.id" :content="content"
-                        :decodedImage="getDecodedImage(content)" :isRead="false"></content-card>
-                </div>
-            </div>
             <div class="wrapper" v-for="section in sections" :key="section.id">
                 <h2 class="my2">{{ section.name }}</h2>
                 <div class="slider-content">
