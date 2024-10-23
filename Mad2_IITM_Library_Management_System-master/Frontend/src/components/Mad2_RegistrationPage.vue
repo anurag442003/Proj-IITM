@@ -85,7 +85,7 @@
       <input v-model="userData.role" type="radio" class="btn-check" name="btnradio" id="btnradio1" value="READER">
       <label class="btn btn-outline-primary" for="btnradio1"><b>READER</b></label>
 
-      <input v-model="userData.role" type="radio" class="btn-check" name="btnradio" id="btnradio2" value="LIBRARIAN" disabled>
+      <input v-model="userData.role" type="radio" class="btn-check" name="btnradio" id="btnradio2" value="LIBRARIAN">
       <label class="btn btn-outline-success" for="btnradio2"><b>LIBRARIAN</b></label>
     </div>
   </div>

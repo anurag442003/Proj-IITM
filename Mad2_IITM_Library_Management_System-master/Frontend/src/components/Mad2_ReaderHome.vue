@@ -3,6 +3,7 @@
         <section class="single-container">
             <div class="wrapper" v-for="section in sections" :key="section.id">
                 <h2 class="my2">{{ section.name }}</h2>
+                <h2 class="my3">{{ section.time }}</h2>
                 <div class="slider-content">
                     <content-card v-for="content in filteredContents(section.id)"
                                   :key="content.id"
@@ -12,6 +13,7 @@
                                   :isRequested="content.isRequested"
                                   @content-updated="updatedContent">
                     </content-card>
+                    <!-- additional charge plus section.price has to be made -->
                 </div>
             </div>
         </section>

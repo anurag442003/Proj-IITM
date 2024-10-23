@@ -1,12 +1,12 @@
 <template>
     <div class="content">
-        <button v-if="isLoggedIn()" class="btn btn-sm btn-light top-btn" @click="confirmPurchase(content.id)">
+        <!-- <button v-if="isLoggedIn()" class="btn btn-sm btn-light top-btn" @click="confirmPurchase(content.id)">
             <i class="fa-solid fa-download"></i>
-        </button>
+        </button> -->
         <img :src="decodedImage" alt="Content Image" @error="handleImageError" />
         <div class="body">
             <div class="title-holder">
-                <p>Title</p>
+                <!-- <p>Title</p> -->
                 <h3>{{ content.title }}</h3>
             </div>
             <div class="bottom-area">
@@ -53,11 +53,11 @@ export default {
         },
     },
     methods: {
-        confirmPurchase(contentId) {
-            if (confirm("Are you sure you want to purchase/download this content?")) {
-                this.buyDownload(contentId);
-            }
-        },
+        // confirmPurchase(contentId) {
+        //     if (confirm("Are you sure you want to purchase/download this content?")) {
+        //         this.buyDownload(contentId);
+        //     }
+        // },
         async createRequest(contentId) {
             if (!this.isLoggedIn()) {
                 this.$router.push('/login');

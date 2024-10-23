@@ -62,6 +62,9 @@ class Review(db.Model):
 class Section(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
+    baseprice = db.Column(db.Float, nullable=False)
+    time = db.Column(db.Integer, nullable=False)
+    desc = db.Column(db.String(250), nullable=True)
 
 # class Service(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
@@ -122,8 +125,8 @@ class Login(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     last_login_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
-class Purchase(db.Model): 
-    id = db.Column(db.Integer, primary_key=True)
-    amount = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    content_id = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)
+# class Purchase(db.Model): 
+#     id = db.Column(db.Integer, primary_key=True)
+#     amount = db.Column(db.Integer, nullable=False)
+#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+#     content_id = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)

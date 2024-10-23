@@ -73,7 +73,7 @@ stream_handler.setFormatter(formatter)
 logging.getLogger().addHandler(stream_handler)
 
 
-from Mad2_Models import db, User, Section, Content, Borrowing, TransactionsLog, Review, Login, Purchase, Requests
+from Mad2_Models import db, User, Section, Content, Borrowing, TransactionsLog, Review, Login, Requests
 db.init_app(app)
 api = Api(app)
 excel.init_excel(app)
@@ -564,13 +564,13 @@ def get_all_sections():
 
 
         sections_list = [
-            {"id": section.id, "name": section.name} for section in sections
+            {"id": section.id, "name": section.name, "base-price": section.baseprice, "time": section.time, "Desc": section.desc} for section in sections
         ]
 
         app.logger.info("Fetched Sections")
         return jsonify({"sections": sections_list})
     except Exception as e:
-        app.logger.error("Fetching Sections Failed")
+        app.logger.error(e)
         return jsonify({"error": "Failed to fetch sections", "Reasons": str(e)}), 500
 
 # 2. Content

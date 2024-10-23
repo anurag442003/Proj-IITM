@@ -53,9 +53,9 @@ export default {
                         if (content.isRead) {
                             this.$store.dispatch('setContentRead', { contentId: content.id, isRead: true });
                         }
-                        <!--if (content.isWishlisted) {
-                            this.$store.dispatch('toggleContentWishlist', { contentId: content.id, isWishlisted: true });
-                        }-->
+                        // if (content.isWishlisted) {
+                        //     this.$store.dispatch('toggleContentWishlist', { contentId: content.id, isWishlisted: true });
+                        // }
                     });
                 })
                 .catch(error => {
