@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import AboutUs from '../components/Mad2_AboutUs.vue';
 import ReaderHome from '../components/Mad2_ReaderHome.vue';
 import LibrarianHome from '../components/Mad2_LibrarianHome.vue';
+import AdminHome from '../components/AdminHome.vue';
 import AddBook from '../components/Mad2_AddBook.vue';
 import BorrowBook from '../components/Mad2_BorrowBook.vue';
 import CreateSection from '../components/Mad2_CreateSection.vue';
@@ -29,6 +30,7 @@ const routes = [
   { path: '/reader-home', name: 'ReaderHome', component: ReaderHome, meta: { requiresAuth: true } },
   { path: '/detail_view/:contentId/:userId', name: 'DetailView', component: DetailView, meta: { requiresAuth: true } },
   { path: '/librarian-home', name: 'LibrarianHome', component: LibrarianHome, meta: { requiresAuth: true } },
+  { path: '/admin-home', name: 'AdminHome', component: AdminHome, meta: { requiresAuth: true } },
   { path: '/about', name: 'AboutUs', component: AboutUs },
   { path: '/addbook', name: 'AddBook', component: AddBook, meta: { requiresAuth: true } },
   { path: '/borrowbook', name: 'BorrowBook', component: BorrowBook, meta: { requiresAuth: true } },

@@ -11,6 +11,9 @@
         <router-link :to="{ name: 'ReaderHome' }" v-if="loggedIn && role === 'READER'">
           <i class="fa-solid fa-house px-3 py-2 my-2 profile-link"></i>
         </router-link>
+        <router-link :to="{ name: 'AdminHome' }" v-if="loggedIn && role === 'ADMIN'">
+          <i class="fa-solid fa-house px-3 py-2 my-2 profile-link"></i>
+        </router-link>
       </div>
       <div class="d-flex justify-content-center search">
         <form class="d-flex" @submit.prevent="search">
