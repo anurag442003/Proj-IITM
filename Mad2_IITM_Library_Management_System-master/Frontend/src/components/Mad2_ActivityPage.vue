@@ -3,11 +3,7 @@
         <div class="data d-flex justify-content-between">
             <h2>Current Reader Count: {{ currentReaderCount }}</h2>
             <h2>Total Reader Count: {{ totalReaderCount }}</h2>
-<<<<<<< Updated upstream
             <!--<h2>Wishlist Count: {{ wishlistCount }}</h2>-->
-=======
-        <!--<h2>Wishlist Count: {{ wishlistCount }}</h2>-->
->>>>>>> Stashed changes
         </div>
         <table class="table table-striped table-bordered">
             <thead class="thead-dark">

@@ -127,35 +127,35 @@ export default {
         //         console.error('Error toggling wishlist:', error);
         //     }
         // },
-        async buyDownload(contentId) {
-            if (!this.isLoggedIn()) {
-                this.$router.push('/login');
-                return;
-            }
+        // async buyDownload(contentId) {
+        //     if (!this.isLoggedIn()) {
+        //         this.$router.push('/login');
+        //         return;
+        //     }
 
-            try {
-                const response = await this.$axios.get(`http://127.0.0.1:5000/download_purchase/${contentId}`, {
-                    responseType: 'blob',
-                    headers: {
-                        Authorization: `Bearer ${sessionStorage.getItem('token')}`,
-                    },
-                });
+        //     try {
+        //         const response = await this.$axios.get(`http://127.0.0.1:5000/download_purchase/${contentId}`, {
+        //             responseType: 'blob',
+        //             headers: {
+        //                 Authorization: `Bearer ${sessionStorage.getItem('token')}`,
+        //             },
+        //         });
 
-                const blob = new Blob([response.data], { type: 'application/pdf' });
-                const url = window.URL.createObjectURL(blob);
+        //         const blob = new Blob([response.data], { type: 'application/pdf' });
+        //         const url = window.URL.createObjectURL(blob);
 
-                const link = document.createElement('a');
-                link.href = url;
-                link.setAttribute('download', `${this.content.pdf_file_name}`);
-                document.body.appendChild(link);
-                link.click();
+        //         const link = document.createElement('a');
+        //         link.href = url;
+        //         link.setAttribute('download', `${this.content.pdf_file_name}`);
+        //         document.body.appendChild(link);
+        //         link.click();
 
-                window.URL.revokeObjectURL(url);
-                document.body.removeChild(link);
-            } catch (error) {
-                console.error('Error purchasing and downloading content:', error);
-            }
-        },
+        //         window.URL.revokeObjectURL(url);
+        //         document.body.removeChild(link);
+        //     } catch (error) {
+        //         console.error('Error purchasing and downloading content:', error);
+        //     }
+        // },
         handleImageError(event) {
             console.error("Error loading image:", event);
         },

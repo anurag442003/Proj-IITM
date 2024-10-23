@@ -10,7 +10,7 @@
                                   :key="content.id"
                                   :content="content"
                                   :decodedImage="content.decodedImage"
-                                  :isRead="content.isRead"
+                                  :price="content.price"
                                   :isRequested="content.isRequested"
                                   @content-updated="updatedContent">
                     </content-card>
