@@ -1476,6 +1476,7 @@ def search_result():
             'id': content.id,
             'title': content.title,
             'author': content.author,
+            'price': content.price,
             'section': content.section,
             'rating': db.session.query(func.avg(Review.rating)).filter(Review.content_id == content.id).scalar(),
             'imageType': content.imageType,

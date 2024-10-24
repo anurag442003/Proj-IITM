@@ -3,10 +3,15 @@
     <section class="single-container">
       <div v-if="searchResults && searchResults.length > 0">
         <h3 class="mb-4">Content Results</h3>
-        <div class="slider-content">
+        <div class="slider-content"  v-if="loggedIn && role === 'READER'">
           <content-card v-for="(result, index) in searchResults" :key="index" :content="result"
             :isIssued="result.isIssued" :isRequested="result.isRequested" :decodedImage="getDecodedImage(result)" :isRead="result.isRead"
             @content-updated="updatedContent"></content-card>
+        </div>
+        <div v-else class="slider-content">
+          <admin-content-card v-for="(result, index) in searchResults" :key="index"
+                        :content="result" :decodedImage="getDecodedImage(result)" 
+                        @content-updated="updatedContent"></admin-content-card>
         </div>
       </div>
       <div v-else class="center">
@@ -18,9 +23,11 @@
 
 <script>
 import ContentCard from './Mad2_ContentCard.vue'
+import AdminContentCard from './Mad2_AdminContentCard.vue'
 export default {
   components: {
     ContentCard,
+    AdminContentCard
   },
   data() {
     return {
@@ -42,6 +49,7 @@ export default {
     },
     async fetchSearchResults() {
       const query = this.$route.params.query;
+      const role = this.$route.params.role;
       try {
         let headers = {};
         const token = sessionStorage.getItem('token');
@@ -51,7 +59,7 @@ export default {
           };
         }
 
-        const apiUrl = `http://127.0.0.1:5000/search-result?query=${query}`;
+        const apiUrl = `http://127.0.0.1:5000/search-result/${query}/${role}`;
         const response = await fetch(apiUrl, {
           headers: headers,
         });
