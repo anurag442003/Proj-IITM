@@ -49,7 +49,6 @@ export default {
     },
     async fetchSearchResults() {
       const query = this.$route.params.query;
-      const role = this.$route.params.role;
       try {
         let headers = {};
         const token = sessionStorage.getItem('token');
@@ -59,7 +58,7 @@ export default {
           };
         }
 
-        const apiUrl = `http://127.0.0.1:5000/search-result/${query}/${role}`;
+        const apiUrl = `http://127.0.0.1:5000/search-result?query=${query}`;
         const response = await fetch(apiUrl, {
           headers: headers,
         });
