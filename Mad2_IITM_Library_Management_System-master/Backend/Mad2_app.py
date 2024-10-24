@@ -1614,7 +1614,8 @@ def create_requests(contentId):
         existing_requests = Requests.query.filter(
         Requests.contentId == contentId,
         Requests.userId == current_user_id,
-        Requests.response != 'Accepted'
+        Requests.response != 'Accepted',
+        Requests.response != 'Rejected',
         ).first()
         
         if existing_requests:
@@ -1666,7 +1667,8 @@ def reject_request(content_id, user_id):
     try:
         requests = Requests.query.filter_by(contentId=content_id, userId=user_id).first()
         if requests:
-            requests.response = "Rejected"
+            # requests.response = "Rejected"
+            db.session.delete(requests)
             db.session.commit()
             return jsonify({"message": "Issue request rejected successfully"}), 200
         else:

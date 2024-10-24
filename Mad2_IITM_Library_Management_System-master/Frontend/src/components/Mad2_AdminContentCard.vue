@@ -80,7 +80,7 @@ export default {
                 }));
         },
         editContent(contentId) {
-            this.$router.push({ name: 'EditContent', params: { contentId } });
+            this.$router.push({ name: 'UpdateContent', params: { contentId } });
         },
         removeContent(contentId) {
             const token = sessionStorage.getItem('token');
