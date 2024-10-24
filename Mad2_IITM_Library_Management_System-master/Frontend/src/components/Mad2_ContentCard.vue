@@ -8,8 +8,13 @@
             <div class="title-holder">
                 <!-- <p>Title</p> -->
                 <h3>{{ content.title }}</h3>
-                <p>Service Charge: {{ content.price }} </p>
-
+                <p> About me: </p>
+                <p> {{ content.author }} </p>
+                <p> </p>
+               
+            </div>
+            <div class="bottom-area">
+                <p>Service Charge: {{ content.price }}</p>
             </div>
             <div class="bottom-area">
                 <p>Rating: {{ !content.rating || isNaN(content.rating) ? 'N/A' : `${content.rating.toFixed(2)} / 5` }}</p>
