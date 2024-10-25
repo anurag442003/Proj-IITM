@@ -855,7 +855,7 @@ def get_section(section_id):
         section = Section.query.get(section_id)
 
         if section:
-            return jsonify({"name": section.name}), 200
+            return jsonify({"name": section.name, "time": section.time, "baseprice": section.baseprice}), 200
         else:
             return jsonify({"error": "Section not found"}), 404
     except Exception as e:
@@ -899,18 +899,22 @@ def update_section(section_id):
     section = Section.query.get(section_id)
 
     data = request.get_json()
-    existing_Section = Section.query.filter_by(name=data["name"]).first()
+    existing_Section = Section.query.filter_by(name=data["name"],baseprice=data["baseprice"],time=data["time"]).first()
     if existing_Section:
         app.logger.warning("Section Already Exist")
         return jsonify({"error": "Section already exists"}), 400
 
     new_name = data.get("name")
+    new_time = data.get("time")
+    new_baseprice = data.get("baseprice")
 
-    if not new_name:
-        app.logger.error("Enter Section Name")
-        return jsonify({"error": "Name is required"}), 400
+    if (not new_name) and (not new_time) and (not new_baseprice):
+        app.logger.error("Enter Section Details")
+        return jsonify({"error": "Section details are required"}), 400
 
     section.name = new_name
+    section.time = new_time
+    section.baseprice = new_baseprice
     db.session.commit()
 
     app.logger.info("Section Updated to: ", new_name)

@@ -2,8 +2,12 @@
     <div class="custom-container">
         <div class="add-section-form">
             <form @submit.prevent="updateSection">
-                <label for="sectionName" class="my-4">Section Name:</label>
+                <label for="sectionName" class="my-4">Service Name:</label>
                 <input v-model="sectionName" type="text" id="sectionName" required>
+                <label for="sectionTime" class="my-4">Service Time:</label>
+                <input v-model="sectionTime" type="text" id="sectionTime" required>
+                <label for="sectionBaseprice" class="my-4">Service Base Price:</label>
+                <input v-model="sectionBaseprice" type="text" id="sectionBaseprice" required>
                 <div class="row mt-4">
                     <div class="col-6 d-flex align-items-center justify-content-center">
                         <button class="btn btn-secondary" type="submit">Update</button>
@@ -24,6 +28,8 @@ export default {
     data() {
         return {
             sectionName: '',
+            sectionBaseprice: 0.00,
+            sectionTime: 1
         };
     },
     mounted() {
@@ -44,6 +50,8 @@ export default {
 
                 if (response.ok) {
                     this.sectionName = data.name;
+                    this.sectionTime = data.time;
+                    this.sectionBaseprice = data.baseprice;
                 } else {
                     console.error('Failed to fetch section data');
                 }
@@ -55,6 +63,8 @@ export default {
             const sectionId = this.$route.params.sectionId;
             const putData = {
                 name: this.sectionName,
+                time : this.sectionTime,
+                baseprice: this.sectionBaseprice
             };
             const token = sessionStorage.getItem("token");
 
