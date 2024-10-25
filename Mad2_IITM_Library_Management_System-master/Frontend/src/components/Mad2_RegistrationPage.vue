@@ -77,6 +77,48 @@
         </div>
       </div>
 
+
+      <!-- Additional fields for Librarian -->
+      <div v-if="userData.role === 'LIBRARIAN'">
+        <div class="row">
+          <div class="col-md-3 mb-3">
+            <label for="experience" class="form-label">Experience (in years):</label>
+            <input v-model="userData.experience" type="number" class="form-control" required />
+          </div>
+          <div class="col-md-3 mb-3">
+            <label for="publishYear" class="form-label">Publish Year:</label>
+            <input v-model="userData.publish_year" type="date" class="form-control" required />
+          </div>
+          <div class="col-md-3 mb-3">
+            <label for="additionalCharges" class="form-label">Additional Charges:</label>
+            <input v-model="userData.additionalCharges" type="number" step="0.01" class="form-control" required />
+          </div>
+          <div class="col-md-3 mb-3">
+            <label for="resume" class="form-label">Resume:</label>
+            <input type="file" @change="handleResumeUpload" class="form-control" required />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label for="description" class="form-label">Description:</label>
+            <input v-model="userData.description" type="text-box" class="form-control" required />
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="image" class="form-label">Image:</label>
+            <input type="file" @change="handleImageUpload" class="form-control" required />
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="serviceType" class="form-label">Service Type:</label>
+            <select v-model="userData.serviceType" class="form-select" required>
+              <option value="type1">Type 1</option>
+              <option value="type2">Type 2</option>
+              <option value="type3">Type 3</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    
+
       <!-- Fourth row for Role -->
       <div class="row">
         <div class="mb-3">
@@ -91,37 +133,7 @@
         </div>
       </div>
 
-      <!-- Additional fields for Librarian -->
-      <div v-if="userData.role === 'LIBRARIAN'">
-        <div class="row">
-          <div class="col-md-4 mb-3">
-            <label for="experience" class="form-label">Experience (in years):</label>
-            <input v-model="userData.experience" type="number" class="form-control" required />
-          </div>
-          <div class="col-md-4 mb-3">
-            <label for="additionalCharges" class="form-label">Additional Charges:</label>
-            <input v-model="userData.additionalCharges" type="number" step="0.01" class="form-control" required />
-          </div>
-          <div class="col-md-4 mb-3">
-            <label for="resume" class="form-label">Resume:</label>
-            <input type="file" @change="handleResumeUpload" class="form-control" required />
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-md-6 mb-3">
-            <label for="image" class="form-label">Image:</label>
-            <input type="file" @change="handleImageUpload" class="form-control" required />
-          </div>
-          <div class="col-md-6 mb-3">
-            <label for="serviceType" class="form-label">Service Type:</label>
-            <select v-model="userData.serviceType" class="form-select" required>
-              <option value="type1">Type 1</option>
-              <option value="type2">Type 2</option>
-              <option value="type3">Type 3</option>
-            </select>
-          </div>
-        </div>
-      </div>
+      
 
       <!-- Submit button -->
       <button type="submit" class="btn btn-primary">Register</button>
@@ -150,6 +162,8 @@ export default {
         role: 'READER',
         experience: '',
         additionalCharges: '',
+        publish_year: '', 
+        description: '',
         resume: null,
         image: null,
         serviceType: ''
@@ -221,6 +235,8 @@ export default {
         role: 'READER',
         experience: '',
         additionalCharges: '',
+        publish_year: '',
+        description: '',
         resume: null,
         image: null,
         serviceType: ''
