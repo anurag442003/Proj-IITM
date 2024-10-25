@@ -3,17 +3,18 @@
         <img :src="decodedImage" alt="Content Image" @error="handleImageError" />
         <div class="content-body">
             <div class="title-section">
-                <p>Title</p>
+                <!-- <p>Title</p> -->
                 <h3>{{ content.title }}</h3>
             </div>
             <div class="details-section">
-                <p>Author: {{ content.author }}</p>
+                <p>About me: {{ content.author }}</p>
+                <p>Service Charge: {{ content.price }} </p>
                 <p>Rating: {{ isNaN(content.rating) ? 'N/A' : content.rating.toFixed(2) }} / 5</p>
             </div>
             <div class="action-buttons">
-                <button class="btn btn-primary btn-sm" @click="editContent(content.id)">
+                <!-- <button class="btn btn-primary btn-sm" @click="editContent(content.id)">
                     <i class="fa-solid fa-pen"></i> Edit
-                </button>
+                </button> -->
                 <router-link class="btn btn-success btn-sm" :to="'/activity-data/' + content.id">
                     <i class="fa-solid fa-chart-line"></i> View Activity
                 </router-link>

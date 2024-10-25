@@ -6,7 +6,7 @@
                     <h2 class="my2">{{ section.name }}</h2>
                     <div class="section-btn">
                         <router-link :to="'/update-section/' + section.id" class="btn btn-sm btn-primary"><i class="fa-regular fa-pen-to-square"></i></router-link>
-                        <router-link :to="'/upload-content/' + section.id" class="btn btn-sm btn-success"><i class="fa-solid fa-plus"></i></router-link>
+                        <!-- <router-link :to="'/upload-content/' + section.id" class="btn btn-sm btn-success"><i class="fa-solid fa-plus"></i></router-link> -->
                         <button @click="confirmDelete(section.id)" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>

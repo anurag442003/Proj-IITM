@@ -1,8 +1,8 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import AboutUs from '../components/AboutUs.vue';
+import AdminHome from '../components/AdminHome.vue';
 import ReaderHome from '../components/Mad2_ReaderHome.vue';
 import LibrarianHome from '../components/Mad2_LibrarianHome.vue';
-import AdminHome from '../components/AdminHome.vue';
 import AddBook from '../components/Mad2_AddBook.vue';
 import BorrowBook from '../components/Mad2_BorrowBook.vue';
 import CreateSection from '../components/Mad2_CreateSection.vue';

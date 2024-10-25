@@ -1,7 +1,7 @@
 <template>
     <div class="position-fixed bottom-0 end-0 p-3">
         <div class="btn-group dropend">
-            <router-link to="/librarian-home" class="btn btn-light custom-btn">
+            <router-link to="/admin-home" class="btn btn-light custom-btn">
                 <i class="fa-solid fa-house"></i>
             </router-link>
         </div>

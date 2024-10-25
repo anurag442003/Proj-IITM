@@ -2,10 +2,10 @@
   <nav class="navbar navbar-expand-lg bg-white border-bottom border-body" data-bs-theme="light">
     <div class="container-fluid d-flex justify-content-between align-items-center">
       <div class="d-flex align-items-center">
-        <a class="navbar-brand" href="#">
+        <!-- <a class="navbar-brand" href="#">
           <img src="../assets/logo/Mad2_logo.png" class="logo" alt="Logo">
-        </a>
-        <router-link :to="{ name: 'LibrarianHome' }" v-if="loggedIn && role === 'LIBRARIAN'">
+        </a> -->
+        <router-link :to="{ name: 'RequestList' }" v-if="loggedIn && role === 'LIBRARIAN'">
           <i class="fa-solid fa-house px-3 py-2 my-2 profile-link"></i>
         </router-link>
         <router-link :to="{ name: 'ReaderHome' }" v-if="loggedIn && role === 'READER'">
@@ -24,11 +24,11 @@
         </form>
       </div>
       <div class="profile d-flex">
-        <div class="librarian mx-4" v-if="role === 'LIBRARIAN'">
+        <!-- <div class="librarian mx-4" v-if="role === 'LIBRARIAN'">
           <router-link :to="{ name: 'RequestList' }" v-if="loggedIn">
             <i class="fa-regular fa-comment-dots px-3 py-2 profile-link"></i>
           </router-link>
-        </div>
+        </div> -->
         <!--<router-link :to="{ name: 'ReaderWishlist', params: { userId: userId } }" v-if="loggedIn && role === 'READER'">
           <i class="fa-solid fa-clipboard-list px-3 py-2 profile-link"></i>
         </router-link>-->

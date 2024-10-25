@@ -212,7 +212,7 @@ def login():
             or_(User.email == data["input"], User.uname == data["input"])
         ).first()
 
-        if user.uname == "Admin" and user.password == "Admin@123":
+        if user.uname == "admin" and user.password == "Admin@123":
                 additional_claims = {
                     "id": user.id,
                     "role": "ADMIN",
@@ -1678,65 +1678,65 @@ def reject_request(content_id, user_id):
         app.logger.error("Error rejecting issue request", str(e))
         return jsonify({"error": "Rejecting issue request failed", "details": str(e)}), 500
 
-@app.route('/download_purchase/<int:contentId>', methods=['GET'])
-@jwt_required()
-def download_purchase(contentId):
+# @app.route('/download_purchase/<int:contentId>', methods=['GET'])
+# @jwt_required()
+# def download_purchase(contentId):
 
-    current_user_id = get_jwt_identity()
+#     current_user_id = get_jwt_identity()
 
-    content = Content.query.get(contentId)
-    if content is None:
-        return abort(404, description="Content not found")
+#     content = Content.query.get(contentId)
+#     if content is None:
+#         return abort(404, description="Content not found")
 
-    content_amount = content.price
+#     content_amount = content.price
 
-    pdf_blob = content.file
+#     pdf_blob = content.file
 
-    pdf_bytes = BytesIO(pdf_blob)
+#     pdf_bytes = BytesIO(pdf_blob)
 
-    purchase_data = Purchase.query.filter_by(user_id=current_user_id, content_id=contentId).first()
-    if purchase_data:
+#     purchase_data = Purchase.query.filter_by(user_id=current_user_id, content_id=contentId).first()
+#     if purchase_data:
 
-        new_transaction_log = TransactionsLog(
-            user_id=current_user_id,
-            action="Re-Download",
-            content_id=contentId,
-            timestamp=datetime.now(),
-        )
+#         new_transaction_log = TransactionsLog(
+#             user_id=current_user_id,
+#             action="Re-Download",
+#             content_id=contentId,
+#             timestamp=datetime.now(),
+#         )
 
-        db.session.add(new_transaction_log)
+#         db.session.add(new_transaction_log)
 
-        db.session.commit()
-        app.logger.info("PDF File Sent For Download - Already Paid")
-        return send_file(pdf_bytes, as_attachment=True, mimetype='application/pdf', download_name="Book.pdf")
+#         db.session.commit()
+#         app.logger.info("PDF File Sent For Download - Already Paid")
+#         return send_file(pdf_bytes, as_attachment=True, mimetype='application/pdf', download_name="Book.pdf")
     
-    if (purchase_data == None):
-        user = User.query.get(current_user_id)
-        if user.balance_amt < content.price:
-            app.logger.warn("Insufficient Account balance_amt")
-            return abort(400, description="Insufficient balance_amt to purchase content")
+#     if (purchase_data == None):
+#         user = User.query.get(current_user_id)
+#         if user.balance_amt < content.price:
+#             app.logger.warn("Insufficient Account balance_amt")
+#             return abort(400, description="Insufficient balance_amt to purchase content")
 
-        user.balance_amt -= content.price
-        new_purchase = Purchase(user_id = current_user_id, content_id = contentId, amount=content_amount)
-        db.session.add(new_purchase)
-        db.session.commit()
+#         user.balance_amt -= content.price
+#         new_purchase = Purchase(user_id = current_user_id, content_id = contentId, amount=content_amount)
+#         db.session.add(new_purchase)
+#         db.session.commit()
 
-        new_transaction_log = TransactionsLog(
-            user_id=current_user_id,
-            action="Bought",
-            content_id=contentId,
-            timestamp=datetime.now(),
-        )
+#         new_transaction_log = TransactionsLog(
+#             user_id=current_user_id,
+#             action="Bought",
+#             content_id=contentId,
+#             timestamp=datetime.now(),
+#         )
 
-        db.session.add(new_transaction_log)
+#         db.session.add(new_transaction_log)
 
-        db.session.commit()
+#         db.session.commit()
 
-        app.logger.info("PDF File Sent For Download - Paid Now")
-        return send_file(pdf_bytes, as_attachment=True, mimetype='application/pdf', download_name="Book.pdf")
+#         app.logger.info("PDF File Sent For Download - Paid Now")
+#         return send_file(pdf_bytes, as_attachment=True, mimetype='application/pdf', download_name="Book.pdf")
 
-    app.logger.error("Error Purchasing Content")
-    return abort(403, description="Content not purchased")
+#     app.logger.error("Error Purchasing Content")
+#     return abort(403, description="Content not purchased")
 
 
 

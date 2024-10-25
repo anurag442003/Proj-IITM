@@ -8,13 +8,14 @@
             <div class="title-holder">
                 <!-- <p>Title</p> -->
                 <h3>{{ content.title }}</h3>
+                <p>About me: {{ content.author }}</p>
                 <p>Service Charge: {{ content.price }} </p>
 
             </div>
             <div class="bottom-area">
                 <p>Rating: {{ !content.rating || isNaN(content.rating) ? 'N/A' : `${content.rating.toFixed(2)} / 5` }}</p>
             </div>
-            <div class="text-center" v-if="content.isRead">
+            <div class="text-center" v-if="content.isIssued">
                 <router-link :to="{ name: 'RateContent', params: { contentId: content.id } }" class="btn btn-warning btn-sm">
                     Rate <i class="fa-regular fa-star"></i>
                 </router-link>

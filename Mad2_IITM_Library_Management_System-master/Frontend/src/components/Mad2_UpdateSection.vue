@@ -65,7 +65,7 @@ export default {
             })
                 .then(response => {
                     console.log(response.data.message);
-                    this.$router.push('/librarian-home');
+                    this.$router.push('/admin-home');
                 })
                 .catch(error => {
                     console.error('Error updating section:', error.response ? error.response.data : error.message);

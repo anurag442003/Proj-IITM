@@ -9,7 +9,7 @@
             <button class="mt-4 btn btn-secondary" type="submit">Add Section</button>
           </div>
           <div class="col-6 d-flex align-items-center justify-content-center">
-            <router-link class="btn btn-danger can" to="/librarian-home">Cancel</router-link>
+            <router-link class="btn btn-danger can" to="/admin-home">Cancel</router-link>
           </div>
         </div>
       </form>
@@ -40,7 +40,7 @@ export default {
       })
         .then(response => {
           console.log(response.data.message);
-          this.$router.push('/librarian-home');
+          this.$router.push('/admin-home');
         })
         .catch(error => {
           console.error('Error adding section:', error.response ? error.response.data : error.message);
