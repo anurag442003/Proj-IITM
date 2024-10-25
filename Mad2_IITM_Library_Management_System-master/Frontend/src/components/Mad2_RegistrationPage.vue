@@ -79,17 +79,49 @@
 
       <!-- Fourth row for Role -->
       <div class="row">
-  <div class="mb-3">
-    <label for="role" class="form-label">Role:</label>
-    <div class="btn-group visibility col-12 pt-3 px-2 py-2" role="group" aria-label="Basic radio toggle button group">
-      <input v-model="userData.role" type="radio" class="btn-check" name="btnradio" id="btnradio1" value="READER">
-      <label class="btn btn-outline-primary" for="btnradio1"><b>READER</b></label>
+        <div class="mb-3">
+          <label for="role" class="form-label">Role:</label>
+          <div class="btn-group visibility col-12 pt-3 px-2 py-2" role="group" aria-label="Basic radio toggle button group">
+            <input v-model="userData.role" type="radio" class="btn-check" name="btnradio" id="btnradio1" value="READER">
+            <label class="btn btn-outline-primary" for="btnradio1"><b>READER</b></label>
 
-      <input v-model="userData.role" type="radio" class="btn-check" name="btnradio" id="btnradio2" value="LIBRARIAN">
-      <label class="btn btn-outline-success" for="btnradio2"><b>LIBRARIAN</b></label>
-    </div>
-  </div>
-</div>
+            <input v-model="userData.role" type="radio" class="btn-check" name="btnradio" id="btnradio2" value="LIBRARIAN">
+            <label class="btn btn-outline-success" for="btnradio2"><b>LIBRARIAN</b></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional fields for Librarian -->
+      <div v-if="userData.role === 'LIBRARIAN'">
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label for="experience" class="form-label">Experience (in years):</label>
+            <input v-model="userData.experience" type="number" class="form-control" required />
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="additionalCharges" class="form-label">Additional Charges:</label>
+            <input v-model="userData.additionalCharges" type="number" step="0.01" class="form-control" required />
+          </div>
+          <div class="col-md-4 mb-3">
+            <label for="resume" class="form-label">Resume:</label>
+            <input type="file" @change="handleResumeUpload" class="form-control" required />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="image" class="form-label">Image:</label>
+            <input type="file" @change="handleImageUpload" class="form-control" required />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="serviceType" class="form-label">Service Type:</label>
+            <select v-model="userData.serviceType" class="form-select" required>
+              <option value="type1">Type 1</option>
+              <option value="type2">Type 2</option>
+              <option value="type3">Type 3</option>
+            </select>
+          </div>
+        </div>
+      </div>
 
       <!-- Submit button -->
       <button type="submit" class="btn btn-primary">Register</button>
@@ -115,7 +147,12 @@ export default {
         state: '',
         zip: '',
         address: '',
-        role: 'READER'
+        role: 'READER',
+        experience: '',
+        additionalCharges: '',
+        resume: null,
+        image: null,
+        serviceType: ''
       },
       validationErrors: {},
       successMessage: '',
@@ -181,8 +218,19 @@ export default {
         state: '',
         zip: '',
         address: '',
-        role: 'READER'
+        role: 'READER',
+        experience: '',
+        additionalCharges: '',
+        resume: null,
+        image: null,
+        serviceType: ''
       };
+    },
+    handleResumeUpload(event) {
+      this.userData.resume = event.target.files[0];
+    },
+    handleImageUpload(event) {
+      this.userData.image = event.target.files[0];
     }
   }
 };
