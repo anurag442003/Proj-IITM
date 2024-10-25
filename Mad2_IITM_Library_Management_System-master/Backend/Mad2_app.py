@@ -306,6 +306,14 @@ def register():
             "utf-8"
         )
 
+        if 'image' not in request.files:
+            app.logger.error("Image is not found")
+            return jsonify({"message": "Image is required"}), 400
+
+        if 'pdf' not in request.files:
+            app.logger.error("PDF file is missing")
+            return jsonify({"message": "PDF file is required"}), 400
+
         new_user = User(
             fname=data["firstname"],
             lname=data["lastname"],
@@ -320,8 +328,62 @@ def register():
             pin=data["zip"],
             role=data["role"],
         )
-
         db.session.add(new_user)
+        db.session.commit()
+
+        #get userid amd store it in userid
+        userid = ''
+
+        if data["role"] == 'LIBRARIAN':
+            new_prof = Content(
+                title=data["firstname"] + " " + data["lastname"],
+                author=data["description"],
+                image=data["image"],
+                imageType=data["image"],
+                uploaded_by_id=userid,
+                publish_year=data["publish_year"],
+                is_verified = False,
+                price=data["additionalCharges"],
+                section=data["serviceType"],
+                
+            ) #isverified add in db
+
+            
+            if "image" in request.files:
+                image = request.files["image"]
+                if image:
+                    filename = secure_filename(image.filename)
+                    image_data = image.read()
+                    image_type = imghdr.what(None, h=image_data)
+                    new_prof.image = image_data
+                    new_prof.imageType = image_type
+
+            if "pdf" in request.files:
+                pdf = request.files["pdf"]
+                if pdf:
+                    filename = secure_filename(pdf.filename)
+                    pdf_data = pdf.read()
+
+                    try:
+                        pdf_reader = PdfReader(pdf)
+                        if len(pdf_reader.pages) == 0:
+                            app.logger.warning("No Pages Available In PDF")
+                            return (
+                                jsonify({"message": "Invalid PDF file: No pages found"}),
+                                400,
+                            )
+                        else:
+                            new_prof.no_of_pages = len(pdf_reader.pages)
+                    except Exception as e:
+                        app.logger.error("Invalid PDF File")
+                        return jsonify({"message": f"Invalid PDF file: {str(e)}"}), 400
+
+                    new_prof.pdf_file_name = filename
+                    new_prof.file = pdf_data
+            else:
+                new_prof.file = None
+
+        db.session.add(new_prof)
         db.session.commit()
         print("1 user register")
         app.logger.info('User Registered Successfully!')
