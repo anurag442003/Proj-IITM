@@ -49,7 +49,7 @@ export default {
                 window.location.reload();
               });
             } else if (user && user.role === "LIBRARIAN") {
-              this.$router.push("/librarian-home").then(() => {
+              this.$router.push("/request-list").then(() => {
                 window.location.reload();
               });
             } else if (user && user.role === "READER") {

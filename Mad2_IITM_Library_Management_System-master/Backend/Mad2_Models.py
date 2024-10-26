@@ -55,7 +55,7 @@ class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.String(255), nullable=False)
-    content_id = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)
+    content_id = db.Column(db.Integer, db.ForeignKey('content.id', ondelete='CASCADE'), nullable=False)
     # profeshional_id = db.Column(db.Integer, db.ForeignKey('profeshionalsdetails.pid'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
@@ -82,7 +82,7 @@ class Content(db.Model):
     publish_year = db.Column(db.Integer, nullable=False) #birthday
     file = db.Column(db.LargeBinary, nullable=False) #resume
     pdf_file_name = db.Column(db.String(250), nullable=True) #not needed
-    #is_verified = db.Column(db.Boolean, default=False)
+    is_verified = db.Column(db.Boolean, default=False)
     price = db.Column(db.Float, nullable=False) #additional charge
     section = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False) #servicetype
     borrowings = db.relationship('Borrowing', backref='borrowed_content',  cascade="all, delete-orphan") #service request backref to request
@@ -97,7 +97,7 @@ class TransactionsLog(db.Model):
 
 class Borrowing(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    content_id = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)
+    content_id = db.Column(db.Integer, db.ForeignKey('content.id', ondelete='CASCADE'), nullable=False)
     member_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     borrow_date = db.Column(db.DateTime, default=datetime.now, nullable=False)
     returned = db.Column(db.Boolean, default=False)
@@ -109,7 +109,7 @@ class Borrowing(db.Model):
 
 class Requests(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    contentId = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)
+    contentId = db.Column(db.Integer, db.ForeignKey('content.id', ondelete='CASCADE'), nullable=False)
     userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     response = db.Column(db.String(10), default='Pending')
 

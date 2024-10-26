@@ -16,6 +16,7 @@ import UploadContent from '../components/Mad2_UploadContent.vue';
 import HomePage from '../components/Mad2_HomePage.vue';
 import UserProfile from '../components/Mad2_UserProfile.vue';
 // import ReaderWishlist from '../components/Mad2_ReaderWishlist.vue';
+import Approve from '../components/Mad2_Approve.vue';
 import RateContent from '../components/Mad2_RateContent.vue';
 import SummaryGraph from '../components/Mad2_SummaryGraph.vue';
 import ActivityPage from '../components/Mad2_ActivityPage.vue';
@@ -28,6 +29,7 @@ const routes = [
   { path: '/rate/:contentId', name: 'RateContent', component: RateContent, props: true, meta: { requiresAuth: true } },
   // { path: '/wishlist/:userId', name: 'ReaderWishlist', component: ReaderWishlist, meta: { requiresAuth: true } },
   { path: '/reader-home', name: 'ReaderHome', component: ReaderHome, meta: { requiresAuth: true } },
+  { path: '/approve', name: 'Approve', component: Approve, meta: { requiresAuth: true } },
   { path: '/detail_view/:contentId/:userId', name: 'DetailView', component: DetailView, meta: { requiresAuth: true } },
   { path: '/librarian-home', name: 'LibrarianHome', component: LibrarianHome, meta: { requiresAuth: true } },
   { path: '/admin-home', name: 'AdminHome', component: AdminHome, meta: { requiresAuth: true } },

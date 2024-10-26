@@ -300,19 +300,22 @@ def logout():
 @app.route("/register", methods=["POST"])
 def register():
     try:
-        data = request.get_json()
+        data = {
+            'firstname': request.form.get('firstname'),
+            'lastname': request.form.get('lastname'),
+            'username': request.form.get('username'),
+            'phoneNumber': request.form.get('phoneNumber'),
+            'email': request.form.get('email'),
+            'password': request.form.get('password'),
+            'gender': request.form.get('gender'),
+            'address': request.form.get('address'),
+            'city': request.form.get('city'),
+            'state': request.form.get('state'),
+            'zip': request.form.get('zip'),
+            'role': request.form.get('role')
+        }
 
-        hashed_password = bcrypt.generate_password_hash(data["password"]).decode(
-            "utf-8"
-        )
-
-        if 'image' not in request.files:
-            app.logger.error("Image is not found")
-            return jsonify({"message": "Image is required"}), 400
-
-        if 'pdf' not in request.files:
-            app.logger.error("PDF file is missing")
-            return jsonify({"message": "PDF file is required"}), 400
+        hashed_password = bcrypt.generate_password_hash(data["password"]).decode("utf-8")
 
         new_user = User(
             fname=data["firstname"],
@@ -331,68 +334,50 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        #get userid amd store it in userid
-        userid = ''
-
         if data["role"] == 'LIBRARIAN':
+            user_from_db = User.query.filter_by(uname=data["username"]).first()
+            userid = user_from_db.id
+
             new_prof = Content(
-                title=data["firstname"] + " " + data["lastname"],
-                author=data["description"],
-                image=data["image"],
-                imageType=data["image"],
+                title=f"{data['firstname']} {data['lastname']}",
+                no_of_pages=int(request.form.get('experience', 0)),
+                author=request.form.get('description', ''),
                 uploaded_by_id=userid,
-                publish_year=data["publish_year"],
-                is_verified = False,
-                price=data["additionalCharges"],
-                section=data["serviceType"],
-                
-            ) #isverified add in db
+                publish_year=int(request.form.get('publish_year', 2024)),
+                price=float(request.form.get('additionalCharges', 0.0)),
+                section=int(request.form.get('serviceType', 1))
+            )
 
-            
-            if "image" in request.files:
-                image = request.files["image"]
-                if image:
-                    filename = secure_filename(image.filename)
-                    image_data = image.read()
-                    image_type = imghdr.what(None, h=image_data)
+            if 'image' in request.files:
+                image_file = request.files['image']
+                if image_file and image_file.filename:
+                    image_data = image_file.read()
                     new_prof.image = image_data
-                    new_prof.imageType = image_type
+                    new_prof.imageType = imghdr.what(None, h=image_data)
 
-            if "pdf" in request.files:
-                pdf = request.files["pdf"]
-                if pdf:
-                    filename = secure_filename(pdf.filename)
-                    pdf_data = pdf.read()
-
-                    try:
-                        pdf_reader = PdfReader(pdf)
-                        if len(pdf_reader.pages) == 0:
-                            app.logger.warning("No Pages Available In PDF")
-                            return (
-                                jsonify({"message": "Invalid PDF file: No pages found"}),
-                                400,
-                            )
-                        else:
-                            new_prof.no_of_pages = len(pdf_reader.pages)
-                    except Exception as e:
-                        app.logger.error("Invalid PDF File")
-                        return jsonify({"message": f"Invalid PDF file: {str(e)}"}), 400
-
-                    new_prof.pdf_file_name = filename
-                    new_prof.file = pdf_data
+            if 'resume' in request.files:
+                resume_file = request.files['resume']
+                if resume_file and resume_file.filename:
+                    resume_data = resume_file.read()
+                    new_prof.file = resume_data
+                    new_prof.pdf_file_name = secure_filename(resume_file.filename)
             else:
-                new_prof.file = None
+                new_prof.file = b'' 
+                new_prof.pdf_file_name = ''
 
-        db.session.add(new_prof)
-        db.session.commit()
-        print("1 user register")
+            db.session.add(new_prof)
+            db.session.commit()
+
         app.logger.info('User Registered Successfully!')
-        return jsonify({"message": "Registration successful!!"}), 201
-    except Exception as e:
-        print("2 User not register")
-        app.logger.error('User Registered Failed')
-        return jsonify({"error": "Registration Failed", "Reasons": str(e)}), 500
+        return jsonify({"message": "Registration successful!"}), 201
 
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f'Registration Failed: {str(e)}')
+        return jsonify({
+            "error": "Registration Failed",
+            "details": str(e)
+        }), 500
 
 @app.route("/verify", methods=["OPTIONS"])
 def handle_options():
@@ -1158,12 +1143,12 @@ def total_reader_count(content_id):
 @jwt_required()
 def accept_request(content_id, user_id):
     try:
-        current_user_id = user_id
+        current_user_id = user_id 
 
         content = Content.query.get(content_id)
 
         if not content:
-            app.logger.warn("No Such Content Found To Borrow")
+            app.logger.warn("No Such Prof Found To Borrow")
             return jsonify({"error": "Content not found"}), 404
 
         total_borrowing = Borrowing.query.filter_by(
@@ -1214,6 +1199,23 @@ def accept_request(content_id, user_id):
         app.logger.error("Error Borrowing Content", str(e))
         return jsonify({"error": "Issuing content failed", "details": str(e)}), 500
 
+@app.route('/accept_approval/<int:content_id>', methods=['POST'])
+@jwt_required()
+def accept_approval(content_id):
+    try:
+        content = Content.query.get(content_id)
+        if content:
+            content.is_verified = True
+            db.session.commit()
+        else:
+            app.logger.warn("Professional not found to approve")
+
+        app.logger.info("Approved Sucessfully")
+        return jsonify({"message": "Approved successfully"}), 200
+    except Exception as e:
+        print("exception ",e)
+        app.logger.error("Error Approving Professional", str(e))
+        return jsonify({"error": "Approving Professional failed", "details": str(e)}), 500
 
 @app.route("/return_content/<int:content_id>", methods=["POST"])
 @jwt_required()
@@ -1611,18 +1613,59 @@ def search_result():
 #     except Exception as e:
 #         app.logger.error("Error Fetching User Wishlist: %s", str(e))
 #         return jsonify({'error': str(e)}), 500
-    
+
 @app.route('/fetch_requests', methods=['GET'])
 @jwt_required()
 def get_requests():
     try:
-        requests = Requests.query.filter_by(response='Pending').all()
+        current_user_id = get_jwt_identity()
+        
+        # Join Content and Requests tables to get requests for content uploaded by current user
+        requests = db.session.query(Requests, Content).join(Content, Content.id == Requests.contentId).filter(Content.uploaded_by_id == current_user_id).filter(Requests.response == 'Pending').all()
+
+        request_list = []
+        for request, content in requests:
+            request_list.append({
+                'contentId': content.id,
+                'userId': request.userId
+            })
+
         app.logger.info("Issue Requests Fetched")
-        return jsonify([{'contentId': ir.contentId, 'userId': ir.userId} for ir in requests]), 200
+        return jsonify(request_list), 200
     except Exception as e:
         app.logger.error("Error Fetching Issue Requests")
         return jsonify({'error': str(e)}), 500
-    
+
+
+@app.route('/fetch_approvals', methods=['GET'])
+@jwt_required()
+def get_approvals():
+    try:
+
+        contents = Content.query.filter_by(is_verified=0).all()
+        
+        approve_list = []
+        for content in contents:
+            approve_list.append({
+                'id': content.id,
+                'title': content.title,
+                'author': content.author,
+                'uploaded_by_id': content.uploaded_by_id,
+                'no_of_pages': content.no_of_pages,
+                'publish_year': content.publish_year,
+                'file': base64.b64encode(content.file).decode('utf-8') if content.file else None,
+                'pdf_file_name': content.pdf_file_name,
+                'price': content.price,
+                'section': content.section
+            })
+        return jsonify(approve_list), 200
+    except Exception as e:
+        print("exception",e)
+        app.logger.error("Error Fetching Issue Requests")
+        return jsonify({'error': str(e)}), 500
+
+
+
 
 @app.route('/user/<int:user_id>', methods=['GET'])
 @cache.cached(timeout=60)
@@ -1743,6 +1786,24 @@ def reject_request(content_id, user_id):
     except Exception as e:
         app.logger.error("Error rejecting issue request", str(e))
         return jsonify({"error": "Rejecting issue request failed", "details": str(e)}), 500
+
+@app.route("/reject_approval/<int:content_id>", methods=["GET", "POST"])
+@jwt_required()
+def reject_approval(content_id):
+    try:
+        content = Content.query.get(content_id)
+        if content:
+            content.is_verified = False
+            db.session.delete(content)
+            db.session.commit()
+            return jsonify({"message": "Approval rejected successfully"}), 200
+        else:
+            app.logger.warn("Approval not found for the specified content and user")
+            return jsonify({"error": "Approval not found"}), 404
+    except Exception as e:
+        print("ex ",e)
+        app.logger.error("Error rejecting approval", str(e))
+        return jsonify({"error": "Rejecting approval failed", "details": str(e)}), 500
 
 # @app.route('/download_purchase/<int:contentId>', methods=['GET'])
 # @jwt_required()
