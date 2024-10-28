@@ -26,14 +26,19 @@
       <div class="profile d-flex">
         <div class="librarian mx-4">
           <router-link :to="{ name: 'Approve' }" v-if="loggedIn && role === 'ADMIN'">
-            <i class="fa-solid fa-clipboard-list px-3 py-2 profile-link"></i>
+            <i class="fa-solid fas fa-handshake px-3 py-2 profile-link"></i>
           </router-link>
         </div> 
+        <div class="librarian mx-4">
+          <router-link :to="{ name: 'Activate' }" v-if="loggedIn && role === 'ADMIN'">
+            <i class="fa-solid fas fa-users px-3 py-2 profile-link"></i>
+          </router-link>
+        </div>
         <!-- <router-link :to="{ name: 'ReaderWishlist', params: { userId: userId } }" v-if="loggedIn && role === 'READER'">
           <i class="fa-solid fa-clipboard-list px-3 py-2 profile-link"></i>
         </router-link> -->
         <router-link :to="{ name: 'UserProfile', params: { userId: userId } }" v-if="loggedIn">
-          <i class="fa-regular fa-user mx-4 px-2 py-2 profile-link"></i>
+          <i class="fa-regular fa-user-circle mx-4 px-2 py-2 profile-link"></i>
         </router-link>
         <button v-if="loggedIn" @click="logout" class="btn btn-danger">Logout</button>
         <router-link v-else to="/login" class="btn btn-success">Login</router-link>

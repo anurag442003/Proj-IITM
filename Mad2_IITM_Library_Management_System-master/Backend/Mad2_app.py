@@ -228,34 +228,38 @@ def login():
 
         if user:
             app.logger.info(f"User found: {user.uname}")
-            if bcrypt.check_password_hash(user.password, data["password"]):
-                login = Login.query.filter_by(user_id=user.id).first()
+            if user.is_active == True:
+                if bcrypt.check_password_hash(user.password, data["password"]):
+                    login = Login.query.filter_by(user_id=user.id).first()
 
-                if login:
-                    login.last_login_time = datetime.now()
-                else:
-                    login = Login(
-                        user_id=user.id, last_login_time=datetime.now()
+                    if login:
+                        login.last_login_time = datetime.now()
+                    else:
+                        login = Login(
+                            user_id=user.id, last_login_time=datetime.now()
+                        )
+                        db.session.add(login)
+
+                    db.session.commit()
+
+                    additional_claims = {
+                        "id": user.id,
+                        "role": user.role,
+                        "username": user.uname,
+                        "email": user.email,
+                    }
+                    access_token = create_access_token(
+                        identity=user.id, additional_claims=additional_claims
                     )
-                    db.session.add(login)
 
-                db.session.commit()
-
-                additional_claims = {
-                    "id": user.id,
-                    "role": user.role,
-                    "username": user.uname,
-                    "email": user.email,
-                }
-                access_token = create_access_token(
-                    identity=user.id, additional_claims=additional_claims
-                )
-
-                app.logger.info("Login Successfully!")
-                return jsonify({"message": "Login successful!", "token": access_token}), 200
+                    app.logger.info("Login Successfully!")
+                    return jsonify({"message": "Login successful!", "token": access_token}), 200
+                else:
+                    app.logger.warning("Incorrect password")
+                    return jsonify({"error": "Invalid password"}), 401
             else:
-                app.logger.warning("Incorrect password")
-                return jsonify({"error": "Invalid password"}), 401
+                app.logger.warning("User is inactive")
+                return jsonify({"error": "User has been deactivated"}), 500
         else:
             app.logger.warning("User not found")
             return jsonify({"error": "Invalid email/username"}), 401
@@ -330,6 +334,7 @@ def register():
             state=data["state"],
             pin=data["zip"],
             role=data["role"],
+            is_active=True
         )
         db.session.add(new_user)
         db.session.commit()
@@ -625,32 +630,38 @@ def get_all_sections():
 def fetch_content():
     try:
         contents = Content.query.all()
+        user = User.query.filter_by(is_active = 1, role = 'LIBRARIAN').all()
 
+        userids = [u.id for u in user]
         formatted_contents = []
         for content in contents:
-            ratings = Review.query.filter_by(content_id=content.id).all()
-            average_rating = round(sum(rating.rating for rating in ratings) / len(ratings), 2) if ratings else 0
+            if content.uploaded_by_id in userids:
 
-            formatted_content = {
-                "id": content.id,
-                "title": content.title,
-                "author": content.author,
-                "rating": average_rating,
-                "section": content.section,
-                "price": content.price,
-                "imageType": content.imageType,
-                "image": base64.b64encode(content.image).decode("utf-8"),
-                "ratings": [
-                    {
-                        "id": rating.id,
-                        "rating": rating.rating,
-                        "comment": rating.comment,
-                        "user_id": rating.user_id
-                    }
-                    for rating in ratings
-                ]
-            }
-            formatted_contents.append(formatted_content)
+                ratings = Review.query.filter_by(content_id=content.id).all()
+                average_rating = round(sum(rating.rating for rating in ratings) / len(ratings), 2) if ratings else 0
+
+                formatted_content = {
+                    "id": content.id,
+                    "title": content.title,
+                    "author": content.author,
+                    "rating": average_rating,
+                    "section": content.section,
+                    "price": content.price,
+                    "imageType": content.imageType,
+                    "image": base64.b64encode(content.image).decode("utf-8"),
+                    "ratings": [
+                        {
+                            "id": rating.id,
+                            "rating": rating.rating,
+                            "comment": rating.comment,
+                            "user_id": rating.user_id
+                        }
+                        for rating in ratings
+                    ]
+                }
+                formatted_contents.append(formatted_content)
+            else:
+                print("not in userids ",content.id)
 
         app.logger.info("Content Fetched Successfully")
         return jsonify({"contents": formatted_contents})
@@ -669,20 +680,26 @@ def fetch_InDemand_contents():
             .order_by(func.avg(Review.rating).desc()) \
             .limit(15) \
             .all()
+        user = User.query.filter_by(is_active = 1, role = 'LIBRARIAN').all()
+
+        userids = [u.id for u in user]
         serialized_contents = []
         for content, avg_rating in InDemand_contents:
-            serialized_content = {
-                'id': content.id,
-                'title': content.title,
-                'author': content.author,
-                'rating': round(avg_rating or 0, 2),
-                'price' : content.price,
-                'image': content.image,
-                'imageType': content.imageType,
-                "image": base64.b64encode(content.image).decode("utf-8"),
-                'average_rating': avg_rating
-            }
-            serialized_contents.append(serialized_content)
+            if content.uploaded_by_id in userids:
+                serialized_content = {
+                    'id': content.id,
+                    'title': content.title,
+                    'author': content.author,
+                    'rating': round(avg_rating or 0, 2),
+                    'price' : content.price,
+                    'image': content.image,
+                    'imageType': content.imageType,
+                    "image": base64.b64encode(content.image).decode("utf-8"),
+                    'average_rating': avg_rating
+                }
+                serialized_contents.append(serialized_content)
+            else:
+                print("not in active userids ",content.id,content.title)
         
         app.logger.info("Fetched InDemand Content Successfully")
         return jsonify({'contents': serialized_contents}), 200
@@ -714,6 +731,7 @@ def fetch_user_content(user_id):
                 Content.author,
                 Content.section,
                 Content.price,
+                Content.uploaded_by_id,
                 func.avg(Review.rating).label("rating"),
                 Content.imageType,
                 Content.image,
@@ -726,24 +744,32 @@ def fetch_user_content(user_id):
             .all()
         )
 
-        formatted_contents = [
-            {
-                "id": content.id,
-                "title": content.title,
-                "author": content.author,
-                "section": content.section,
-                "rating": round(content.rating or 0, 2),
-                "price": content.price,
-                "imageType": content.imageType,
-                "image": base64.b64encode(content.image).decode("utf-8"),
-                "isIssued": content.borrowing_id is not None and not content.returned,
-                # "isWishlisted": content.wishlist_id is not None,
-                "isRead": content.borrowing_id is not None,
-                "isRequested": content.isRequested == 'Pending' if content.isRequested else False
-            }
-            for content in contents
-        ]
-        app.logger.info("Content Fetched by User-ID Successful")
+        user = User.query.filter_by(is_active = 1, role = 'LIBRARIAN').all()
+
+        userids = [u.id for u in user]
+        print("userids ",userids)
+        formatted_contents = []
+        for content in contents:
+            if content.uploaded_by_id in userids:
+
+                fc = {
+                        "id": content.id,
+                        "title": content.title,
+                        "author": content.author,
+                        "section": content.section,
+                        "rating": round(content.rating or 0, 2),
+                        "price": content.price,
+                        "imageType": content.imageType,
+                        "image": base64.b64encode(content.image).decode("utf-8"),
+                        "isIssued": content.borrowing_id is not None and not content.returned,
+                        # "isWishlisted": content.wishlist_id is not None,
+                        "isRead": content.borrowing_id is not None,
+                        "isRequested": content.isRequested == 'Pending' if content.isRequested else False
+                    }
+                formatted_contents.append(fc)
+                app.logger.info("Content Fetched by User-ID Successful")
+            else:
+                print("not active ",content.id, content.title)
 
         return jsonify({"contents": formatted_contents})
 
@@ -1217,6 +1243,42 @@ def accept_approval(content_id):
         app.logger.error("Error Approving Professional", str(e))
         return jsonify({"error": "Approving Professional failed", "details": str(e)}), 500
 
+@app.route('/activate/<int:activate_id>', methods=['POST'])
+@jwt_required()
+def activate_user(activate_id):
+    try:
+        user = User.query.get(activate_id)
+        if user:
+            user.is_active = True
+            db.session.commit()
+        else:
+            app.logger.warn("User not found to activate")
+
+        app.logger.info("Activated Sucessfully")
+        return jsonify({"message": "Activated successfully"}), 200
+    except Exception as e:
+        print("exception ",e)
+        app.logger.error("Error activating user", str(e))
+        return jsonify({"error": "Activating User failed", "details": str(e)}), 500
+
+@app.route('/deactivate/<int:activate_id>', methods=['POST'])
+@jwt_required()
+def deactivate_user(activate_id):
+    try:
+        user = User.query.get(activate_id)
+        if user:
+            user.is_active = False
+            db.session.commit()
+        else:
+            app.logger.warn("User not found to activate")
+
+        app.logger.info("Deactivated Sucessfully")
+        return jsonify({"message": "deactivated successfully"}), 200
+    except Exception as e:
+        print("exception ",e)
+        app.logger.error("Error deactivating user", str(e))
+        return jsonify({"error": "Deactivating User failed", "details": str(e)}), 500
+
 @app.route("/return_content/<int:content_id>", methods=["POST"])
 @jwt_required()
 def return_content(content_id):
@@ -1509,52 +1571,56 @@ def search_result():
     query = request.args.get('query')
 
     current_user_id = get_jwt_identity()
+    user = User.query.filter_by(is_active = 1, role = 'LIBRARIAN').all()
 
+    userids = [u.id for u in user]
     content_results = Content.query.filter(Content.title.ilike(f'%{query}%')).all()
 
     formatted_content_results = []
     for content in content_results:
-        image_data = content.image
-        image_base64 = None
-        if image_data:
-            image_base64 = base64.b64encode(image_data).decode('utf-8')
+        if content.uploaded_by_id in userids:  
+            image_data = content.image
+            image_base64 = None
+            if image_data:
+                image_base64 = base64.b64encode(image_data).decode('utf-8')
 
-        is_issued = False
-        is_read = False
-        is_requested = False
-        # is_wishlisted = False
-        if current_user_id:
-            borrowing = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id, returned=False).first()
-            if borrowing:
-                is_issued = True
+            is_issued = False
+            is_read = False
+            is_requested = False
+            # is_wishlisted = False
+            if current_user_id:
+                borrowing = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id, returned=False).first()
+                if borrowing:
+                    is_issued = True
 
-            # wishlist_item = Wishlist.query.filter_by(content_id=content.id, user_id=current_user_id).first()
-            # if wishlist_item:
-            #     is_wishlisted = True
+                # wishlist_item = Wishlist.query.filter_by(content_id=content.id, user_id=current_user_id).first()
+                # if wishlist_item:
+                #     is_wishlisted = True
 
-            read = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id, returned=False).first()
-            if read:
-                is_read = True
+                read = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id, returned=False).first()
+                if read:
+                    is_read = True
 
-            issueRequest =Requests.query.filter_by(contentId=content.id, userId=current_user_id, response='Pending').first()
-            if issueRequest:
-                is_requested = True
+                issueRequest =Requests.query.filter_by(contentId=content.id, userId=current_user_id, response='Pending').first()
+                if issueRequest:
+                    is_requested = True
 
-        result = {
-            'id': content.id,
-            'title': content.title,
-            'author': content.author,
-            'section': content.section,
-            'rating': db.session.query(func.avg(Review.rating)).filter(Review.content_id == content.id).scalar(),
-            'imageType': content.imageType,
-            'image': image_base64,
-            'isRead': is_read,
-            'isIssued': is_issued,
-            # 'isWishlisted': is_wishlisted,
-            'isRequested': is_requested
-        }
+            result = {
+                'id': content.id,
+                'title': content.title,
+                'author': content.author,
+                'section': content.section,
+                'rating': db.session.query(func.avg(Review.rating)).filter(Review.content_id == content.id).scalar(),
+                'imageType': content.imageType,
+                'image': image_base64,
+                'isRead': is_read,
+                'isIssued': is_issued,
+                # 'isWishlisted': is_wishlisted,
+                'isRequested': is_requested
+            }
 
-        formatted_content_results.append(result)
+            formatted_content_results.append(result)
+            
 
     app.logger.info("Search Result Fetched")
     return jsonify({'results': formatted_content_results})
@@ -1662,6 +1728,37 @@ def get_approvals():
     except Exception as e:
         print("exception",e)
         app.logger.error("Error Fetching Issue Requests")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/fetch_activate', methods=['GET'])
+@jwt_required()
+def get_active():
+    try:
+
+        users = User.query.all()
+        
+        active_list = []
+        for user in users:
+            active_list.append({
+                'id': user.id,
+                'fname': user.fname,
+                'lname': user.lname,
+                'uname': user.uname,
+                'email': user.email,
+                'phone': user.phNumber,
+                'gender': user.gender,
+                'address': user.address,
+                'city': user.city,
+                'state': user.state,
+                'pin': user.pin,
+                'role': user.role,
+                'status': user.is_active
+            })
+        print(active_list[0])
+        return jsonify(active_list), 200
+    except Exception as e:
+        print("exception",e)
+        app.logger.error("Error Fetching Activated Users")
         return jsonify({'error': str(e)}), 500
 
 

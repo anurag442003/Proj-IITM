@@ -307,6 +307,7 @@ export default {
         zip: '',
         address: '',
         role: 'READER',
+        is_active: 1,
         experience: '',
         additionalCharges: '',
         publish_year: '',

@@ -22,6 +22,7 @@ class User(db.Model):
     role = db.Column(db.String(20), nullable=False)
     balance_amt = db.Column(db.Float, default=1000.0)
     ratings = db.relationship('Review', backref='rater', lazy=True)
+    is_active = db.Column(db.Boolean, default=False)
 
     def validate_username(self, uname):
         if len(uname) > 20:
