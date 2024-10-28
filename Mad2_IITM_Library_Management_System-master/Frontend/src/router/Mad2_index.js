@@ -23,6 +23,7 @@ import SummaryGraph from '../components/Mad2_SummaryGraph.vue';
 import ActivityPage from '../components/Mad2_ActivityPage.vue';
 import RequestList from '@/components/Mad2_RequestList.vue';
 import DetailView from '@/components/Mad2_DetailView.vue';
+import MoreDetails from '@/components/Mad2_MoreDetails.vue';
 
 const routes = [
   { path: '/', name: 'home', component: HomePage },
@@ -33,6 +34,7 @@ const routes = [
   { path: '/approve', name: 'Approve', component: Approve, meta: { requiresAuth: true } },
   { path: '/activate', name: 'Activate', component: Activate, meta: { requiresAuth: true } },
   { path: '/detail_view/:contentId/:userId', name: 'DetailView', component: DetailView, meta: { requiresAuth: true } },
+  { path: '/more_details/:contentId/:userId', name: 'MoreDetails', component: MoreDetails, meta: { requiresAuth: true } },
   { path: '/librarian-home', name: 'LibrarianHome', component: LibrarianHome, meta: { requiresAuth: true } },
   { path: '/admin-home', name: 'AdminHome', component: AdminHome, meta: { requiresAuth: true } },
   { path: '/about', name: 'AboutUs', component: AboutUs },

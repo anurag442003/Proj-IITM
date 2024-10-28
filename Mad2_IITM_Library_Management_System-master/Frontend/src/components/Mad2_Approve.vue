@@ -31,7 +31,7 @@
               </button>
             </td>
             <td>
-              <router-link :to="{ name: 'DetailView', params: { contentId: approval.id, userId: approval.uploaded_by_id } }"
+              <router-link :to="{ name: 'MoreDetails', params: { contentId: approval.id, userId: approval.uploaded_by_id } }"
                 class="btn btn-action btn-warning">
                 <i class="fa-solid fa-eye"></i>
               </router-link>
@@ -65,7 +65,7 @@
           this.fetchApproveRequests();
           console.log("Approve Request Accepted");
         } catch (error) {
-            
+
           console.error("Error accepting content request:", error);
         }
       },
