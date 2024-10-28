@@ -1494,6 +1494,7 @@ def rate_content(content_id):
         app.logger.info("Content Review Saved Successfully")
         return jsonify({'message': 'Review saved successfully'}), 200
     except Exception as e:
+        print(e)
         app.logger.info("Error Saving Content Review")
         return jsonify({'error': str(e)}), 500
 
@@ -1619,6 +1620,7 @@ def search_result():
                 if issueRequest:
                     is_requested = True
 
+            
             result = {
                 'id': content.id,
                 'title': content.title,

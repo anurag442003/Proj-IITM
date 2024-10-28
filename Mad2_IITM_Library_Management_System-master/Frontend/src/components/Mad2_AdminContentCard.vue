@@ -9,7 +9,7 @@
             <div class="details-section">
                 <p>About me: {{ content.author }}</p>
                 <p>Service Charge: {{ content.price }} </p>
-                <p>Rating: {{ isNaN(content.rating) ? 'N/A' : content.rating.toFixed(2) }} / 5</p>
+                <p>Rating: {{ !content.rating || isNaN(content.rating) ? 'N/A' : `${content.rating.toFixed(2)} / 5` }}</p>
             </div>
             <div class="action-buttons">
                 <!-- <button class="btn btn-primary btn-sm" @click="editContent(content.id)">
