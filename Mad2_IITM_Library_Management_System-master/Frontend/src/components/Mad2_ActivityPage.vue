@@ -1,8 +1,8 @@
 <template>
     <div class="custom-container">
         <div class="data d-flex justify-content-between">
-            <h2>Current Reader Count: {{ currentReaderCount }}</h2>
-            <h2>Total Reader Count: {{ totalReaderCount }}</h2>
+            <h2>Ongoing Services: {{ currentReaderCount }}</h2>
+            <h2>Total Services rendered: {{ totalReaderCount }}</h2>
             <!--<h2>Wishlist Count: {{ wishlistCount }}</h2>-->
         </div>
         <table class="table table-striped table-bordered">

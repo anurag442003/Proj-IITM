@@ -21,7 +21,7 @@
                 </router-link>
             </div>
             <div class="button-grid">
-                <button v-if="!content.isIssued && !content.isRequested" class="btn btn-primary btn-sm" @click="createRequest(content.id)">
+                <button v-if="!content.isIssued && !content.isRequested " class="btn btn-primary btn-sm" @click="createRequest(content.id)">
                     <i class="fa-solid fa-book"></i> Request
                 </button>
                 <div v-if="content.isRequested && !content.isIssued" class="btn btn-secondary btn-sm">
