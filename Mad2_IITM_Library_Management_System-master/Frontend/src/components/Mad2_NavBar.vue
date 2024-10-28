@@ -15,7 +15,7 @@
           <i class="fa-solid fa-house px-3 py-2 my-2 profile-link"></i>
         </router-link>
       </div>
-      <div class="d-flex justify-content-center search">
+      <div class="d-flex justify-content-center search" v-if="loggedIn && (role === 'ADMIN' ||  role === 'READER')">
         <form class="d-flex" @submit.prevent="search">
           <div class="input-group position-relative">
             <input v-model="searchQuery" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
