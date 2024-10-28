@@ -20,14 +20,14 @@ export default {
     data() {
         return {
             selectedRating: 0,
-            comment: '',
+            comment: '-',
             contentId: null
         };
     },
     created() {
         this.contentId = this.$route.params.contentId;
 
-        this.fetchPreviousRating();
+        //this.fetchPreviousRating();
     },
     methods: {
         async fetchPreviousRating() {

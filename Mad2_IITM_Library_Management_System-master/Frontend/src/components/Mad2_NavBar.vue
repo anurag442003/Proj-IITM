@@ -33,6 +33,9 @@
           <router-link :to="{ name: 'Activate' }" v-if="loggedIn && role === 'ADMIN'">
             <i class="fa-solid fas fa-users px-3 py-2 profile-link"></i>
           </router-link>
+          <router-link :to="{ name: 'Comments' }" v-if="loggedIn && role === 'LIBRARIAN'">
+            <i class="fa-solid fas fa-users px-3 py-2 profile-link"></i>
+          </router-link>
         </div>
         <!-- <router-link :to="{ name: 'ReaderWishlist', params: { userId: userId } }" v-if="loggedIn && role === 'READER'">
           <i class="fa-solid fa-clipboard-list px-3 py-2 profile-link"></i>

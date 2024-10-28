@@ -212,23 +212,23 @@ def login():
                 ).first()
         
 
-
-        if user.uname == "admin" and user.password == "Admin@123":
-                additional_claims = {
-                    "id": user.id,
-                    "role": "ADMIN",
-                    "username": user.uname,
-                    "email": "admin@gmail.com",
-                }
-                access_token = create_access_token(
-                    identity=user.id, additional_claims=additional_claims
-                )
-
-                app.logger.info("Login Successfully!")
-                return jsonify({"message": "Login successful!", "token": access_token}), 200
-
-        content = {}
         if user:
+            if user.uname == "admin" and user.password == "Admin@123":
+                    additional_claims = {
+                        "id": user.id,
+                        "role": "ADMIN",
+                        "username": user.uname,
+                        "email": "admin@gmail.com",
+                    }
+                    access_token = create_access_token(
+                        identity=user.id, additional_claims=additional_claims
+                    )
+
+                    app.logger.info("Login Successfully!")
+                    return jsonify({"message": "Login successful!", "token": access_token}), 200
+
+            content = {}
+        
             app.logger.info(f"User found: {user.uname}")
             if user.is_active == True:
               
@@ -853,56 +853,56 @@ def delete_section(section_id):
         return jsonify({"error": "Section deletion failed", "Reasons": str(e)}), 500
 
 # 2. Content
-@app.route("/delete-content/<int:content_id>", methods=["DELETE"])
-@jwt_required()
-def delete_content(content_id):
-    try:
-        content = Content.query.get(content_id)
-        if not content:
-            app.logger.warning("Content not found: %s", content_id)
-            return jsonify({"error": "Content not found"}), 404
+# @app.route("/delete-content/<int:content_id>", methods=["DELETE"])
+# @jwt_required()
+# def delete_content(content_id):
+#     try:
+#         content = Content.query.get(content_id)
+#         if not content:
+#             app.logger.warning("Content not found: %s", content_id)
+#             return jsonify({"error": "Content not found"}), 404
 
-        app.logger.info("Content found: %s", content_id)
+#         app.logger.info("Content found: %s", content_id)
 
-        # try:
-        #     related_wishlist_items = Wishlist.query.filter_by(content_id=content_id).all()
-        #     app.logger.info("Found %d related wishlist items", len(related_wishlist_items))
-        #     for wishlist_item in related_wishlist_items:
-        #         db.session.delete(wishlist_item)
-        # except Exception as e:
-        #     app.logger.error("Error deleting wishlist items: %s", str(e))
-        #     return jsonify({"error": "Failed to delete wishlist items", "details": str(e)}), 500
+#         # try:
+#         #     related_wishlist_items = Wishlist.query.filter_by(content_id=content_id).all()
+#         #     app.logger.info("Found %d related wishlist items", len(related_wishlist_items))
+#         #     for wishlist_item in related_wishlist_items:
+#         #         db.session.delete(wishlist_item)
+#         # except Exception as e:
+#         #     app.logger.error("Error deleting wishlist items: %s", str(e))
+#         #     return jsonify({"error": "Failed to delete wishlist items", "details": str(e)}), 500
 
-        try:
-            related_review_items = Review.query.filter_by(content_id=content_id).all()
-            app.logger.info("Found %d related review items", len(related_review_items))
-            for review_item in related_review_items:
-                db.session.delete(review_item)
-        except Exception as e:
-            app.logger.error("Error deleting review items: %s", str(e))
-            return jsonify({"error": "Failed to delete review items", "details": str(e)}), 500
-        try:
-            related_borrowing_items = Borrowing.query.filter_by(content_id=content_id).all()
-            app.logger.info("Found %d related borrowing items", len(related_borrowing_items))
-            for borrow_item in related_borrowing_items:
-                db.session.delete(borrow_item)
-        except Exception as e:
-            app.logger.error("Error deleting borrowing items: %s", str(e))
-            return jsonify({"error": "Failed to delete borrowing items", "details": str(e)}), 500
+#         try:
+#             related_review_items = Review.query.filter_by(content_id=content_id).all()
+#             app.logger.info("Found %d related review items", len(related_review_items))
+#             for review_item in related_review_items:
+#                 db.session.delete(review_item)
+#         except Exception as e:
+#             app.logger.error("Error deleting review items: %s", str(e))
+#             return jsonify({"error": "Failed to delete review items", "details": str(e)}), 500
+#         try:
+#             related_borrowing_items = Borrowing.query.filter_by(content_id=content_id).all()
+#             app.logger.info("Found %d related borrowing items", len(related_borrowing_items))
+#             for borrow_item in related_borrowing_items:
+#                 db.session.delete(borrow_item)
+#         except Exception as e:
+#             app.logger.error("Error deleting borrowing items: %s", str(e))
+#             return jsonify({"error": "Failed to delete borrowing items", "details": str(e)}), 500
 
-        try:
-            db.session.delete(content)
-            db.session.commit()
-        except Exception as e:
-            app.logger.error("Error deleting content: %s", str(e))
-            return jsonify({"error": "Failed to delete content", "details": str(e)}), 500
+#         try:
+#             db.session.delete(content)
+#             db.session.commit()
+#         except Exception as e:
+#             app.logger.error("Error deleting content: %s", str(e))
+#             return jsonify({"error": "Failed to delete content", "details": str(e)}), 500
 
-        app.logger.info("Content and related items deleted successfully")
-        return jsonify({"message": "Content and related items deleted successfully"}), 200
+#         app.logger.info("Content and related items deleted successfully")
+#         return jsonify({"message": "Content and related items deleted successfully"}), 200
 
-    except Exception as e:
-        app.logger.error("Unexpected error: %s", str(e))
-        return jsonify({"error": "Content deletion failed", "details": str(e)}), 500
+#     except Exception as e:
+#         app.logger.error("Unexpected error: %s", str(e))
+#         return jsonify({"error": "Content deletion failed", "details": str(e)}), 500
 
 # 3. Wishlist
 # @app.route("/wishlist/remove/<int:content_id>", methods=["POST"])
@@ -1509,6 +1509,17 @@ def rate_content(content_id):
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/get_all_comments/<int:content_id>', methods=['GET'])
+@jwt_required()
+def get_all_comments(content_id):
+    try:
+        user_id = get_jwt_identity()
+
+        previous_rating = Review.query.filter(content_id=content_id).all()
+    except:
+
+
+
 @app.route('/get_previous_rating/<int:content_id>', methods=['GET'])
 @jwt_required()
 def get_previous_rating(content_id):
@@ -2016,8 +2027,9 @@ def reject_approval(content_id):
         user = User.query.get(content.uploaded_by_id)
         if content:
             content.is_verified = False
-            db.session.delete(content)
+            
             db.session.delete(user)
+            db.session.delete(content)
             db.session.commit()
             return jsonify({"message": "Approval rejected successfully"}), 200
         else:

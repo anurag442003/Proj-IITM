@@ -57,11 +57,11 @@ export default {
         },
     },
     methods: {
-        confirmDeletion(contentId) {
-            if (confirm("Are you sure you want to delete this content?")) {
-                this.removeContent(contentId);
-            }
-        },
+        // confirmDeletion(contentId) {
+        //     if (confirm("Are you sure you want to delete this content?")) {
+        //         this.removeContent(contentId);
+        //     }
+        // },
         getDecodedImage(content) {
             return `data:image/${content.imageType};base64,${content.image}`;
         },
@@ -83,37 +83,37 @@ export default {
         editContent(contentId) {
             this.$router.push({ name: 'UpdateContent', params: { contentId } });
         },
-        removeContent(contentId) {
-            const token = sessionStorage.getItem('token');
+        // removeContent(contentId) {
+        //     const token = sessionStorage.getItem('token');
 
-            fetch(`http://127.0.0.1:5000/delete-content/${contentId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-            })
-                .then(response => {
-                    if (response.ok) {
-                        this.showAlert = true;
-                        this.alertType = 'success';
-                        this.alertMessage = 'Content successfully deleted.';
-                        return response.json();
-                    } else {
-                        throw new Error('Failed to delete content');
-                    }
-                })
-                .then(data => {
-                    this.$emit('contentUpdated');
-                    console.log(data.message);
-                })
-                .catch(error => {
-                    this.showAlert = true;
-                    this.alertType = 'error';
-                    this.alertMessage = 'Content deletion failed.';
-                    console.error(error);
-                });
-        },
+        //     fetch(`http://127.0.0.1:5000/delete-content/${contentId}`, {
+        //         method: 'DELETE',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'Authorization': `Bearer ${token}`,
+        //         },
+        //     })
+        //         .then(response => {
+        //             if (response.ok) {
+        //                 this.showAlert = true;
+        //                 this.alertType = 'success';
+        //                 this.alertMessage = 'Content successfully deleted.';
+        //                 return response.json();
+        //             } else {
+        //                 throw new Error('Failed to delete content');
+        //             }
+        //         })
+        //         .then(data => {
+        //             this.$emit('contentUpdated');
+        //             console.log(data.message);
+        //         })
+        //         .catch(error => {
+        //             this.showAlert = true;
+        //             this.alertType = 'error';
+        //             this.alertMessage = 'Content deletion failed.';
+        //             console.error(error);
+        //         });
+        // },
         closeAlert() {
             this.showAlert = false;
         }
