@@ -13,7 +13,7 @@
                         <button class="btn btn-secondary" type="submit">Update</button>
                     </div>
                     <div class="col-6 d-flex align-items-center justify-content-center">
-                        <router-link class="btn btn-danger" to="/request-list">Cancel</router-link>
+                        <router-link class="btn btn-danger" to="/admin-home">Cancel</router-link>
                     </div>
                 </div>
             </form>

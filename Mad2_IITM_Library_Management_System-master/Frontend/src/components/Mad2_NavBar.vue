@@ -33,7 +33,7 @@
           <router-link :to="{ name: 'Activate' }" v-if="loggedIn && role === 'ADMIN'">
             <i class="fa-solid fas fa-users px-3 py-2 profile-link"></i>
           </router-link>
-          <router-link :to="{ name: 'Comments' }" v-if="loggedIn && role === 'LIBRARIAN'">
+          <router-link :to="{ name: 'Comments', params: { contentId: userId } }" v-if="loggedIn && role === 'LIBRARIAN'">
             <i class="fa-solid fas fa-users px-3 py-2 profile-link"></i>
           </router-link>
         </div>
@@ -68,6 +68,7 @@ export default {
       if (this.searchQuery.trim() !== "") {
         this.$router.push({ name: 'searchResult', params: { query: this.searchQuery } });
       }
+      this.searchQuery = '';
     },
     async logout() {
       sessionStorage.removeItem('token');

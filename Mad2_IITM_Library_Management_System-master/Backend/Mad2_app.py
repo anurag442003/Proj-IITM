@@ -101,6 +101,7 @@ def make_celery(app):
     
     celery.Task = ContextTask
     return celery
+
 celery = make_celery(app)
 
 celery.conf.beat_schedule = {
@@ -124,12 +125,12 @@ celery.conf.beat_schedule = {
 
 @celery.task(name="send_email")
 def desert_user():
-    threshold_time = datetime.now() - timedelta(days=1)
+    threshold_time = datetime.now() - timedelta(minutes=1)
     inactive_users = User.query.join(Login).filter(Login.last_login_time < threshold_time).all()
     for user in inactive_users:
-        subject = 'Reminder: Log in to our Library Management System'
-        body = f'Dear {user.fname},\n\nThis is a reminder to log in to our Library Management System.'
-        sender = "noreply@app.com"
+        subject = 'Reminder: Log in to HH Household Services App'
+        body = f'Dear {user.fname},\n\nThis is a reminder to log in to HH Household Services App'
+        sender = "noreply@hhapp.com"
         msg = Message(subject, sender=sender, recipients=[user.email], body=body)
         try:
             mail.send(msg)
@@ -141,17 +142,18 @@ def monthly_report():
     try:
         all_users = User.query.all()
         for user in all_users:
-            active_borrowings_count = Borrowing.query.filter_by(member_id=user.id, returned=False).count()
+            active_services = Borrowing.query.filter_by(member_id=user.id, returned=False).count()
             # wishlist_items_count = len(user.wishlist_items)
+            total_services = Borrowing.query.filter(member_id=user.id).count()
 
             pdf_buffer = BytesIO()
             c = canvas.Canvas(pdf_buffer)
             c.drawString(100, 750, "Monthly Report for User: {}".format(user.uname))
-            c.drawString(100, 730, "Active Borrowings: {}".format(active_borrowings_count))
-            # c.drawString(100, 710, "Wishlist Items Count: {}".format(wishlist_items_count))
+            c.drawString(100, 730, "Active Services: {}".format(active_services))
+            c.drawString(100, 710, "Total Services: {}".format(wishlist_items_count))
             c.save()
 
-            sender = "noreply@app.com"
+            sender = "noreply@hhapp.com"
             msg = Message("Monthly Report", sender=sender, recipients=[user.email])
             msg.body = "Please find attached the monthly report."
             msg.attach("monthly_report.pdf", "application/pdf", pdf_buffer.getvalue())
@@ -235,9 +237,6 @@ def login():
 
                 if user.role == 'LIBRARIAN':
                     content = Content.query.filter_by(uploaded_by_id=user.id).first()
-                    
-                    
-                            
                       
                 if bcrypt.check_password_hash(user.password, data["password"]):
                     login = Login.query.filter_by(user_id=user.id).first()
@@ -249,6 +248,7 @@ def login():
                             user_id=user.id, last_login_time=datetime.now()
                         )
                         db.session.add(login)
+                        
 
                     db.session.commit()
 
@@ -263,12 +263,14 @@ def login():
                     )
 
                     if user.role == 'LIBRARIAN' and content.is_verified == False:
+                        print("not verif")
                         app.logger.warning("Professional hasnt been verfied yet")
                         return jsonify({"error": "Professional hasnt been verfied yet"}), 401
 
                     app.logger.info("Login Successfully!")
                     return jsonify({"message": "Login successful!", "token": access_token}), 200
                 else:
+                    print("wrong pwsd")
                     app.logger.warning("Incorrect password")
                     return jsonify({"error": "Invalid password"}), 401
             else:
@@ -1079,6 +1081,7 @@ def update_content(content_id, user_id):
 
                 content.file = pdf_data
 
+        
         db.session.commit()
 
         app.logger.info("Content Updated Successfully")
@@ -1088,17 +1091,6 @@ def update_content(content_id, user_id):
         app.logger.error("Error Updating Content")
         return jsonify({"message": "Error updating content"}), 500
 
-
-
-
-
-
-
-
-
-
-
-    
 
 
 
@@ -1234,7 +1226,7 @@ def accept_request(content_id, user_id):
 
         new_transaction_log = TransactionsLog(
             user_id=current_user_id,
-            action="Issue",
+            action="Accepted Request for service",
             content_id=content_id,
             timestamp=datetime.now(),
         )
@@ -1261,6 +1253,7 @@ def accept_approval(content_id):
             app.logger.warn("Professional not found to approve")
 
         app.logger.info("Approved Sucessfully")
+       
         return jsonify({"message": "Approved successfully"}), 200
     except Exception as e:
         print("exception ",e)
@@ -1336,7 +1329,7 @@ def return_content(content_id):
 
         new_transaction_log = TransactionsLog(
             user_id=current_user_id,
-            action="Return",
+            action="End service",
             content_id=borrowing.content_id,
             timestamp=datetime.now(),
         )
@@ -1349,50 +1342,6 @@ def return_content(content_id):
     except Exception as e:
         app.logger.error("Error Returning Content", str(e))
         return jsonify({"error": "Returning content failed", "details": str(e)}), 500
-
-
-@app.route("/reissue_content/<int:borrowing_id>", methods=["POST"])
-@jwt_required()
-def reissue_content(borrowing_id):
-    try:
-        current_user_id = get_jwt_identity()
-
-        borrowing = Borrowing.query.filter_by(
-            id=borrowing_id, member_id=current_user_id, return_date=None
-        ).first()
-
-        if not borrowing:
-            app.logger.warn("Borrowing Record Not Found / Already Returned")
-            return (
-                jsonify({"error": "Borrowing record not found or already returned"}),
-                404,
-            )
-
-        if borrowing.reissue_count >= 3:
-            app.logger.warning("Re-Issue Limit Reached")
-            return jsonify({"error": "Maximum reissue limit reached"}), 400
-
-        borrowing.reissue_count += 1
-        borrowing.estimated_return_date = borrowing.last_return_date + timedelta(days=7)
-        borrowing.last_return_date = datetime.now()
-
-        new_transaction_log = TransactionsLog(
-            user_id=current_user_id,
-            action="Re-Issue",
-            content_id=borrowing_id,
-            timestamp=datetime.now(),
-        )
-        db.session.add(new_transaction_log)
-
-        db.session.commit()
-
-        app.logger.info("Content Reissue Successful")
-        return jsonify({"message": "Content reissued successfully"}), 200
-    except Exception as e:
-        app.logger.warn("Content Reissue Failed", str(e))
-        return jsonify({"error": "Reissuing content failed", "details": str(e)}), 500
-
-
 
 
 
@@ -1446,7 +1395,7 @@ def revoke_access():
 
         new_transaction_log = TransactionsLog(
             user_id=user_id,
-            action="Revoke",
+            action="Revoke service",
             content_id=content_id,
             timestamp=datetime.now(),
         )
@@ -1474,7 +1423,7 @@ def rate_content(content_id):
         rating = Review.query.filter_by(content_id=content_id, user_id=user_id).first()
         new_transaction_log = TransactionsLog(
                 user_id=user_id,
-                action="New Content Review",
+                action="Service review",
                 content_id=content_id,
                 timestamp=datetime.now(),
             )
@@ -1488,7 +1437,7 @@ def rate_content(content_id):
 
             new_transaction_log = TransactionsLog(
                 user_id=user_id,
-                action="Updated Content Review",
+                action="Updated service review",
                 content_id=content_id,
                 timestamp=datetime.now(),
             )
@@ -1509,15 +1458,27 @@ def rate_content(content_id):
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/get_all_comments/<int:content_id>', methods=['GET'])
+@app.route('/get_all_comments/<int:userid>', methods=['GET'])
 @jwt_required()
-def get_all_comments(content_id):
+def get_all_comments(userid):
     try:
-        user_id = get_jwt_identity()
-
-        previous_rating = Review.query.filter(content_id=content_id).all()
-    except:
-        pass
+        content=Content.query.filter_by(uploaded_by_id=userid).first()
+        reviews = Review.query.filter_by(content_id=content.id).all()
+        reviews_list = []
+        for review in reviews:
+            user = User.query.filter_by(id=review.user_id).first()
+            reviews_list.append({
+                'user_id': review.user_id,
+                'username': user.uname,
+                'rating': review.rating,
+                'comment': review.comment
+            })
+        print(reviews_list)
+        app.logger.info("All Comments Fetched Successfully")
+        return jsonify(reviews_list), 200
+    except Exception as e:
+        app.logger.error("Error Fetching Comments")
+        return jsonify({'error': str(e)}), 500
 
 
 
@@ -1613,17 +1574,13 @@ def search_result():
 
     uploaded_by_ids = [user.id for user in librarian_users]
 
-    librarian_content_results = Content.query.filter(Content.uploaded_by_id.in_(uploaded_by_ids)).all()
-    content_results = Content.query.filter(Content.title.ilike(f'%{query}%')).all()
+    librarian_content_results = Content.query.filter(Content.uploaded_by_id.in_(uploaded_by_ids))
+    content_results = Content.query.filter(Content.title.ilike(f'%{query}%'))
 
-    for x in content_results:
-        if x in librarian_content_results:
-            pass
-        else:
-            librarian_content_results += x
+    results = librarian_content_results.union(content_results).all()
 
     formatted_content_results = []
-    for content in librarian_content_results:  
+    for content in results:  
         image_data = content.image
         image_base64 = None
         if image_data:
@@ -1731,10 +1688,11 @@ def search_result():
 def get_requests():
     try:
         current_user_id = get_jwt_identity()
-        
+        print("in fetch requests")
         # Join Content and Requests tables to get requests for content uploaded by current user
         requests = db.session.query(Requests, Content).join(Content, Content.id == Requests.contentId).filter(Content.uploaded_by_id == current_user_id).filter(Requests.response == 'Pending').all()
 
+        print(requests)
         request_list = []
         for request, content in requests:
             request_list.append({
