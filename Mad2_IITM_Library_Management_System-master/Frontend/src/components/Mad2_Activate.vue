@@ -7,6 +7,8 @@
             <th>ID</th>
             <th>Name</th>
             <th>Role</th>
+            <th>Details</th>
+
             <th>Active</th>
             
           </tr>
@@ -16,19 +18,18 @@
             <td>{{ active.id }}</td>
             <td>{{ active.fname }}</td>
             <td>{{ active.role }}</td>
-            
+            <td>
+              <router-link :to="{ name: 'AllDetails', params: { userId: active.id } }"
+                class="btn btn-action btn-warning">
+                <i class="fa-solid fa-eye"></i>
+              </router-link>
+            </td>
             <td>
             <label class="switch">
               <input type="checkbox" :checked="active.status" @change="toggleStatus(active)">
               <span class="slider"></span>
             </label>
             </td>
-            <!-- <td>
-              <router-link :to="{ name: 'DetailView', params: { contentId: approval.id, userId: approval.uploaded_by_id } }"
-                class="btn btn-action btn-warning">
-                <i class="fa-solid fa-eye"></i>
-              </router-link>
-            </td> -->
           </tr>
         </tbody>
       </table>

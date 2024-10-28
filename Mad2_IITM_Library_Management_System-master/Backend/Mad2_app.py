@@ -825,6 +825,16 @@ def delete_section(section_id):
         section = Section.query.get(section_id)
 
         if section:
+            uploaded_by_ids = db.session.query(distinct(Content.uploaded_by_id)) \
+                        .filter_by(section=section_id) \
+                        .all()
+    
+            uploaded_by_ids = [user_id[0] for user_id in uploaded_by_ids]
+            Content.query.filter_by(section=section_id).delete()
+            if uploaded_by_ids:
+                User.query.filter(User.id.in_(uploaded_by_ids)).delete(synchronize_session=False)
+
+            
             Content.query.filter_by(section=section_id).delete()
 
             db.session.delete(section)
@@ -1917,6 +1927,64 @@ def more_details(content_id, user_id):
         }
         
         app.logger.info("Details fetched successfully")
+        return jsonify(response_data), 200
+    except Exception as e:
+        app.logger.error("Error fetching details: %s", str(e))
+        return jsonify({'error': 'Error fetching details'}), 500    
+
+@app.route('/all_details/<int:user_id>', methods=["GET"])
+@jwt_required()
+def all_details(user_id):
+    try:
+        user = User.query.get(user_id)
+
+        # Check if user exists
+        if user is None:
+            return jsonify({'error': 'User not found'}), 404
+
+        # Prepare initial response with user details
+        response_data = {
+            'id': user.id,
+            'fname': user.fname,
+            'lname': user.lname,
+            'uname': user.uname,
+            'phNumber': user.phNumber,
+            'email': user.email,
+            'pin': user.pin,
+            'city': user.city,
+            'state': user.state,
+            'role': user.role
+        }
+
+        print("role is",user.role)
+        # If the user is a librarian, fetch content details uploaded by this user
+        if user.role == 'LIBRARIAN':
+            content = Content.query.filter_by(uploaded_by_id=user.id).first()
+            print(content)
+            # Check if content exists for this user
+            if content:
+                section = Section.query.get(content.section)
+                section_name = section.name if section else "N/A"
+
+                image_base64 = base64.b64encode(content.image).decode('utf-8') if content.image else None
+                pdf_base64 = base64.b64encode(content.file).decode('utf-8') if content.file else None
+                # Add content-related fields to response data
+                response_data.update({
+                    'cid':content.id,
+                    'section': section_name,
+                    'author': content.author,
+                    'price': content.price,
+                    'no_of_pages': content.no_of_pages,
+                    'image':image_base64,
+                    'image_type':content.imageType,
+                    'pdf_file':pdf_base64,
+                    'pdf_filename':content.pdf_file_name,
+                    'publish_year': content.publish_year
+                })
+            else:
+                # If no content is found, include a message
+                response_data['content'] = 'No content found for this user'
+
         return jsonify(response_data), 200
     except Exception as e:
         app.logger.error("Error fetching details: %s", str(e))

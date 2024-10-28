@@ -18,9 +18,9 @@
                 <router-link class="btn btn-success btn-sm" :to="'/activity-data/' + content.id">
                     <i class="fa-solid fa-chart-line"></i> View Activity
                 </router-link>
-                <button class="btn btn-danger btn-sm" @click="confirmDeletion(content.id)">
+                <!-- <button class="btn btn-danger btn-sm" @click="confirmDeletion(content.id)">
                     <i class="fa-solid fa-trash"></i> Delete
-                </button>
+                </button> -->
             </div>
             <div v-if="showAlert" :class="[alertType, 'alert-dismissible', 'fade', 'show']" role="alert">
                 {{ alertMessage }}
