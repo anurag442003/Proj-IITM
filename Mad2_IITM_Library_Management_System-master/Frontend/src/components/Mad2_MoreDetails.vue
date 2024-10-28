@@ -5,7 +5,10 @@
         <p><strong>Username:</strong> {{ userDetails.username }}</p>
         <p><strong>Phone Number:</strong> {{ userDetails.phno }}</p>
         <p><strong>Pincode:</strong> {{ userDetails.pin }}</p>
-        <p><strong>Section Name:</strong> {{ userDetails.sectionName }}</p>
+        <p><strong>Service Name:</strong> {{ userDetails.sectionName }}</p>
+        <p><strong>Experience:</strong> {{ userDetails.experience }} years</p>
+        <p><strong>Additional charges for service:</strong> {{ userDetails.additionalCharges }} Rs.</p>
+        <p><strong>Description:</strong> {{ userDetails.desc }}</p>
         <div class="d-flex">
             <router-link :to="{ name: 'Approve'}" class="btn btn-primary mx-4"><i class="fa-solid fa-angles-left"></i></router-link>
         </div>

@@ -5,7 +5,10 @@
         <p><strong>Username:</strong> {{ userDetails.username }}</p>
         <p><strong>Phone Number:</strong> {{ userDetails.phno }}</p>
         <p><strong>Pincode:</strong> {{ userDetails.pin }}</p>
-        <p><strong>Section Name:</strong> {{ contentDetails.sectionName }}</p>
+        <p><strong>Service Name:</strong> {{ userDetails.sectionName }}</p>
+        <p><strong>Experience:</strong> {{ userDetails.experience }} years</p>
+        <p><strong>Additional charges for service:</strong> {{ userDetails.additionalCharges }} Rs.</p>
+        <p><strong>Description:</strong> {{ userDetails.desc }}</p>
         <div class="d-flex">
             <button class="btn btn-success mx-4" @click="acceptRequest(contentId, userId)">Accept</button>
             <button class="btn btn-danger mx-4" @click="rejectRequest(contentId, userId)">Reject</button>
@@ -19,7 +22,6 @@ export default {
     data() {
         return {
             userDetails: {},
-            contentDetails: {},
             contentId: null,
             userId: null
         }
@@ -37,7 +39,6 @@ export default {
                 });
 
                 this.userDetails = response.data;
-                this.contentDetails = response.data;
                 console.log(response.data)
             } catch (error) {
                 console.error('Error fetching details:', error);

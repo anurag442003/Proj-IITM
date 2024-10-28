@@ -1872,7 +1872,38 @@ def detailed_view(content_id, user_id):
             'username': user.uname,
             'pin': user.pin,
             'phno': user.phNumber,
-            'sectionName': Section.query.get(content.section).name
+            'sectionName': Section.query.get(content.section).name,
+            'experience': content.no_of_pages,
+            'desc': content.author,
+            'additionalCharges': content.price
+        }
+        
+        app.logger.info("Details fetched successfully")
+        return jsonify(response_data), 200
+    except Exception as e:
+        app.logger.error("Error fetching details: %s", str(e))
+        return jsonify({'error': 'Error fetching details'}), 500    
+
+
+@app.route('/more_details/<int:content_id>/<int:user_id>', methods=["GET"])
+@jwt_required()
+def more_details(content_id, user_id):
+    try:
+        user = User.query.get(user_id)
+        content = Content.query.get(content_id)
+        
+        if user is None or content is None:
+            return jsonify({'error': 'User or content not found'}), 404
+
+        response_data = {
+            'userid': user.id,
+            'username': user.uname,
+            'pin': user.pin,
+            'phno': user.phNumber,
+            'sectionName': Section.query.get(content.section).name,
+            'experience': content.no_of_pages,
+            'desc': content.author,
+            'additionalCharges': content.price
         }
         
         app.logger.info("Details fetched successfully")
@@ -1904,9 +1935,11 @@ def reject_request(content_id, user_id):
 def reject_approval(content_id):
     try:
         content = Content.query.get(content_id)
+        user = User.query.get(content.uploaded_by_id)
         if content:
             content.is_verified = False
             db.session.delete(content)
+            db.session.delete(user)
             db.session.commit()
             return jsonify({"message": "Approval rejected successfully"}), 200
         else:
