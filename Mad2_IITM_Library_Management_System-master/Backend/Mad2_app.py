@@ -1586,56 +1586,64 @@ def search_result():
     query = request.args.get('query')
 
     current_user_id = get_jwt_identity()
-    user = User.query.filter_by(is_active = 1, role = 'LIBRARIAN').all()
 
-    userids = [u.id for u in user]
+    librarian_users = User.query.filter(User.is_active == 1, User.role == "LIBRARIAN",(User.city.ilike(f'%{query}%')) | (User.state.ilike(f'%{query}%'))).all()
+
+    uploaded_by_ids = [user.id for user in librarian_users]
+
+    librarian_content_results = Content.query.filter(Content.uploaded_by_id.in_(uploaded_by_ids)).all()
     content_results = Content.query.filter(Content.title.ilike(f'%{query}%')).all()
 
+    for x in content_results:
+        if x in librarian_content_results:
+            pass
+        else:
+            librarian_content_results += x
+
     formatted_content_results = []
-    for content in content_results:
-        if content.uploaded_by_id in userids:  
-            image_data = content.image
-            image_base64 = None
-            if image_data:
-                image_base64 = base64.b64encode(image_data).decode('utf-8')
+    for content in librarian_content_results:  
+        image_data = content.image
+        image_base64 = None
+        if image_data:
+            image_base64 = base64.b64encode(image_data).decode('utf-8')
 
-            is_issued = False
-            is_read = False
-            is_requested = False
-            # is_wishlisted = False
-            if current_user_id:
-                borrowing = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id, returned=False).first()
-                if borrowing:
-                    is_issued = True
+        is_issued = False
+        is_read = False
+        is_requested = False
+        # is_wishlisted = False
+        if current_user_id:
+            borrowing = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id, returned=False).first()
+            if borrowing:
+                is_issued = True
 
-                # wishlist_item = Wishlist.query.filter_by(content_id=content.id, user_id=current_user_id).first()
-                # if wishlist_item:
-                #     is_wishlisted = True
+            # wishlist_item = Wishlist.query.filter_by(content_id=content.id, user_id=current_user_id).first()
+            # if wishlist_item:
+            #     is_wishlisted = True
 
-                read = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id, returned=False).first()
-                if read:
-                    is_read = True
+            read = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id, returned=False).first()
+            if read:
+                is_read = True
 
-                issueRequest =Requests.query.filter_by(contentId=content.id, userId=current_user_id, response='Pending').first()
-                if issueRequest:
-                    is_requested = True
+            issueRequest =Requests.query.filter_by(contentId=content.id, userId=current_user_id, response='Pending').first()
+            if issueRequest:
+                is_requested = True
 
-            
-            result = {
-                'id': content.id,
-                'title': content.title,
-                'author': content.author,
-                'section': content.section,
-                'rating': db.session.query(func.avg(Review.rating)).filter(Review.content_id == content.id).scalar(),
-                'imageType': content.imageType,
-                'image': image_base64,
-                'isRead': is_read,
-                'isIssued': is_issued,
-                # 'isWishlisted': is_wishlisted,
-                'isRequested': is_requested
-            }
+        
+        result = {
+            'id': content.id,
+            'title': content.title,
+            'author': content.author,
+            'section': content.section,
+            'rating': db.session.query(func.avg(Review.rating)).filter(Review.content_id == content.id).scalar(),
+            'imageType': content.imageType,
+            'image': image_base64,
+            'isRead': is_read,
+            'isIssued': is_issued,
+            # 'isWishlisted': is_wishlisted,
+            'isRequested': is_requested
+        }
 
-            formatted_content_results.append(result)
+        formatted_content_results.append(result)
 
 
     app.logger.info("Search Result Fetched")
