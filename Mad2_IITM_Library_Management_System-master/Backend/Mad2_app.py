@@ -1517,6 +1517,7 @@ def get_all_comments(content_id):
 
         previous_rating = Review.query.filter(content_id=content_id).all()
     except:
+        pass
 
 
 

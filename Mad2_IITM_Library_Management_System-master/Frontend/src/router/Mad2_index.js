@@ -25,6 +25,7 @@ import RequestList from '@/components/Mad2_RequestList.vue';
 import DetailView from '@/components/Mad2_DetailView.vue';
 import MoreDetails from '@/components/Mad2_MoreDetails.vue';
 import AllDetails from '@/components/Mad2_AllDetails.vue';
+import Comments from '@/components/Mad2_Comments.vue';
 
 const routes = [
   { path: '/', name: 'home', component: HomePage },
@@ -39,6 +40,7 @@ const routes = [
   { path: '/more_details/:contentId/:userId', name: 'MoreDetails', component: MoreDetails, meta: { requiresAuth: true } },
   { path: '/librarian-home', name: 'LibrarianHome', component: LibrarianHome, meta: { requiresAuth: true } },
   { path: '/admin-home', name: 'AdminHome', component: AdminHome, meta: { requiresAuth: true } },
+  { path: '/get_all_comments/:contentId', name: 'Comments', component: Comments, meta: { requiresAuth: true } },
   { path: '/about', name: 'AboutUs', component: AboutUs },
   { path: '/addbook', name: 'AddBook', component: AddBook, meta: { requiresAuth: true } },
   { path: '/borrowbook', name: 'BorrowBook', component: BorrowBook, meta: { requiresAuth: true } },
