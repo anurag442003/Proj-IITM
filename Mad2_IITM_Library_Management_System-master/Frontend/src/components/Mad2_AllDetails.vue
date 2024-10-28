@@ -1,44 +1,53 @@
 <template>
-
     <div class="custom-container">
-    <h2>User Details</h2>
-    <p><strong>User ID:</strong> {{ userDetails.id }}</p>
-    <p><strong>First Name:</strong> {{ userDetails.fname }}</p>
-    <p><strong>Last Name:</strong> {{ userDetails.lname }}</p>
-    <p><strong>Username:</strong> {{ userDetails.uname }}</p>
-    <p><strong>Phone Number:</strong> {{ userDetails.phNumber }}</p>
-    <p><strong>Email:</strong> {{ userDetails.email }}</p>
-    <p><strong>Pincode:</strong> {{ userDetails.pin }}</p>
-    <p><strong>City:</strong> {{ userDetails.city }}</p>
-    <p><strong>State:</strong> {{ userDetails.state }}</p>
-    <p><strong>Role:</strong> {{ userDetails.role }}</p>
-
-    <!-- Conditionally display content details if the user's role is "librarian" -->
-    <div v-if="userDetails.role === 'LIBRARIAN'">
-        <h2>Content Details</h2>
-        <p><strong>Service Type:</strong> {{  userDetails.section }}</p>
-        <p><strong>Description:</strong> {{  userDetails.author }}</p>
-        <p><strong>Additional Charges:</strong> {{  userDetails.price }} Rs.</p>
-        <p><strong>Experience:</strong> {{  userDetails.no_of_pages }} years</p>
-        <p><strong>Date of birth:</strong> {{  userDetails.publish_year }}</p>
-
-        <!-- Display image if available -->
-        <div v-if=" userDetails.image">
-            <img :src="getDecodedImage(userDetails)" alt="Content Image" />
+        <div class="details-card">
+            <h2 class="card-title">User Details</h2>
+            <div class="info-grid">
+                <p><strong>User ID:</strong> {{ userDetails.id }}</p>
+                <p><strong>First Name:</strong> {{ userDetails.fname }}</p>
+                <p><strong>Last Name:</strong> {{ userDetails.lname }}</p>
+                <p><strong>Username:</strong> {{ userDetails.uname }}</p>
+                <p><strong>Phone:</strong> {{ userDetails.phNumber }}</p>
+                <p><strong>Email:</strong> {{ userDetails.email }}</p>
+                <p><strong>Pincode:</strong> {{ userDetails.pin }}</p>
+                <p><strong>City:</strong> {{ userDetails.city }}</p>
+                <p><strong>State:</strong> {{ userDetails.state }}</p>
+            </div>
+            <p class="role-tag"><strong>Role:</strong> {{ userDetails.role }}</p>
         </div>
 
-        <!-- Display PDF link if available -->
-        <div v-if=" userDetails.pdf_file">
-            <button class="btn btn-primary btn-sm" @click="openContent(userDetails.cid)">
-                <i class="fa-brands fa-readme"></i> {{ userDetails.pdf_file_name }}
-            </button>
+        <!-- Librarian Details -->
+        <div v-if="userDetails.role === 'LIBRARIAN'" class="details-card">
+            <h2 class="card-title">Content Details</h2>
+            <div class="info-grid">
+                <p><strong>Service Type:</strong> {{ userDetails.section }}</p>
+                <p><strong>Description:</strong> {{ userDetails.author }}</p>
+                <p><strong>Charges:</strong> {{ userDetails.price }} Rs.</p>
+                <p><strong>Experience:</strong> {{ userDetails.no_of_pages }} years</p>
+                <p><strong>DOB:</strong> {{ userDetails.publish_year }}</p>
+            </div>
+
+            <div class="media-content">
+                <!-- Profile Image -->
+                <div v-if="userDetails.image" class="profile-image">
+                    <img :src="getDecodedImage(userDetails)" alt="Content Image"/>
+                </div>
+
+                <!-- Resume PDF -->
+                <div v-if="userDetails.pdf_file" class="pdf-button">
+                    <button class="btn btn-primary" @click="openContent(userDetails.cid)">
+                        <i class="fa-brands fa-readme"></i> View Resume
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-buttons">
+            <router-link :to="{ name: 'Activate'}" class="btn btn-primary">
+                <i class="fa-solid fa-angles-left"></i> Back
+            </router-link>
         </div>
     </div>
-
-    <div class="d-flex">
-        <router-link :to="{ name: 'Activate'}" class="btn btn-primary mx-4"><i class="fa-solid fa-angles-left"></i></router-link>
-    </div>
-</div>
 </template>
 
 <script>
@@ -59,15 +68,12 @@ export default {
         async viewDetails() {
             try {
                 this.userId = this.$route.params.userId;
-
                 const response = await this.$axios.get(`http://127.0.0.1:5000/all_details/${this.userId}`, {
                     headers: {
                         Authorization: `Bearer ${sessionStorage.getItem('token')}`
                     }
                 });
-
                 this.userDetails = response.data;
-                console.log(response.data)
             } catch (error) {
                 console.error('Error fetching details:', error);
             }
@@ -80,9 +86,7 @@ export default {
                     },
                 });
                 const blob = await response.blob();
-
                 const pdfUrl = URL.createObjectURL(blob);
-
                 window.open(pdfUrl, '_blank');
             } catch (error) {
                 console.error('Error opening content:', error);
@@ -103,38 +107,92 @@ export default {
 
 <style scoped>
 .custom-container {
-    padding: 15px;
-    margin: 70px auto;
-    width: 40%;
-    border-radius: 2rem;
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1rem;
+}
+
+.details-card {
     background-color: rgba(0, 0, 0, 0.315);
-    color: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: black;
+}
+
+.card-title {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #000;
+    font-size: 1.5rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.info-grid p {
+    margin: 0;
+    padding: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.5rem;
+}
+
+.role-tag {
+    text-align: center;
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.media-content {
     display: flex;
     flex-direction: column;
-    row-gap: 2rem;
     align-items: center;
-    padding-top: 2rem;
+    gap: 1rem;
+    margin-top: 1.5rem;
 }
 
-.modal-content {
-    background-color: #fefefe;
-    margin: 10% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
+.profile-image {
+    width: 200px;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
+.profile-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
+.pdf-button {
+    margin-top: 0.5rem;
+}
+
+.nav-buttons {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+}
+
+@media (max-width: 600px) {
+    .info-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .profile-image {
+        width: 150px;
+        height: 150px;
+    }
 }
 </style>
