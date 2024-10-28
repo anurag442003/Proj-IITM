@@ -207,7 +207,9 @@ def login():
         data = request.get_json()
         app.logger.info(f"Received login data: {data}")
 
-
+        user = User.query.filter(
+                    or_(User.email == data["input"], User.uname == data["input"])
+                ).first()
         
 
 
@@ -225,17 +227,15 @@ def login():
                 app.logger.info("Login Successfully!")
                 return jsonify({"message": "Login successful!", "token": access_token}), 200
 
+        content = {}
         if user:
             app.logger.info(f"User found: {user.uname}")
             if user.is_active == True:
-                user = User.query.filter(
-                    or_(User.email == data["input"], User.uname == data["input"])
-                ).first()
+              
 
                 if user.role == 'LIBRARIAN':
-                    content = Content.query.filter_by(Content.uploaded_by_id == user.id).all()
-                    if content.is_verified == 0:
-                        return jsonify({"message": "Professional hasnt been verfied yet", "token": access_token}), 401
+                    content = Content.query.filter_by(uploaded_by_id=user.id).first()
+                    
                     
                             
                       
@@ -261,6 +261,10 @@ def login():
                     access_token = create_access_token(
                         identity=user.id, additional_claims=additional_claims
                     )
+
+                    if user.role == 'LIBRARIAN' and content.is_verified == False:
+                        app.logger.warning("Professional hasnt been verfied yet")
+                        return jsonify({"error": "Professional hasnt been verfied yet"}), 401
 
                     app.logger.info("Login Successfully!")
                     return jsonify({"message": "Login successful!", "token": access_token}), 200
