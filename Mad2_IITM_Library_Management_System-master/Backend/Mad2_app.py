@@ -238,35 +238,35 @@ def login():
                         return jsonify({"message": "Professional hasnt been verfied yet", "token": access_token}), 401
                     
                             
-                        
-                    if bcrypt.check_password_hash(user.password, data["password"]):
-                        login = Login.query.filter_by(user_id=user.id).first()
+                      
+                if bcrypt.check_password_hash(user.password, data["password"]):
+                    login = Login.query.filter_by(user_id=user.id).first()
 
-                        if login:
-                            login.last_login_time = datetime.now()
-                        else:
-                            login = Login(
-                                user_id=user.id, last_login_time=datetime.now()
-                            )
-                            db.session.add(login)
-
-                        db.session.commit()
-
-                        additional_claims = {
-                            "id": user.id,
-                            "role": user.role,
-                            "username": user.uname,
-                            "email": user.email,
-                        }
-                        access_token = create_access_token(
-                            identity=user.id, additional_claims=additional_claims
-                        )
-
-                        app.logger.info("Login Successfully!")
-                        return jsonify({"message": "Login successful!", "token": access_token}), 200
+                    if login:
+                        login.last_login_time = datetime.now()
                     else:
-                        app.logger.warning("Incorrect password")
-                        return jsonify({"error": "Invalid password"}), 401
+                        login = Login(
+                            user_id=user.id, last_login_time=datetime.now()
+                        )
+                        db.session.add(login)
+
+                    db.session.commit()
+
+                    additional_claims = {
+                        "id": user.id,
+                        "role": user.role,
+                        "username": user.uname,
+                        "email": user.email,
+                    }
+                    access_token = create_access_token(
+                        identity=user.id, additional_claims=additional_claims
+                    )
+
+                    app.logger.info("Login Successfully!")
+                    return jsonify({"message": "Login successful!", "token": access_token}), 200
+                else:
+                    app.logger.warning("Incorrect password")
+                    return jsonify({"error": "Invalid password"}), 401
             else:
                 app.logger.warning("User is inactive")
                 return jsonify({"error": "User has been deactivated"}), 500
