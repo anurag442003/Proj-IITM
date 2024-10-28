@@ -50,7 +50,7 @@ class Config:
     broker = 'redis://localhost:6379/0'
     result_backend = 'redis://localhost:6379/0'
     MAIL_SERVER = 'localhost'
-    MAIL_PORT = 1025
+    MAIL_PORT = 25
     MAIL_USE_TLS = False
     MAIL_USE_SSL = False
     MAIL_USERNAME = None
@@ -89,8 +89,8 @@ CORS(app)
 def make_celery(app):
     celery = Celery(
         app.import_name,
-        broker=app.config.get('CELERY_BROKER_URL', 'redis://localhost:6379/0'),
-        backend=app.config.get('CELERY_RESULT_BACKEND', 'redis://localhost:6379/0')
+        broker=app.config.get('broker', 'redis://localhost:6379/0'),
+        backend=app.config.get('result_backend', 'redis://localhost:6379/0')
     )
     celery.conf.update(app.config)
     
@@ -107,32 +107,36 @@ celery = make_celery(app)
 celery.conf.beat_schedule = {
     'send_email-inactive': {
         'task': 'send_email',
-        'schedule': crontab(minute="*/10"),
+        'schedule': crontab(minute="*/3"),
     },
     'monthly_report': {
         'task': 'monthly_report',
-        'schedule': crontab(minute="*/10")
+        'schedule': crontab(minute="*/3")
     },
     'revoke_access': {
         'task': 'revoke_access',
-        'schedule': crontab(minute="*/10")
+        'schedule': crontab(minute="*/3")
     },
     'delete_rej_issue': {
         'task': 'delete_rejected_issue_requests',
-        'schedule': crontab(minute="*/10")
+        'schedule': crontab(minute="*/3")
     }
 }
 
 @celery.task(name="send_email")
 def desert_user():
+    print("trying to send mail")
     threshold_time = datetime.now() - timedelta(minutes=1)
     inactive_users = User.query.join(Login).filter(Login.last_login_time < threshold_time).all()
+    print(inactive_users)
     for user in inactive_users:
+        print("inactive users are ",user.email)
         subject = 'Reminder: Log in to HH Household Services App'
         body = f'Dear {user.fname},\n\nThis is a reminder to log in to HH Household Services App'
-        sender = "noreply@hhapp.com"
+        sender = "noreply@gmail.com"
         msg = Message(subject, sender=sender, recipients=[user.email], body=body)
         try:
+            print("mail on the way")
             mail.send(msg)
         except Exception as e:
             print(f"Failed Sending Email: {e}")
@@ -150,7 +154,7 @@ def monthly_report():
             c = canvas.Canvas(pdf_buffer)
             c.drawString(100, 750, "Monthly Report for User: {}".format(user.uname))
             c.drawString(100, 730, "Active Services: {}".format(active_services))
-            c.drawString(100, 710, "Total Services: {}".format(wishlist_items_count))
+            c.drawString(100, 710, "Total Services: {}".format(total_services))
             c.save()
 
             sender = "noreply@hhapp.com"
@@ -316,7 +320,22 @@ def logout():
         return jsonify({"error": "Logout failed", "Reasons": str(e)}), 500
 
 
+@app.route("/fetch-section_names", methods=["GET"])
+def get_all_section_names():
+    try:
+        sections = Section.query.all()
 
+
+        sections_list = [
+            {"id": section.id, "name": section.name} for section in sections
+        ]
+
+        app.logger.info("Fetched Section Names")
+        return jsonify({"sections": sections_list})
+    except Exception as e:
+        app.logger.error(e)
+        return jsonify({"error": "Failed to fetch section names", "Reasons": str(e)}), 500
+        
 @app.route("/register", methods=["POST"])
 def register():
     try:

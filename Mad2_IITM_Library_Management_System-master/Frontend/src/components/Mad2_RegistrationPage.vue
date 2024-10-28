@@ -121,11 +121,11 @@
             <input type="file" @change="handleImageUpload" class="form-control" accept="image/*" required />
           </div>
           <div class="col-md-4 mb-3">
-            <label for="serviceType" class="form-label">Service Type:</label>
+            <label for="serviceType" class="form-label">Section:</label>
             <select v-model="userData.serviceType" class="form-select" required>
-              <option value="1">Type 1</option>
-              <option value="2">Type 2</option>
-              <option value="3">Type 3</option>
+              <option v-for="section in sections" :key="section.id" :value="section.id">
+                {{ section.name }}
+              </option>
             </select>
           </div>
         </div>
@@ -167,13 +167,23 @@ export default {
         description: '',
         resume: null,
         image: null,
-        serviceType: '1'
+        serviceType: ''
       },
+      sections: [],
       validationErrors: {},
       successMessage: '',
       errorMessage: '',
       isSubmitting: false
     };
+  },
+  async created() {
+    try {
+      const response = await this.$axios.get('http://127.0.0.1:5000/fetch-section_names');
+      this.sections = response.data.sections;
+    } catch (error) {
+      console.error('Error fetching sections:', error);
+      this.errorMessage = 'Failed to load sections';
+    }
   },
   methods: {
     validateForm() {
@@ -314,7 +324,7 @@ export default {
         description: '',
         resume: null,
         image: null,
-        serviceType: '1'
+        serviceType: ''
       };
       this.validationErrors = {};
       this.errorMessage = '';
