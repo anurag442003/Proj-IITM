@@ -1753,21 +1753,22 @@ def get_active():
         
         active_list = []
         for user in users:
-            active_list.append({
-                'id': user.id,
-                'fname': user.fname,
-                'lname': user.lname,
-                'uname': user.uname,
-                'email': user.email,
-                'phone': user.phNumber,
-                'gender': user.gender,
-                'address': user.address,
-                'city': user.city,
-                'state': user.state,
-                'pin': user.pin,
-                'role': user.role,
-                'status': user.is_active
-            })
+            if user.role != 'ADMIN':
+                active_list.append({
+                    'id': user.id,
+                    'fname': user.fname,
+                    'lname': user.lname,
+                    'uname': user.uname,
+                    'email': user.email,
+                    'phone': user.phNumber,
+                    'gender': user.gender,
+                    'address': user.address,
+                    'city': user.city,
+                    'state': user.state,
+                    'pin': user.pin,
+                    'role': user.role,
+                    'status': user.is_active
+                })
         print(active_list[0])
         return jsonify(active_list), 200
     except Exception as e:
