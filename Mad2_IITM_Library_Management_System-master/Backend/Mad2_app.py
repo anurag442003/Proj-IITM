@@ -208,9 +208,8 @@ def login():
         app.logger.info(f"Received login data: {data}")
 
 
-        user = User.query.filter(
-            or_(User.email == data["input"], User.uname == data["input"])
-        ).first()
+        
+
 
         if user.uname == "admin" and user.password == "Admin@123":
                 additional_claims = {
@@ -229,34 +228,45 @@ def login():
         if user:
             app.logger.info(f"User found: {user.uname}")
             if user.is_active == True:
-                if bcrypt.check_password_hash(user.password, data["password"]):
-                    login = Login.query.filter_by(user_id=user.id).first()
+                user = User.query.filter(
+                    or_(User.email == data["input"], User.uname == data["input"])
+                ).first()
 
-                    if login:
-                        login.last_login_time = datetime.now()
-                    else:
-                        login = Login(
-                            user_id=user.id, last_login_time=datetime.now()
+                if user.role == 'LIBRARIAN':
+                    content = Content.query.filter_by(Content.uploaded_by_id == user.id).all()
+                    if content.is_verified == 0:
+                        return jsonify({"message": "Professional hasnt been verfied yet", "token": access_token}), 401
+                    
+                            
+                        
+                    if bcrypt.check_password_hash(user.password, data["password"]):
+                        login = Login.query.filter_by(user_id=user.id).first()
+
+                        if login:
+                            login.last_login_time = datetime.now()
+                        else:
+                            login = Login(
+                                user_id=user.id, last_login_time=datetime.now()
+                            )
+                            db.session.add(login)
+
+                        db.session.commit()
+
+                        additional_claims = {
+                            "id": user.id,
+                            "role": user.role,
+                            "username": user.uname,
+                            "email": user.email,
+                        }
+                        access_token = create_access_token(
+                            identity=user.id, additional_claims=additional_claims
                         )
-                        db.session.add(login)
 
-                    db.session.commit()
-
-                    additional_claims = {
-                        "id": user.id,
-                        "role": user.role,
-                        "username": user.uname,
-                        "email": user.email,
-                    }
-                    access_token = create_access_token(
-                        identity=user.id, additional_claims=additional_claims
-                    )
-
-                    app.logger.info("Login Successfully!")
-                    return jsonify({"message": "Login successful!", "token": access_token}), 200
-                else:
-                    app.logger.warning("Incorrect password")
-                    return jsonify({"error": "Invalid password"}), 401
+                        app.logger.info("Login Successfully!")
+                        return jsonify({"message": "Login successful!", "token": access_token}), 200
+                    else:
+                        app.logger.warning("Incorrect password")
+                        return jsonify({"error": "Invalid password"}), 401
             else:
                 app.logger.warning("User is inactive")
                 return jsonify({"error": "User has been deactivated"}), 500
@@ -1620,7 +1630,7 @@ def search_result():
             }
 
             formatted_content_results.append(result)
-            
+
 
     app.logger.info("Search Result Fetched")
     return jsonify({'results': formatted_content_results})
