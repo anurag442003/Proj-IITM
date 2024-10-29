@@ -82,8 +82,8 @@
         <div class="mb-3">
           <label for="role" class="form-label">Role:</label>
           <div class="btn-group visibility col-12 pt-3 px-2 py-2" role="group">
-            <input v-model="userData.role" type="radio" class="btn-check" name="btnradio" id="btnradio1" value="READER">
-            <label class="btn btn-outline-primary" for="btnradio1"><b>READER</b></label>
+            <input v-model="userData.role" type="radio" class="btn-check" name="btnradio" id="btnradio1" value="USER">
+            <label class="btn btn-outline-primary" for="btnradio1"><b>USER</b></label>
 
             <input v-model="userData.role" type="radio" class="btn-check" name="btnradio" id="btnradio2" value="PROFESSIONAL">
             <label class="btn btn-outline-success" for="btnradio2"><b>PROFESSIONAL</b></label>
@@ -160,7 +160,7 @@ export default {
         state: '',
         zip: '',
         address: '',
-        role: 'READER',
+        role: 'USER',
         experience: '',
         additionalCharges: '',
         date_of_birth: '',
@@ -316,7 +316,7 @@ export default {
         state: '',
         zip: '',
         address: '',
-        role: 'READER',
+        role: 'USER',
         is_active: 1,
         experience: '',
         additionalCharges: '',

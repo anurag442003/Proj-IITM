@@ -52,7 +52,7 @@ export default {
               this.$router.push("/request-list").then(() => {
                 window.location.reload();
               });
-            } else if (user && user.role === "READER") {
+            } else if (user && user.role === "USER") {
               this.$router.push("/users-home").then(() => {
                 window.location.reload();
               });

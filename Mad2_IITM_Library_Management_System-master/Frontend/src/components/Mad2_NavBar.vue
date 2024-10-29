@@ -8,14 +8,14 @@
         <router-link :to="{ name: 'RequestList' }" v-if="loggedIn && role === 'PROFESSIONAL'">
           <i class="fa-solid fa-house px-3 py-2 my-2 profile-link"></i>
         </router-link>
-        <router-link :to="{ name: 'UsersHome' }" v-if="loggedIn && role === 'READER'">
+        <router-link :to="{ name: 'UsersHome' }" v-if="loggedIn && role === 'USER'">
           <i class="fa-solid fa-house px-3 py-2 my-2 profile-link"></i>
         </router-link>
         <router-link :to="{ name: 'AdminHome' }" v-if="loggedIn && role === 'ADMIN'">
           <i class="fa-solid fa-house px-3 py-2 my-2 profile-link"></i>
         </router-link>
       </div>
-      <div class="d-flex justify-professional-center search" v-if="loggedIn && (role === 'ADMIN' ||  role === 'READER')">
+      <div class="d-flex justify-professional-center search" v-if="loggedIn && (role === 'ADMIN' ||  role === 'USER')">
         <form class="d-flex" @submit.prevent="search">
           <div class="input-group position-relative">
             <input v-model="searchQuery" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
