@@ -10,9 +10,7 @@ import LoginPage from '../components/Mad2_LoginPage.vue';
 import RegistrationPage from '../components/Mad2_RegistrationPage.vue';
 import SearchResult from '../components/Mad2_SearchResult.vue';
 import TransactionLogs from '../components/Mad2_TransactionLogs.vue';
-import UpdateProfessional from '../components/Mad2_UpdateProfessional.vue';
 import UpdateService from '../components/Mad2_UpdateService.vue';
-import UploadProfessional from '../components/Mad2_UploadProfessional.vue';
 import HomePage from '../components/Mad2_HomePage.vue';
 import UserProfile from '../components/Mad2_UserProfile.vue';
 import Approve from '../components/Mad2_Approve.vue';
@@ -49,9 +47,7 @@ const routes = [
   { path: '/register', name: 'RegistrationPage', component: RegistrationPage },
   { path: '/searchresult/:query', name: 'searchResult', component: SearchResult },
   { path: '/transactionlogs', name: 'TransactionLogs', component: TransactionLogs, meta: { requiresAuth: true } },
-  { path: '/update-professional/:professionalId', name: 'UpdateProfessional', component: UpdateProfessional, meta: { requiresAuth: true } },
   { path: '/update-service/:serviceId', name: 'UpdateService', component: UpdateService, meta: { requiresAuth: true } },
-  { path: '/upload-professional/:serviceId', name: 'UploadProfessional', component: UploadProfessional, meta: { requiresAuth: true } },
   { path: '/create-service', name: 'CreateService', component: CreateService, meta: { requiresAuth: true } },
   { path: '/summary-graph', name: 'SummaryGraph', component: SummaryGraph, meta: { requiresAuth: true } },
 ];

@@ -8,7 +8,6 @@
                     <h4 class="my3">  - Base Price : {{ service.baseprice }} Rs.</h4>
                     <div class="service-btn">
                         <router-link :to="'/update-service/' + service.id" class="btn btn-sm btn-primary"><i class="fa-regular fa-pen-to-square"></i></router-link>
-                        <!-- <router-link :to="'/upload-professional/' + service.id" class="btn btn-sm btn-success"><i class="fa-solid fa-plus"></i></router-link> -->
                         <button @click="confirmDelete(service.id)" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>

@@ -12,15 +12,9 @@
                 <p>Rating: {{ !professional.rating || isNaN(professional.rating) ? 'N/A' : `${professional.rating.toFixed(2)} / 5` }}</p>
             </div>
             <div class="action-buttons">
-                <!-- <button class="btn btn-primary btn-sm" @click="editProfessional(professional.id)">
-                    <i class="fa-solid fa-pen"></i> Edit
-                </button> -->
                 <router-link class="btn btn-success btn-sm" :to="'/activity-data/' + professional.id">
                     <i class="fa-solid fa-chart-line"></i> View Activity
                 </router-link>
-                <!-- <button class="btn btn-danger btn-sm" @click="confirmDeletion(professional.id)">
-                    <i class="fa-solid fa-trash"></i> Delete
-                </button> -->
             </div>
             <div v-if="showAlert" :class="[alertType, 'alert-dismissible', 'fade', 'show']" role="alert">
                 {{ alertMessage }}
@@ -80,40 +74,6 @@ export default {
                     rating: this.calculateAverageRating(professional.id),
                 }));
         },
-        editProfessional(professionalId) {
-            this.$router.push({ name: 'UpdateProfessional', params: { professionalId } });
-        },
-        // removeProfessional(professionalId) {
-        //     const token = sessionStorage.getItem('token');
-
-        //     fetch(`http://127.0.0.1:5000/delete-professional/${professionalId}`, {
-        //         method: 'DELETE',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //             'Authorization': `Bearer ${token}`,
-        //         },
-        //     })
-        //         .then(response => {
-        //             if (response.ok) {
-        //                 this.showAlert = true;
-        //                 this.alertType = 'success';
-        //                 this.alertMessage = 'Professional successfully deleted.';
-        //                 return response.json();
-        //             } else {
-        //                 throw new Error('Failed to delete professional');
-        //             }
-        //         })
-        //         .then(data => {
-        //             this.$emit('professionalUpdated');
-        //             console.log(data.message);
-        //         })
-        //         .catch(error => {
-        //             this.showAlert = true;
-        //             this.alertType = 'error';
-        //             this.alertMessage = 'Professional deletion failed.';
-        //             console.error(error);
-        //         });
-        // },
         closeAlert() {
             this.showAlert = false;
         }
