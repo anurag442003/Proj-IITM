@@ -75,7 +75,7 @@ stream_handler.setFormatter(formatter)
 logging.getLogger().addHandler(stream_handler)
 
 
-from Mad2_Models import db, User, Service, Content, Borrowing, TransactionsLog, Review, Login, Requests
+from Mad2_Models import db, User, Service, Professional, Rendering, TransactionsLog, Review, Login, Requests
 db.init_app(app)
 api = Api(app)
 excel.init_excel(app)
@@ -96,7 +96,7 @@ with app.app_context():
     # Test revoke_access
     # print("Testing revoke_access...")
     # revoke_access()  # Call the function directly
-    # print("Access revoked for expired borrowings.")
+    # print("Access revoked for expired renderings.")
 
     # Test delete_rejected_issue_requests
     print("Testing deactivate")

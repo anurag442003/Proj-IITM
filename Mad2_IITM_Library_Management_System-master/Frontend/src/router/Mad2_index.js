@@ -4,7 +4,7 @@ import AdminHome from '../components/AdminHome.vue';
 import ReaderHome from '../components/Mad2_ReaderHome.vue';
 import LibrarianHome from '../components/Mad2_LibrarianHome.vue';
 import AddBook from '../components/Mad2_AddBook.vue';
-import BorrowBook from '../components/Mad2_BorrowBook.vue';
+import RenderBook from '../components/Mad2_RenderBook.vue';
 import CreateService from '../components/Mad2_CreateService.vue';
 import LoginPage from '../components/Mad2_LoginPage.vue';
 import RegistrationPage from '../components/Mad2_RegistrationPage.vue';
@@ -43,7 +43,7 @@ const routes = [
   { path: '/get_all_comments/:contentId', name: 'Comments', component: Comments, meta: { requiresAuth: true } },
   { path: '/about', name: 'AboutUs', component: AboutUs },
   { path: '/addbook', name: 'AddBook', component: AddBook, meta: { requiresAuth: true } },
-  { path: '/borrowbook', name: 'BorrowBook', component: BorrowBook, meta: { requiresAuth: true } },
+  { path: '/renderbook', name: 'RenderBook', component: RenderBook, meta: { requiresAuth: true } },
   { path: '/activity-data/:contentId', name: 'ActivityPage', component: ActivityPage, meta: { requiresAuth: true } },
   { path: '/request-list', name: 'RequestList', component: RequestList, meta: { requiresAuth: true } },
   { path: '/createcategory', name: 'CreateCategory', component: CreateService, meta: { requiresAuth: true } },

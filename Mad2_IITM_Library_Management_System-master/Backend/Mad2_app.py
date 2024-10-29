@@ -73,7 +73,7 @@ stream_handler.setFormatter(formatter)
 logging.getLogger().addHandler(stream_handler)
 
 
-from Mad2_Models import db, User, Service, Content, Borrowing, TransactionsLog, Review, Login, Requests
+from Mad2_Models import db, User, Service, Professional, Rendering, TransactionsLog, Review, Login, Requests
 db.init_app(app)
 api = Api(app)
 excel.init_excel(app)
@@ -148,8 +148,8 @@ def monthly_report():
     try:
         all_users = User.query.all()
         for user in all_users:
-            active_services = Borrowing.query.filter_by(member_id=user.id, returned=False).count()
-            total_services = Borrowing.query.filter_by(member_id=user.id).count()
+            active_services = Rendering.query.filter_by(member_id=user.id, returned=False).count()
+            total_services = Rendering.query.filter_by(member_id=user.id).count()
 
             pdf_buffer = BytesIO()
             c = canvas.Canvas(pdf_buffer)
@@ -172,11 +172,11 @@ def monthly_report():
 
 @celery.task(name="revoke_access")
 def revoke_access():
-    expired_borrowings = Borrowing.query.filter(Borrowing.last_return_date < datetime.now()).all()
-    for borrowing in expired_borrowings:
-        borrowing.returned = True
-        borrowing.return_date = datetime.now()
-        borrowing.is_read = True
+    expired_renderings = Rendering.query.filter(Rendering.last_return_date < datetime.now()).all()
+    for rendering in expired_renderings:
+        rendering.returned = True
+        rendering.return_date = datetime.now()
+        rendering.is_read = True
     db.session.commit()
 
 @celery.task(name="deactivated_user")
@@ -249,7 +249,7 @@ def login():
               
 
                 if user.role == 'LIBRARIAN':
-                    content = Content.query.filter_by(uploaded_by_id=user.id).first()
+                    content = Professional.query.filter_by(uploaded_by_id=user.id).first()
                       
                 if bcrypt.check_password_hash(user.password, data["password"]):
                     login = Login.query.filter_by(user_id=user.id).first()
@@ -387,12 +387,12 @@ def register():
             user_from_db = User.query.filter_by(uname=data["username"]).first()
             userid = user_from_db.id
 
-            new_prof = Content(
+            new_prof = Professional(
                 title=f"{data['firstname']} {data['lastname']}",
-                no_of_pages=int(request.form.get('experience', 0)),
-                author=request.form.get('description', ''),
+                no_of_years=int(request.form.get('experience', 0)),
+                prof_desc=request.form.get('description', ''),
                 uploaded_by_id=userid,
-                publish_year=int(request.form.get('publish_year', 2024)),
+                date_of_birth=int(request.form.get('date_of_birth', 2024)),
                 price=float(request.form.get('additionalCharges', 0.0)),
                 service=int(request.form.get('serviceType', 1))
             )
@@ -514,7 +514,7 @@ def create_service():
         if existing_Service:
             return jsonify({"error": "Service already exists , Please add new Service"}), 400
 
-        new_service = Service(name=data["name"],baseprice=data["price"],time=data["time"])
+        new_service = Service(name=data["name"],baseprice=data["price"],time=data["time"],desc=data["desc"])
         db.session.add(new_service)
         db.session.commit()
 
@@ -522,7 +522,7 @@ def create_service():
     except Exception as e:
         return jsonify({"error": "New Service creation is failed", "Reasons": str(e)}), 500
 
-# 2. Content
+# 2. Professional
 @app.route("/add-content/<int:service_id>/<int:user_id>", methods=["POST"])
 @jwt_required()
 def add_content(service_id, user_id):
@@ -549,20 +549,20 @@ def add_content(service_id, user_id):
 
     try:
         title = escape(request.form.get("title"))
-        author = escape(request.form.get("author"))
-        no_of_pages = escape(request.form.get("number_of_pages"))
+        prof_desc = escape(request.form.get("prof_desc"))
+        no_of_years = escape(request.form.get("number_of_pages"))
         price = escape(request.form.get("price"))
-        publish_year = escape(request.form.get("publish_year"))
+        date_of_birth = escape(request.form.get("date_of_birth"))
 
-        if not all([title, author, no_of_pages, publish_year, price, ]):
+        if not all([title, prof_desc, no_of_years, date_of_birth, price, ]):
             app.logger.warn("Data Is Incomplete")
             return jsonify({"message": "Incomplete form data"}), 400
 
-        content = Content(
+        content = Professional(
             title=title,
-            author=author,
-            no_of_pages=no_of_pages,
-            publish_year=publish_year,
+            prof_desc=prof_desc,
+            no_of_years=no_of_years,
+            date_of_birth=date_of_birth,
             price=price,
             service=service_id,
             uploaded_by_id=user_id,
@@ -592,7 +592,7 @@ def add_content(service_id, user_id):
                             400,
                         )
                     else:
-                        content.no_of_pages = len(pdf_reader.pages)
+                        content.no_of_years = len(pdf_reader.pages)
                 except Exception as e:
                     app.logger.error("Invalid PDF File")
                     return jsonify({"message": f"Invalid PDF file: {str(e)}"}), 400
@@ -605,11 +605,11 @@ def add_content(service_id, user_id):
         db.session.add(content)
         db.session.commit()
 
-        app.logger.info("Content Added Successfully")
-        return jsonify({"message": "Content added successfully"}), 201
+        app.logger.info("Professional Added Successfully")
+        return jsonify({"message": "Professional added successfully"}), 201
 
     except Exception as e:
-        app.logger.error("Error Adding Content", str(e))
+        app.logger.error("Error Adding Professional", str(e))
         return jsonify({"message": f"Error adding content: {str(e)}"}), 500
 
 # 3. Wishlist
@@ -624,8 +624,8 @@ def add_content(service_id, user_id):
 #         ).first()
 
 #         if existing_wishlist_item:
-#             app.logger.warn("Content Already In Wishlist")
-#             return jsonify({"error": "Content is already in the wishlist"}), 400
+#             app.logger.warn("Professional Already In Wishlist")
+#             return jsonify({"error": "Professional is already in the wishlist"}), 400
 
 #         new_wishlist_item = Wishlist(content_id=content_id, user_id=current_user_id)
 #         db.session.add(new_wishlist_item)
@@ -640,10 +640,10 @@ def add_content(service_id, user_id):
 
 #         db.session.commit()
 
-#         app.logger.info("Content Wishlisted Successfully")
-#         return jsonify({"message": "Content added to wishlist successfully"}), 200
+#         app.logger.info("Professional Wishlisted Successfully")
+#         return jsonify({"message": "Professional added to wishlist successfully"}), 200
 #     except Exception as e:
-#         app.logger.error("Content Wishlisting Failed", str(e))
+#         app.logger.error("Professional Wishlisting Failed", str(e))
 #         return (
 #             jsonify({"error": "Failed to add content to wishlist", "details": str(e)}),
 #             500,
@@ -669,11 +669,11 @@ def get_all_services():
         app.logger.error(e)
         return jsonify({"error": "Failed to fetch services", "Reasons": str(e)}), 500
 
-# 2. Content
+# 2. Professional
 @app.route("/fetch-content", methods=["GET"])
 def fetch_content():
     try:
-        contents = Content.query.all()
+        contents = Professional.query.all()
         user = User.query.filter_by(is_active = 1, role = 'LIBRARIAN').all()
 
         userids = [u.id for u in user]
@@ -687,7 +687,7 @@ def fetch_content():
                 formatted_content = {
                     "id": content.id,
                     "title": content.title,
-                    "author": content.author,
+                    "prof_desc": content.prof_desc,
                     "rating": average_rating,
                     "service": content.service,
                     "price": content.price,
@@ -707,20 +707,20 @@ def fetch_content():
             else:
                 print("not in userids ",content.id)
 
-        app.logger.info("Content Fetched Successfully")
+        app.logger.info("Professional Fetched Successfully")
         return jsonify({"contents": formatted_contents})
 
     except Exception as e:
-        app.logger.error("Error Fetching Content", str(e))
+        app.logger.error("Error Fetching Professional", str(e))
         return jsonify({"error": "Failed to fetch content", "details": str(e)}), 500
 
 # 3. InDemand
 @app.route('/fetch-InDemand', methods=['GET'])
 def fetch_InDemand_contents():
     try:
-        InDemand_contents = db.session.query(Content, func.avg(Review.rating).label('avg_rating')) \
+        InDemand_contents = db.session.query(Professional, func.avg(Review.rating).label('avg_rating')) \
             .join(Review) \
-            .group_by(Content.id) \
+            .group_by(Professional.id) \
             .order_by(func.avg(Review.rating).desc()) \
             .limit(15) \
             .all()
@@ -733,7 +733,7 @@ def fetch_InDemand_contents():
                 serialized_content = {
                     'id': content.id,
                     'title': content.title,
-                    'author': content.author,
+                    'prof_desc': content.prof_desc,
                     'rating': round(avg_rating or 0, 2),
                     'price' : content.price,
                     'image': content.image,
@@ -745,46 +745,46 @@ def fetch_InDemand_contents():
             else:
                 print("not in active userids ",content.id,content.title)
         
-        app.logger.info("Fetched InDemand Content Successfully")
+        app.logger.info("Fetched InDemand Professional Successfully")
         return jsonify({'contents': serialized_contents}), 200
     except Exception as e:
-        app.logger.error("Error Fetching InDemand Content", str(e))
+        app.logger.error("Error Fetching InDemand Professional", str(e))
         return jsonify({'error': str(e)}), 500
 
-# 4. User Content
+# 4. User Professional
 @app.route("/user/fetch-content/<int:user_id>", methods=["GET"])
 def fetch_user_content(user_id):
     try:
         contents = (
-            Content.query.outerjoin(
-                Borrowing,
-                (Borrowing.content_id == Content.id) & (Borrowing.member_id == user_id),
+            Professional.query.outerjoin(
+                Rendering,
+                (Rendering.content_id == Professional.id) & (Rendering.member_id == user_id),
             )
             # .outerjoin(
             #     Wishlist,
-            #     (Wishlist.content_id == Content.id) & (Wishlist.user_id == user_id),
+            #     (Wishlist.content_id == Professional.id) & (Wishlist.user_id == user_id),
             # )
-            .outerjoin(Review, Review.content_id == Content.id)
+            .outerjoin(Review, Review.content_id == Professional.id)
             .outerjoin(
                 Requests,
-                (Requests.contentId == Content.id) & (Requests.userId == user_id),
+                (Requests.contentId == Professional.id) & (Requests.userId == user_id),
             )
             .add_columns(
-                Content.id,
-                Content.title,
-                Content.author,
-                Content.service,
-                Content.price,
-                Content.uploaded_by_id,
+                Professional.id,
+                Professional.title,
+                Professional.prof_desc,
+                Professional.service,
+                Professional.price,
+                Professional.uploaded_by_id,
                 func.avg(Review.rating).label("rating"),
-                Content.imageType,
-                Content.image,
-                Borrowing.returned.label("returned"),
-                Borrowing.id.label("borrowing_id"),
+                Professional.imageType,
+                Professional.image,
+                Rendering.returned.label("returned"),
+                Rendering.id.label("rendering_id"),
                 # Wishlist.id.label("wishlist_id"),
                 Requests.response.label("isRequested"),
             )
-            .group_by(Content.id)
+            .group_by(Professional.id)
             .all()
         )
 
@@ -799,26 +799,26 @@ def fetch_user_content(user_id):
                 fc = {
                         "id": content.id,
                         "title": content.title,
-                        "author": content.author,
+                        "prof_desc": content.prof_desc,
                         "service": content.service,
                         "rating": round(content.rating or 0, 2),
                         "price": content.price,
                         "imageType": content.imageType,
                         "image": base64.b64encode(content.image).decode("utf-8"),
-                        "isIssued": content.borrowing_id is not None and not content.returned,
+                        "isIssued": content.rendering_id is not None and not content.returned,
                         # "isWishlisted": content.wishlist_id is not None,
-                        "isRead": content.borrowing_id is not None,
+                        "isRead": content.rendering_id is not None,
                         "isRequested": content.isRequested == 'Pending' if content.isRequested else False
                     }
                 formatted_contents.append(fc)
-                app.logger.info("Content Fetched by User-ID Successful")
+                app.logger.info("Professional Fetched by User-ID Successful")
             else:
                 print("not active ",content.id, content.title)
 
         return jsonify({"contents": formatted_contents})
 
     except Exception as e:
-        app.logger.error("Content Fetched by User-ID Failed: %s", str(e))
+        app.logger.error("Professional Fetched by User-ID Failed: %s", str(e))
         return ( 
             jsonify({"error": "Failed to fetch user content", "details": str(e)}),
             500,
@@ -828,22 +828,22 @@ def fetch_user_content(user_id):
 @app.route("/fetch-content-details/<int:content_id>", methods=["GET"])
 @jwt_required()
 def fetch_content_details(content_id):
-    content = Content.query.get(content_id)
+    content = Professional.query.get(content_id)
 
     if content:
         content_details = {
             "image": base64.b64encode(content.image).decode("utf-8"),
             "title": content.title,
-            "author": content.author,
+            "prof_desc": content.prof_desc,
             "price": content.price,
-            "publish_year": content.publish_year,
+            "date_of_birth": content.date_of_birth,
         }
 
-        app.logger.info("Content Fetched by Content-ID Successfully")
+        app.logger.info("Professional Fetched by Professional-ID Successfully")
         return jsonify(content_details)
     else:
-        app.logger.error("Content Fetched by Content-ID Failed")
-        return jsonify({"message": "Content not found"}), 404
+        app.logger.error("Professional Fetched by Professional-ID Failed")
+        return jsonify({"message": "Professional not found"}), 404
 
 
 #DELETE
@@ -855,17 +855,17 @@ def delete_service(service_id):
         service = Service.query.get(service_id)
 
         if service:
-            uploaded_by_ids = db.session.query(distinct(Content.uploaded_by_id)) \
+            uploaded_by_ids = db.session.query(distinct(Professional.uploaded_by_id)) \
                         .filter_by(service=service_id) \
                         .all()
     
             uploaded_by_ids = [user_id[0] for user_id in uploaded_by_ids]
-            Content.query.filter_by(service=service_id).delete()
+            Professional.query.filter_by(service=service_id).delete()
             if uploaded_by_ids:
                 User.query.filter(User.id.in_(uploaded_by_ids)).delete(synchronize_session=False)
 
             
-            Content.query.filter_by(service=service_id).delete()
+            Professional.query.filter_by(service=service_id).delete()
 
             db.session.delete(service)
             db.session.commit()
@@ -882,17 +882,17 @@ def delete_service(service_id):
         app.logger.error("Error Deleting Service", str(e))
         return jsonify({"error": "Service deletion failed", "Reasons": str(e)}), 500
 
-# 2. Content
+# 2. Professional
 # @app.route("/delete-content/<int:content_id>", methods=["DELETE"])
 # @jwt_required()
 # def delete_content(content_id):
 #     try:
-#         content = Content.query.get(content_id)
+#         content = Professional.query.get(content_id)
 #         if not content:
-#             app.logger.warning("Content not found: %s", content_id)
-#             return jsonify({"error": "Content not found"}), 404
+#             app.logger.warning("Professional not found: %s", content_id)
+#             return jsonify({"error": "Professional not found"}), 404
 
-#         app.logger.info("Content found: %s", content_id)
+#         app.logger.info("Professional found: %s", content_id)
 
 #         # try:
 #         #     related_wishlist_items = Wishlist.query.filter_by(content_id=content_id).all()
@@ -912,13 +912,13 @@ def delete_service(service_id):
 #             app.logger.error("Error deleting review items: %s", str(e))
 #             return jsonify({"error": "Failed to delete review items", "details": str(e)}), 500
 #         try:
-#             related_borrowing_items = Borrowing.query.filter_by(content_id=content_id).all()
-#             app.logger.info("Found %d related borrowing items", len(related_borrowing_items))
-#             for borrow_item in related_borrowing_items:
-#                 db.session.delete(borrow_item)
+#             related_rendering_items = Rendering.query.filter_by(content_id=content_id).all()
+#             app.logger.info("Found %d related rendering items", len(related_rendering_items))
+#             for render_item in related_rendering_items:
+#                 db.session.delete(render_item)
 #         except Exception as e:
-#             app.logger.error("Error deleting borrowing items: %s", str(e))
-#             return jsonify({"error": "Failed to delete borrowing items", "details": str(e)}), 500
+#             app.logger.error("Error deleting rendering items: %s", str(e))
+#             return jsonify({"error": "Failed to delete rendering items", "details": str(e)}), 500
 
 #         try:
 #             db.session.delete(content)
@@ -927,12 +927,12 @@ def delete_service(service_id):
 #             app.logger.error("Error deleting content: %s", str(e))
 #             return jsonify({"error": "Failed to delete content", "details": str(e)}), 500
 
-#         app.logger.info("Content and related items deleted successfully")
-#         return jsonify({"message": "Content and related items deleted successfully"}), 200
+#         app.logger.info("Professional and related items deleted successfully")
+#         return jsonify({"message": "Professional and related items deleted successfully"}), 200
 
 #     except Exception as e:
 #         app.logger.error("Unexpected error: %s", str(e))
-#         return jsonify({"error": "Content deletion failed", "details": str(e)}), 500
+#         return jsonify({"error": "Professional deletion failed", "details": str(e)}), 500
 
 # 3. Wishlist
 # @app.route("/wishlist/remove/<int:content_id>", methods=["POST"])
@@ -946,8 +946,8 @@ def delete_service(service_id):
 #         ).first()
 
 #         if not wishlist_item:
-#             app.logger.warn("Content Not Found In Wishlisted")
-#             return jsonify({"error": "Content not found in the wishlist"}), 404
+#             app.logger.warn("Professional Not Found In Wishlisted")
+#             return jsonify({"error": "Professional not found in the wishlist"}), 404
 
 #         db.session.delete(wishlist_item)
 
@@ -961,10 +961,10 @@ def delete_service(service_id):
 
 #         db.session.commit()
 
-#         app.logger.info("Content Removed From Wishlist Successfully")
-#         return jsonify({"message": "Content removed from wishlist successfully"}), 200
+#         app.logger.info("Professional Removed From Wishlist Successfully")
+#         return jsonify({"message": "Professional removed from wishlist successfully"}), 200
 #     except Exception as e:
-#         app.logger.error("Error Removing Content From Wishlist", str(e))
+#         app.logger.error("Error Removing Professional From Wishlist", str(e))
 #         return (
 #             jsonify(
 #                 {"error": "Failed to remove content from wishlist", "details": str(e)}
@@ -1002,7 +1002,7 @@ def get_image_type(image_data):
 @jwt_required()
 def get_pdf(content_id):
     try:
-        content = Content.query.get_or_404(content_id)
+        content = Professional.query.get_or_404(content_id)
 
         pdf_blob = content.file
 
@@ -1047,7 +1047,7 @@ def update_service(service_id):
     app.logger.info("Service Updated to: ", new_name)
     return jsonify({"message": "Service updated successfully"})
 
-# 2. Content
+# 2. Professional
 @app.route("/update-content/<int:content_id>/<int:user_id>", methods=["POST"])
 @jwt_required()
 def update_content(content_id, user_id):
@@ -1057,22 +1057,22 @@ def update_content(content_id, user_id):
         return jsonify({"message": "Unauthorized"}), 401
 
     try:
-        content = Content.query.get(content_id)
+        content = Professional.query.get(content_id)
 
         title = request.form.get("title")
-        author = request.form.get("author")
-        no_of_pages = request.form.get("number_of_pages")
-        publish_year = request.form.get("publish_year")
+        prof_desc = request.form.get("prof_desc")
+        no_of_years = request.form.get("number_of_pages")
+        date_of_birth = request.form.get("date_of_birth")
         price = request.form.get("price")
 
-        if not all([title, author, no_of_pages, publish_year]):
+        if not all([title, prof_desc, no_of_years, date_of_birth]):
             app.logger.warn("Incomplete Data")
             return jsonify({"message": "Incomplete form data"}), 400
 
         content.title = title
-        content.author = author
-        content.no_of_pages = no_of_pages
-        content.publish_year = publish_year
+        content.prof_desc = prof_desc
+        content.no_of_years = no_of_years
+        content.date_of_birth = date_of_birth
         content.price = price
 
         if "image" in request.files:
@@ -1100,7 +1100,7 @@ def update_content(content_id, user_id):
                             400,
                         )
                     else:
-                        content.no_of_pages = len(pdf_reader.pages)
+                        content.no_of_years = len(pdf_reader.pages)
                 except Exception as e:
                     app.logger.error("Invalid PDF File")
                     return jsonify({"message": f"Invalid PDF file: {str(e)}"}), 400
@@ -1112,11 +1112,11 @@ def update_content(content_id, user_id):
         
         db.session.commit()
 
-        app.logger.info("Content Updated Successfully")
-        return jsonify({"message": "Content updated successfully"}), 201
+        app.logger.info("Professional Updated Successfully")
+        return jsonify({"message": "Professional updated successfully"}), 201
 
     except Exception as e:
-        app.logger.error("Error Updating Content")
+        app.logger.error("Error Updating Professional")
         return jsonify({"message": "Error updating content"}), 500
 
 
@@ -1129,20 +1129,19 @@ def get_activity_data(content_id):
     try:
         query_result = (
             db.session.query(
-                Borrowing.content_id,
-                Content.title,
+                Rendering.content_id,
+                Professional.title,
                 User.uname,
                 Service.name.label("service_name"),
-                Borrowing.borrow_date,
-                Borrowing.returned,
-                Borrowing.last_return_date,
-                Borrowing.reissue_count,
+                Rendering.render_date,
+                Rendering.returned,
+                Rendering.last_return_date,
                 User.id.label("user_id"),
             )
-            .join(User, User.id == Borrowing.member_id)
-            .join(Content, Content.id == Borrowing.content_id)
-            .join(Service, Service.id == Content.service)
-            .filter(Borrowing.content_id == content_id, Borrowing.returned == False)
+            .join(User, User.id == Rendering.member_id)
+            .join(Professional, Professional.id == Rendering.content_id)
+            .join(Service, Service.id == Professional.service)
+            .filter(Rendering.content_id == content_id, Rendering.returned == False)
             .all()
         )
 
@@ -1153,14 +1152,13 @@ def get_activity_data(content_id):
                 "title": row.title,
                 "username": row.uname,
                 "service_name": row.service_name,
-                "borrow_date": row.borrow_date.strftime("%Y-%m-%d %H:%M:%S"),
+                "render_date": row.render_date.strftime("%Y-%m-%d %H:%M:%S"),
                 "returned": row.returned,
                 "last_return_date": (
                     row.last_return_date.strftime("%Y-%m-%d %H:%M:%S")
                     if row.last_return_date
                     else None
                 ),
-                "reissue_count": row.reissue_count,
                 "user_id": row.user_id,
             }
             for row in query_result
@@ -1178,7 +1176,7 @@ def get_activity_data(content_id):
 @jwt_required()
 def current_reader_count(content_id):
     try:
-        current_count = Borrowing.query.filter_by(content_id=content_id, returned=False).distinct(Borrowing.member_id).count()
+        current_count = Rendering.query.filter_by(content_id=content_id, returned=False).distinct(Rendering.member_id).count()
         app.logger.info("Current Reader Count Fetched")
         return jsonify({'currentReaderCount': current_count}), 200
     except Exception as e:
@@ -1190,7 +1188,7 @@ def current_reader_count(content_id):
 @jwt_required()
 def total_reader_count(content_id):
     try:
-        total_count = Borrowing.query.filter_by(content_id=content_id).distinct(Borrowing.member_id).count()
+        total_count = Rendering.query.filter_by(content_id=content_id).distinct(Rendering.member_id).count()
         app.logger.info("Total Reader Count Fetched")
         return jsonify({'totalReaderCount': total_count}), 200
     except Exception as e:
@@ -1215,35 +1213,35 @@ def accept_request(content_id, user_id):
     try:
         current_user_id = user_id 
 
-        content = Content.query.get(content_id)
+        content = Professional.query.get(content_id)
 
         if not content:
-            app.logger.warn("No Such Prof Found To Borrow")
-            return jsonify({"error": "Content not found"}), 404
+            app.logger.warn("No Such Prof Found To Render")
+            return jsonify({"error": "Professional not found"}), 404
 
-        total_borrowing = Borrowing.query.filter_by(
+        total_rendering = Rendering.query.filter_by(
             member_id=current_user_id, returned=False
         ).count()
 
-        if total_borrowing == 5:
-            app.logger.warn("Borrowing Limit Reached. Maximum 5 books can be borrowed")
-            return jsonify({"error": "User has reached borrowing limit of 5."}), 400
+        if total_rendering == 5:
+            app.logger.warn("Rendering Limit Reached. Maximum 5 books can be rendered")
+            return jsonify({"error": "User has reached rendering limit of 5."}), 400
 
-        existing_borrowing = Borrowing.query.filter_by(
+        existing_rendering = Rendering.query.filter_by(
             content_id=content_id, member_id=current_user_id, return_date=None
         ).first()
 
-        if existing_borrowing:
-            app.logger.warn("Content Already Borrowed")
-            return jsonify({"error": "User has already borrowed this Content"}), 400
+        if existing_rendering:
+            app.logger.warn("Professional Already Rendered")
+            return jsonify({"error": "User has already rendered this Professional"}), 400
 
-        new_borrowing = Borrowing(
-            content_id=content_id, member_id=current_user_id, borrow_date=datetime.now()
+        new_rendering = Rendering(
+            content_id=content_id, member_id=current_user_id, render_date=datetime.now()
         )
         
-        db.session.add(new_borrowing)
+        db.session.add(new_rendering)
 
-        new_borrowing.last_return_date = new_borrowing.borrow_date + timedelta(days=7)
+        new_rendering.last_return_date = new_rendering.render_date + timedelta(days=7)
 
         requests = Requests.query.filter_by(contentId=content_id, userId=user_id).first()
         if requests:
@@ -1263,17 +1261,17 @@ def accept_request(content_id, user_id):
 
         db.session.commit()
 
-        app.logger.info("Content Borrowed Sucessfully")
-        return jsonify({"message": "Content issued successfully"}), 200
+        app.logger.info("Professional Rendered Sucessfully")
+        return jsonify({"message": "Professional issued successfully"}), 200
     except Exception as e:
-        app.logger.error("Error Borrowing Content", str(e))
+        app.logger.error("Error Rendering Professional", str(e))
         return jsonify({"error": "Issuing content failed", "details": str(e)}), 500
 
 @app.route('/accept_approval/<int:content_id>', methods=['POST'])
 @jwt_required()
 def accept_approval(content_id):
     try:
-        content = Content.query.get(content_id)
+        content = Professional.query.get(content_id)
         if content:
             content.is_verified = True
             db.session.commit()
@@ -1330,24 +1328,24 @@ def return_content(content_id):
     try:
         current_user_id = get_jwt_identity()
 
-        borrowing = Borrowing.query.filter_by(
+        rendering = Rendering.query.filter_by(
             content_id=content_id, member_id=current_user_id, returned=False
         ).first()
 
-        print(content_id, current_user_id, borrowing)
+        print(content_id, current_user_id, rendering)
 
-        if not borrowing:
-            app.logger.warn("Borrowing Record Not Found / Already Returned")
+        if not rendering:
+            app.logger.warn("Rendering Record Not Found / Already Returned")
             return (
-                jsonify({"error": "Borrowing record not found or already returned"}),
+                jsonify({"error": "Rendering record not found or already returned"}),
                 404,
             )
 
-        borrowing.returned = True
-        borrowing.return_date = datetime.now()
-        borrowing.late = (
-            borrowing.last_return_date
-            and datetime.now() > borrowing.last_return_date
+        rendering.returned = True
+        rendering.return_date = datetime.now()
+        rendering.late = (
+            rendering.last_return_date
+            and datetime.now() > rendering.last_return_date
         )
 
 
@@ -1358,17 +1356,17 @@ def return_content(content_id):
         new_transaction_log = TransactionsLog(
             user_id=current_user_id,
             action="End service",
-            content_id=borrowing.content_id,
+            content_id=rendering.content_id,
             timestamp=datetime.now(),
         )
         db.session.add(new_transaction_log)
 
         db.session.commit()
 
-        app.logger.info("Content Returned Successfully")
-        return jsonify({"message": "Content returned successfully"}), 200
+        app.logger.info("Professional Returned Successfully")
+        return jsonify({"message": "Professional returned successfully"}), 200
     except Exception as e:
-        app.logger.error("Error Returning Content", str(e))
+        app.logger.error("Error Returning Professional", str(e))
         return jsonify({"error": "Returning content failed", "details": str(e)}), 500
 
 
@@ -1409,13 +1407,13 @@ def revoke_access():
     content_id = data.get("contentId")
     user_id = data.get("userId")
 
-    borrowing_record = Borrowing.query.filter_by(
+    rendering_record = Rendering.query.filter_by(
         content_id=content_id, member_id=user_id
     ).first()
 
-    if borrowing_record:
-        borrowing_record.returned = True
-        borrowing_record.return_date = datetime.now()
+    if rendering_record:
+        rendering_record.returned = True
+        rendering_record.return_date = datetime.now()
 
         requests = Requests.query.filter_by(contentId=content_id, userId=user_id).first()
         if requests:
@@ -1431,11 +1429,11 @@ def revoke_access():
         db.session.add(new_transaction_log)
         db.session.commit()
 
-        app.logger.info("Access Revoked Successfully For User: %s & Content: %s", user_id, content_id)
+        app.logger.info("Access Revoked Successfully For User: %s & Professional: %s", user_id, content_id)
         return jsonify({"message": "Access revoked successfully"})
     else:
         app.logger.error("Error Revoking Access")
-        return jsonify({"error": "Borrowing record not found"}), 404
+        return jsonify({"error": "Rendering record not found"}), 404
     
 
 @app.route('/rate_content/<int:content_id>', methods=['POST'])
@@ -1478,11 +1476,11 @@ def rate_content(content_id):
 
         db.session.commit()
 
-        app.logger.info("Content Review Saved Successfully")
+        app.logger.info("Professional Review Saved Successfully")
         return jsonify({'message': 'Review saved successfully'}), 200
     except Exception as e:
         print(e)
-        app.logger.info("Error Saving Content Review")
+        app.logger.info("Error Saving Professional Review")
         return jsonify({'error': str(e)}), 500
 
 
@@ -1490,7 +1488,7 @@ def rate_content(content_id):
 @jwt_required()
 def get_all_comments(userid):
     try:
-        content=Content.query.filter_by(uploaded_by_id=userid).first()
+        content=Professional.query.filter_by(uploaded_by_id=userid).first()
         reviews = Review.query.filter_by(content_id=content.id).all()
         reviews_list = []
         for review in reviews:
@@ -1540,8 +1538,8 @@ def get_previous_rating(content_id):
 def count_per_service():
     professional_counts_per_service = db.session.query(
         Service.name,
-        func.count(distinct(Content.id))
-    ).join(Content, Content.service == Service.id) \
+        func.count(distinct(Professional.id))
+    ).join(Professional, Professional.service == Service.id) \
      .group_by(Service.name).all()
 
     service_names = [row[0] for row in professional_counts_per_service]
@@ -1616,8 +1614,8 @@ def search_result():
 
     uploaded_by_ids = [user.id for user in librarian_users]
     
-    librarian_content_results = Content.query.filter(Content.uploaded_by_id.in_(uploaded_by_ids))
-    content_results = Content.query.filter(Content.title.ilike(f'%{query}%'))
+    librarian_content_results = Professional.query.filter(Professional.uploaded_by_id.in_(uploaded_by_ids))
+    content_results = Professional.query.filter(Professional.title.ilike(f'%{query}%'))
     results = librarian_content_results.union(content_results).all()
 
     formatted_content_results = []
@@ -1625,7 +1623,7 @@ def search_result():
         result = {
             'id': content.id,
             'title': content.title,
-            'author': content.author,
+            'prof_desc': content.prof_desc,
             'service': content.service,
             'rating': db.session.query(func.avg(Review.rating)).filter(Review.content_id == content.id).scalar(),
             'imageType': content.imageType,
@@ -1635,9 +1633,9 @@ def search_result():
         if current_user_role == 'ADMIN':
             result.update({
                 'uploaded_by': content.uploaded_by_id,
-                'publish_year': content.publish_year,
+                'date_of_birth': content.date_of_birth,
                 'price': content.price,
-                'no_of_pages': content.no_of_pages,
+                'no_of_years': content.no_of_years,
                 'is_verified': content.is_verified
             })
         else:
@@ -1646,13 +1644,13 @@ def search_result():
             is_requested = False
             
             if current_user_id:
-                borrowing = Borrowing.query.filter_by(
+                rendering = Rendering.query.filter_by(
                     content_id=content.id, 
                     member_id=current_user_id, 
                     returned=False
                 ).first()
-                is_issued = bool(borrowing)
-                is_read = bool(borrowing)
+                is_issued = bool(rendering)
+                is_read = bool(rendering)
 
                 issueRequest = Requests.query.filter_by(
                     contentId=content.id, 
@@ -1684,15 +1682,15 @@ def search_result():
 #         wishlist = []
 
 #         for item in wishlist_items:
-#             content = Content.query.get(item.content_id)
+#             content = Professional.query.get(item.content_id)
 
 #             image_data = content.image
 #             image_base64 = base64.b64encode(image_data).decode('utf-8') if image_data else None
 
 #             is_read = False
 #             if current_user_id:
-#                 borrowing = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id).first()
-#                 is_read = bool(borrowing)
+#                 rendering = Rendering.query.filter_by(content_id=content.id, member_id=current_user_id).first()
+#                 is_read = bool(rendering)
 
 #             is_wishlisted = False
 #             if current_user_id:
@@ -1701,7 +1699,7 @@ def search_result():
 
 #             is_issued = False
 #             if current_user_id:
-#                 issued = Borrowing.query.filter_by(member_id=current_user_id, content_id=content.id, returned=False).first()
+#                 issued = Rendering.query.filter_by(member_id=current_user_id, content_id=content.id, returned=False).first()
 #                 is_issued = bool(issued)
 
 #             is_requested = False
@@ -1712,10 +1710,10 @@ def search_result():
 #             wishlist.append({
 #                 'id': content.id,
 #                 'title': content.title,
-#                 'author': content.author,
+#                 'prof_desc': content.prof_desc,
 #                 'image': image_base64,
-#                 'number_of_pages': content.no_of_pages,
-#                 'publish_year': content.publish_year,
+#                 'number_of_pages': content.no_of_years,
+#                 'date_of_birth': content.date_of_birth,
 #                 'isRead': is_read,
 #                 'isIssued': is_issued,
 #                 'isWishlisted': is_wishlisted,
@@ -1734,8 +1732,8 @@ def get_requests():
     try:
         current_user_id = get_jwt_identity()
         print("in fetch requests")
-        # Join Content and Requests tables to get requests for content uploaded by current user
-        requests = db.session.query(Requests, Content).join(Content, Content.id == Requests.contentId).filter(Content.uploaded_by_id == current_user_id).filter(Requests.response == 'Pending').all()
+        # Join Professional and Requests tables to get requests for content uploaded by current user
+        requests = db.session.query(Requests, Professional).join(Professional, Professional.id == Requests.contentId).filter(Professional.uploaded_by_id == current_user_id).filter(Requests.response == 'Pending').all()
 
         print(requests)
         request_list = []
@@ -1757,17 +1755,17 @@ def get_requests():
 def get_approvals():
     try:
 
-        contents = Content.query.filter_by(is_verified=0).all()
+        contents = Professional.query.filter_by(is_verified=0).all()
         
         approve_list = []
         for content in contents:
             approve_list.append({
                 'id': content.id,
                 'title': content.title,
-                'author': content.author,
+                'prof_desc': content.prof_desc,
                 'uploaded_by_id': content.uploaded_by_id,
-                'no_of_pages': content.no_of_pages,
-                'publish_year': content.publish_year,
+                'no_of_years': content.no_of_years,
+                'date_of_birth': content.date_of_birth,
                 'file': base64.b64encode(content.file).decode('utf-8') if content.file else None,
                 'pdf_file_name': content.pdf_file_name,
                 'price': content.price,
@@ -1897,7 +1895,7 @@ def create_requests(contentId):
 def detailed_view(content_id, user_id):
     try:
         user = User.query.get(user_id)
-        content = Content.query.get(content_id)
+        content = Professional.query.get(content_id)
         
         if user is None or content is None:
             return jsonify({'error': 'User or content not found'}), 404
@@ -1908,8 +1906,8 @@ def detailed_view(content_id, user_id):
             'pin': user.pin,
             'phno': user.phNumber,
             'serviceName': Service.query.get(content.service).name,
-            'experience': content.no_of_pages,
-            'desc': content.author,
+            'experience': content.no_of_years,
+            'desc': content.prof_desc,
             'additionalCharges': content.price
         }
         
@@ -1925,7 +1923,7 @@ def detailed_view(content_id, user_id):
 def more_details(content_id, user_id):
     try:
         user = User.query.get(user_id)
-        content = Content.query.get(content_id)
+        content = Professional.query.get(content_id)
         
         if user is None or content is None:
             return jsonify({'error': 'User or content not found'}), 404
@@ -1936,8 +1934,8 @@ def more_details(content_id, user_id):
             'pin': user.pin,
             'phno': user.phNumber,
             'serviceName': Service.query.get(content.service).name,
-            'experience': content.no_of_pages,
-            'desc': content.author,
+            'experience': content.no_of_years,
+            'desc': content.prof_desc,
             'additionalCharges': content.price
         }
         
@@ -1974,7 +1972,7 @@ def all_details(user_id):
         print("role is",user.role)
         # If the user is a librarian, fetch content details uploaded by this user
         if user.role == 'LIBRARIAN':
-            content = Content.query.filter_by(uploaded_by_id=user.id).first()
+            content = Professional.query.filter_by(uploaded_by_id=user.id).first()
             print(content)
             # Check if content exists for this user
             if content:
@@ -1987,14 +1985,14 @@ def all_details(user_id):
                 response_data.update({
                     'cid':content.id,
                     'service': service_name,
-                    'author': content.author,
+                    'prof_desc': content.prof_desc,
                     'price': content.price,
-                    'no_of_pages': content.no_of_pages,
+                    'no_of_years': content.no_of_years,
                     'image':image_base64,
                     'image_type':content.imageType,
                     'pdf_file':pdf_base64,
                     'pdf_filename':content.pdf_file_name,
-                    'publish_year': content.publish_year
+                    'date_of_birth': content.date_of_birth
                 })
             else:
                 # If no content is found, include a message
@@ -2027,7 +2025,7 @@ def reject_request(content_id, user_id):
 @jwt_required()
 def reject_approval(content_id):
     try:
-        content = Content.query.get(content_id)
+        content = Professional.query.get(content_id)
         user = User.query.get(content.uploaded_by_id)
         if content:
             content.is_verified = False
@@ -2050,9 +2048,9 @@ def reject_approval(content_id):
 
 #     current_user_id = get_jwt_identity()
 
-#     content = Content.query.get(contentId)
+#     content = Professional.query.get(contentId)
 #     if content is None:
-#         return abort(404, description="Content not found")
+#         return abort(404, description="Professional not found")
 
 #     content_amount = content.price
 
@@ -2101,8 +2099,8 @@ def reject_approval(content_id):
 #         app.logger.info("PDF File Sent For Download - Paid Now")
 #         return send_file(pdf_bytes, as_attachment=True, mimetype='application/pdf', download_name="Book.pdf")
 
-#     app.logger.error("Error Purchasing Content")
-#     return abort(403, description="Content not purchased")
+#     app.logger.error("Error Purchasing Professional")
+#     return abort(403, description="Professional not purchased")
 
 
 
@@ -2118,9 +2116,9 @@ class CourseNameError(HTTPException):
 
 book_parser = reqparse.RequestParser()
 book_parser.add_argument("title")
-book_parser.add_argument("author")
-book_parser.add_argument("publish_year")
-book_parser.add_argument("no_of_pages")
+book_parser.add_argument("prof_desc")
+book_parser.add_argument("date_of_birth")
+book_parser.add_argument("no_of_years")
 book_parser.add_argument("price")
 book_parser.add_argument("service_id")
 
@@ -2143,14 +2141,14 @@ review_parser.add_argument("user_id")
 
 class BookApi(Resource):
     def get(self, id):
-        entry = Content.query.get(id)
+        entry = Professional.query.get(id)
         if entry:
             jsonobj = {
                 "book_id": entry.id,
                 "title": entry.title,
-                "author": entry.author,
-                "publish_year": entry.publish_year,
-                "no_of_pages": entry.no_of_pages,
+                "prof_desc": entry.prof_desc,
+                "date_of_birth": entry.date_of_birth,
+                "no_of_years": entry.no_of_years,
                 "price": entry.price,
                 "service_id": entry.service,
             }
@@ -2161,60 +2159,60 @@ class BookApi(Resource):
     def post(self):
         args = book_parser.parse_args()
         title_u = args.get("title", None)
-        author_u = args.get("author", None)
-        publish_year_u = args.get("publish_year", None)
-        no_of_pages_u = args.get("no_of_pages", None)
+        author_u = args.get("prof_desc", None)
+        date_of_birth_u = args.get("date_of_birth", None)
+        no_of_years_u = args.get("no_of_years", None)
         price_u = args.get("price", None)
         service_id_u = args.get("service_id", None)
-        if not all([title_u, author_u, publish_year_u, no_of_pages_u, price_u, service_id_u]):
+        if not all([title_u, author_u, date_of_birth_u, no_of_years_u, price_u, service_id_u]):
             raise CourseNameError(status_code=400, error_code="BOOK_ERROR", error_message="Sufficient data not found")
 
-        entry = Content.query.filter_by(title=title_u).first()
+        entry = Professional.query.filter_by(title=title_u).first()
         if entry:
             return "Book already exists", 409
 
-        entry = Content(title=title_u, author=author_u, publish_year=publish_year_u, no_of_pages=no_of_pages_u, price=price_u, service=service_id_u,image=None,imageType=None, file=None,pdf_file_name=None )
+        entry = Professional(title=title_u, prof_desc=author_u, date_of_birth=date_of_birth_u, no_of_years=no_of_years_u, price=price_u, service=service_id_u,image=None,imageType=None, file=None,pdf_file_name=None )
         db.session.add(entry)
         db.session.commit()
         jsonobj = {
             "book_id": entry.id,
             "title": entry.title,
-            "author": entry.author,
-            "publish_year": entry.publish_year,
-            "no_of_pages": entry.no_of_pages,
+            "prof_desc": entry.prof_desc,
+            "date_of_birth": entry.date_of_birth,
+            "no_of_years": entry.no_of_years,
             "price": entry.price,
             "service_id": entry.service,
         }
         return jsonobj, 201
 
     def put(self, id):
-        entry = Content.query.get(id)
+        entry = Professional.query.get(id)
         if not entry:
             raise NotFoundError(status_code=404)
         
         args = book_parser.parse_args()
         title_u = args.get("title", None)
-        author_u = args.get("author", None)
-        publish_year_u = args.get("publish_year", None)
-        no_of_pages_u = args.get("no_of_pages", None)
+        author_u = args.get("prof_desc", None)
+        date_of_birth_u = args.get("date_of_birth", None)
+        no_of_years_u = args.get("no_of_years", None)
         price_u = args.get("price", None)
         service_id_u = args.get("service_id", None)
-        if not all([title_u, author_u, publish_year_u, no_of_pages_u, price_u, service_id_u]):
+        if not all([title_u, author_u, date_of_birth_u, no_of_years_u, price_u, service_id_u]):
             raise CourseNameError(status_code=400, error_code="BOOK_ERROR", error_message="Sufficient data not found")
 
         entry.title = title_u
-        entry.author = author_u
-        entry.publish_year = publish_year_u
-        entry.no_of_pages = no_of_pages_u
+        entry.prof_desc = author_u
+        entry.date_of_birth = date_of_birth_u
+        entry.no_of_years = no_of_years_u
         entry.price = price_u
         entry.service = service_id_u
         db.session.commit()
         jsonobj = {
             "book_id": entry.id,
             "title": entry.title,
-            "author": entry.author,
-            "publish_year": entry.publish_year,
-            "no_of_pages": entry.no_of_pages,
+            "prof_desc": entry.prof_desc,
+            "date_of_birth": entry.date_of_birth,
+            "no_of_years": entry.no_of_years,
             "price": entry.price,
             "service_id": entry.service,
         }
@@ -2222,7 +2220,7 @@ class BookApi(Resource):
 
 
     def delete(self, id):
-        entry = Content.query.get(id)
+        entry = Professional.query.get(id)
         if entry:
             db.session.delete(entry)
             db.session.commit()

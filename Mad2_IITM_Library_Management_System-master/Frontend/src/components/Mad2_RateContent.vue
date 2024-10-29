@@ -1,6 +1,6 @@
 <template>
     <div class="custom-container">
-        <h2><u>Rate Content</u></h2>
+        <h2><u>Rate Professional</u></h2>
         <div class="stars">
             <span v-for="star in 5" :key="star" @click="rateContent(star)" :class="{ 'rated': star <= selectedRating }">&#9733;</span>
         </div>

@@ -1,12 +1,12 @@
 <template>
-    <div class="borrow-book-container">
-        <h2>Borrow Book</h2>
+    <div class="render-book-container">
+        <h2>Render Book</h2>
         <form @submit.prevent="submitForm">
             <div class="form-group">
                 <label for="bookId">Book ID</label>
                 <input v-model.number="bookId" type="number" class="form-control" id="bookId" required>
             </div>
-            <button type="submit" class="btn btn-primary">Borrow Book</button>
+            <button type="submit" class="btn btn-primary">Render Book</button>
         </form>
     </div>
 </template>
@@ -21,7 +21,7 @@ export default {
     methods: {
         async submitForm() {
             try {
-                const response = await this.$axios.post(`/borrow/${this.bookId}`);
+                const response = await this.$axios.post(`/render/${this.bookId}`);
                 console.log(response.data);
                 this.bookId = null;
             } catch (error) {
@@ -33,7 +33,7 @@ export default {
 </script>
   
 <style scoped>
-.borrow-book-container {
+.render-book-container {
     max-width: 400px;
     margin: auto;
     padding: 20px;

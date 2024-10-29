@@ -2,7 +2,7 @@
   <div class="custom-container">
     <section class="single-container">
       <div v-if="searchResults && searchResults.length > 0">
-        <h3 class="mb-4">Content Results</h3>
+        <h3 class="mb-4">Professional Results</h3>
         <div class="slider-content">
           <component 
             :is="userRole === 'ADMIN' ? 'admin-content-card' : 'content-card'" 
@@ -85,9 +85,9 @@ export default {
       if (this.userRole === 'ADMIN') {
         return {
           uploadedBy: result.uploaded_by,
-          publishYear: result.publish_year,
+          publishYear: result.date_of_birth,
           price: result.price,
-          noOfPages: result.no_of_pages,
+          noOfYears: result.no_of_years,
           isVerified: result.is_verified
         };
       }

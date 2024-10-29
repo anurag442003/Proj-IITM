@@ -18,19 +18,19 @@
 
         <!-- Librarian Details -->
         <div v-if="userDetails.role === 'LIBRARIAN'" class="details-card">
-            <h2 class="card-title">Content Details</h2>
+            <h2 class="card-title">Professional Details</h2>
             <div class="info-grid">
                 <p><strong>Service Type:</strong> {{ userDetails.service }}</p>
-                <p><strong>Description:</strong> {{ userDetails.author }}</p>
+                <p><strong>Description:</strong> {{ userDetails.prof_desc }}</p>
                 <p><strong>Charges:</strong> {{ userDetails.price }} Rs.</p>
-                <p><strong>Experience:</strong> {{ userDetails.no_of_pages }} years</p>
-                <p><strong>DOB:</strong> {{ userDetails.publish_year }}</p>
+                <p><strong>Experience:</strong> {{ userDetails.no_of_years }} years</p>
+                <p><strong>DOB:</strong> {{ userDetails.date_of_birth }}</p>
             </div>
 
             <div class="media-content">
                 <!-- Profile Image -->
                 <div v-if="userDetails.image" class="profile-image">
-                    <img :src="getDecodedImage(userDetails)" alt="Content Image"/>
+                    <img :src="getDecodedImage(userDetails)" alt="Professional Image"/>
                 </div>
 
                 <!-- Resume PDF -->

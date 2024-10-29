@@ -99,8 +99,8 @@
             <input v-model="userData.experience" type="number" class="form-control" required />
           </div>
           <div class="col-md-3 mb-3">
-            <label for="publishYear" class="form-label">Publish Year:</label>
-            <input v-model="userData.publish_year" type="date" class="form-control" required />
+            <label for="publishYear" class="form-label">Date of Birth:</label>
+            <input v-model="userData.date_of_birth" type="date" class="form-control" required />
           </div>
           <div class="col-md-3 mb-3">
             <label for="additionalCharges" class="form-label">Additional Charges:</label>
@@ -163,7 +163,7 @@ export default {
         role: 'READER',
         experience: '',
         additionalCharges: '',
-        publish_year: '',
+        date_of_birth: '',
         description: '',
         resume: null,
         image: null,
@@ -263,7 +263,7 @@ export default {
         
         Object.keys(this.userData).forEach(key => {
           if (key !== 'resume' && key !== 'image') {
-            if (key === 'publish_year' && this.userData[key]) {
+            if (key === 'date_of_birth' && this.userData[key]) {
               formData.append(key, new Date(this.userData[key]).getFullYear().toString());
             } else {
               formData.append(key, this.userData[key]);
@@ -320,7 +320,7 @@ export default {
         is_active: 1,
         experience: '',
         additionalCharges: '',
-        publish_year: '',
+        date_of_birth: '',
         description: '',
         resume: null,
         image: null,

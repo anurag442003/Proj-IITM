@@ -8,14 +8,13 @@
         <table class="table table-striped table-bordered">
             <thead class="thead-dark">
                 <tr> 
-                    <th>Content ID</th>
+                    <th>Professional ID</th>
                     <th>Title</th>
                     <th>Username</th>
                     <th>Service Name</th>
-                    <th>Borrow Date</th>
+                    <th>Render Date</th>
                     <th>Returned</th>
                     <th>Return Date</th>
-                    <th>Reissue Count</th>
                     <th>Revoke</th>
                 </tr>
             </thead>
@@ -25,10 +24,9 @@
                     <td>{{ row.title }}</td>
                     <td>{{ row.uname }}</td>
                     <td>{{ row.service_name }}</td>
-                    <td>{{ row.borrow_date }}</td>
+                    <td>{{ row.render_date }}</td>
                     <td>{{ row.returned }}</td>
                     <td>{{ row.last_return_date }}</td>
-                    <td>{{ row.reissue_count }}</td>
                     <td><button class="btn btn-danger btn-sm"
                             @click="revokeAccess(row.content_id, row.user_id)">Revoke</button></td>
                 </tr>

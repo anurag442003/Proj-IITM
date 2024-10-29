@@ -4,7 +4,7 @@
             <thead class="thead-dark">
                 <tr>
             <th>User ID</th>
-            <th>Content ID</th>
+            <th>Professional ID</th>
             <th>Actions</th>
             <th>Reject</th>
             <th>Details</th>

@@ -7,8 +7,8 @@
                 <input v-model="title" type="text" class="form-control" id="title" required>
             </div>
             <div class="form-group">
-                <label for="author">Author</label>
-                <input v-model="author" type="text" class="form-control" id="author" required>
+                <label for="prof_desc">Author</label>
+                <input v-model="prof_desc" type="text" class="form-control" id="prof_desc" required>
             </div>
             <div class="form-group">
                 <label for="category">Category</label>
@@ -36,7 +36,7 @@ export default {
     data() {
         return {
             title: '',
-            author: '',
+            prof_desc: '',
             category: '',
             numberOfPages: '',
             publishYear: '',
@@ -48,7 +48,7 @@ export default {
             try {
                 const response = await this.$axios.post('/add_books', {
                     title: this.title,
-                    author: this.author,
+                    prof_desc: this.prof_desc,
                     category: this.category,
                     numberOfPages: this.numberOfPages,
                     publishYear: this.publishYear,

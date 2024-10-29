@@ -67,26 +67,23 @@ class Service(db.Model):
     time = db.Column(db.Integer, nullable=False)
     desc = db.Column(db.String(250), nullable=True)
 
-# class Service(db.Model):
-#     id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(50), unique=True, nullable=False)
 
-class Content(db.Model):
+class Professional(db.Model):
     id = db.Column(db.Integer, primary_key=True) #prof ka id
     title = db.Column(db.String(100), nullable=False) #prof ka name
-    author = db.Column(db.String(50), nullable=False) #wont exist anymore, can be desc
+    prof_desc = db.Column(db.String(50), nullable=False) #wont exist anymore, can be desc
     image = db.Column(db.LargeBinary) #prof ka profile photo
     imageType = db.Column(db.String(10)) #idec
     uploaded_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # userid
     ratings = db.relationship('Review', backref='content', lazy=True) #exists
-    no_of_pages = db.Column(db.Integer, nullable=False) #experience no of years
-    publish_year = db.Column(db.Integer, nullable=False) #birthday
+    no_of_years = db.Column(db.Integer, nullable=False) #experience no of years
+    date_of_birth = db.Column(db.Integer, nullable=False) #birthday
     file = db.Column(db.LargeBinary, nullable=False) #resume
     pdf_file_name = db.Column(db.String(250), nullable=True) #not needed
     is_verified = db.Column(db.Boolean, default=False)
     price = db.Column(db.Float, nullable=False) #additional charge
     service = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False) #servicetype
-    borrowings = db.relationship('Borrowing', backref='borrowed_content',  cascade="all, delete-orphan") #service request backref to request
+    renderings = db.relationship('Rendering', backref='rendered_content',  cascade="all, delete-orphan") #service request backref to request
     # wishlists = db.relationship('Wishlist', backref='wishlisted_content',  cascade="all, delete-orphan") #not needed
 
 class TransactionsLog(db.Model):
@@ -96,15 +93,14 @@ class TransactionsLog(db.Model):
     content_id = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
-class Borrowing(db.Model):
+class Rendering(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     content_id = db.Column(db.Integer, db.ForeignKey('content.id', ondelete='CASCADE'), nullable=False)
     member_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    borrow_date = db.Column(db.DateTime, default=datetime.now, nullable=False)
+    render_date = db.Column(db.DateTime, default=datetime.now, nullable=False)
     returned = db.Column(db.Boolean, default=False)
     return_date = db.Column(db.DateTime)
     last_return_date = db.Column(db.DateTime)
-    reissue_count = db.Column(db.Integer, default=0)
     is_read = db.Column(db.Boolean, default=False)
 
 
@@ -119,7 +115,7 @@ class Requests(db.Model):
 #     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 #     content_id = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)
 #     user = db.relationship('User', backref='wishlist_items', lazy=True)
-#     content = db.relationship('Content', back_populates='wishlists', lazy=True, overlaps="wishlisted_content")
+#     content = db.relationship('Professional', back_populates='wishlists', lazy=True, overlaps="wishlisted_content")
 
 class Login(db.Model):
     id = db.Column(db.Integer, primary_key=True)

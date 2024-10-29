@@ -1,13 +1,13 @@
 <template>
     <div class="content-card">
-        <img :src="decodedImage" alt="Content Image" @error="handleImageError" />
+        <img :src="decodedImage" alt="Professional Image" @error="handleImageError" />
         <div class="content-body">
             <div class="title-service">
                 <!-- <p>Title</p> -->
                 <h3>{{ content.title }}</h3>
             </div>
             <div class="details-service">
-                <p>About me: {{ content.author }}</p>
+                <p>About me: {{ content.prof_desc }}</p>
                 <p>Service Charge: {{ content.price }} </p>
                 <p>Rating: {{ !content.rating || isNaN(content.rating) ? 'N/A' : `${content.rating.toFixed(2)} / 5` }}</p>
             </div>
@@ -97,7 +97,7 @@ export default {
         //             if (response.ok) {
         //                 this.showAlert = true;
         //                 this.alertType = 'success';
-        //                 this.alertMessage = 'Content successfully deleted.';
+        //                 this.alertMessage = 'Professional successfully deleted.';
         //                 return response.json();
         //             } else {
         //                 throw new Error('Failed to delete content');
@@ -110,7 +110,7 @@ export default {
         //         .catch(error => {
         //             this.showAlert = true;
         //             this.alertType = 'error';
-        //             this.alertMessage = 'Content deletion failed.';
+        //             this.alertMessage = 'Professional deletion failed.';
         //             console.error(error);
         //         });
         // },

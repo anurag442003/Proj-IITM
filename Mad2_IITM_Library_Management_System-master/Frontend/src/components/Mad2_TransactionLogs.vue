@@ -8,7 +8,7 @@
                     <th>User ID</th>
                     <th>Action</th>
                     <th>Timestamp</th>
-                    <th>Content ID</th>
+                    <th>Professional ID</th>
                 </tr>
             </thead>
             <tbody>

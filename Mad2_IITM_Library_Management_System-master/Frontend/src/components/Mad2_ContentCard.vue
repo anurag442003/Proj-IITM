@@ -3,12 +3,12 @@
         <!-- <button v-if="isLoggedIn()" class="btn btn-sm btn-light top-btn" @click="confirmPurchase(content.id)">
             <i class="fa-solid fa-download"></i>
         </button> -->
-        <img :src="decodedImage" alt="Content Image" @error="handleImageError" />
+        <img :src="decodedImage" alt="Professional Image" @error="handleImageError" />
         <div class="body">
             <div class="title-holder">
                 <!-- <p>Title</p> -->
                 <h3>{{ content.title }}</h3>
-                <p>About me: {{ content.author }}</p>
+                <p>About me: {{ content.prof_desc }}</p>
                 <p>Service Charge: {{ content.price }} </p>
 
             </div>

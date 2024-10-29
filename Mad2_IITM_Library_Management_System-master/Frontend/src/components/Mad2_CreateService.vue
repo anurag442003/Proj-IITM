@@ -8,6 +8,8 @@
         <input v-model="price" type="text" id="price" required>
         <label for="time" class="mx-3 mb-3">Service Time in hours:</label>
         <input v-model="time" type="text" id="time" required>
+        <label for="desc" class="mx-3 mb-3">Description:</label>
+        <input v-model="desc" type="text" id="desc" required>
         <div class="row">
           <div class="col-6 d-flex align-items-center justify-content-center">
             <button class="mt-4 btn btn-secondary" type="submit">Add Service</button>
@@ -37,7 +39,8 @@ export default {
       const postData = {
         name: this.serviceName,
         price: this.price,
-        time: this.time
+        time: this.time,
+        'desc':this.desc
 
       };
       const token = sessionStorage.getItem("token");

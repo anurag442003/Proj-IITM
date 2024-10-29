@@ -2,7 +2,7 @@
     <div class="custom-container">
         <AlertTop v-if="content.showAlert" :message="content.alertMessage" type="error"
             @close="content.showAlert = false"></AlertTop>
-        <h2><b>Upload New Content</b></h2>
+        <h2><b>Upload New Professional</b></h2>
         <form @submit.prevent="submitForm">
             <div class="row">
                 <div class="col-md-6">
@@ -31,14 +31,14 @@
             <div class="row">
                 <div class="col-6">
                     <div class="form-group">
-                        <label for="author">Author(s)</label>
-                        <input v-model="content.author" type="text" class="form-control" id="author" required>
+                        <label for="prof_desc">Author(s)</label>
+                        <input v-model="content.prof_desc" type="text" class="form-control" id="prof_desc" required>
                     </div>
                 </div>
                 <div class="col-4">
                     <div class="form-group">
                         <label for="publishYear">Publish Year</label>
-                        <select v-model="content.publish_year" class="form-control" id="publishYear" required>
+                        <select v-model="content.date_of_birth" class="form-control" id="publishYear" required>
                             <option disabled value="">Select year</option>
                             <option v-for="year in range(1900, 2025)" :key="year">{{ year }}</option>
                         </select>
@@ -76,9 +76,9 @@ export default {
         return {
             content: {
                 title: "",
-                author: "",
+                prof_desc: "",
                 number_of_pages: 0,
-                publish_year: 0,
+                date_of_birth: 0,
                 price: 0,
                 image: null,
                 pdf: null,
@@ -117,9 +117,9 @@ export default {
 
             const formData = new FormData();
             formData.append('title', this.content.title);
-            formData.append('author', this.content.author);
+            formData.append('prof_desc', this.content.prof_desc);
             formData.append('number_of_pages', this.content.number_of_pages);
-            formData.append('publish_year', this.content.publish_year);
+            formData.append('date_of_birth', this.content.date_of_birth);
             formData.append('image', this.content.image);
             formData.append('price', this.content.price);
             formData.append('pdf', this.content.pdf, this.content.pdf.name);
@@ -138,10 +138,10 @@ export default {
                     console.log(response.data);
                     this.content = {
                         title: "",
-                        author: "",
+                        prof_desc: "",
                         number_of_pages: 0,
                         price: 0,
-                        publish_year: 0,
+                        date_of_birth: 0,
                         image: null,
                     };
 

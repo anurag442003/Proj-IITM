@@ -1,6 +1,6 @@
 <template>
   <div class="container">
-    <h2><b>Update Content</b></h2>
+    <h2><b>Update Professional</b></h2>
     <form @submit.prevent="submitForm">
       <div class="row">
         <div class="col-md-6">
@@ -29,14 +29,14 @@
       <div class="row">
         <div class="col-7">
           <div class="form-group">
-            <label for="author">Author(s)</label>
-            <input v-model="content.author" type="text" class="form-control" id="author" required>
+            <label for="prof_desc">Author(s)</label>
+            <input v-model="content.prof_desc" type="text" class="form-control" id="prof_desc" required>
           </div>
         </div>
         <div class="col-md-3">
           <div class="form-group">
             <label for="publishYear">Publish Year</label>
-            <input v-model="content.publish_year" type="number" class="form-control" id="publishYear" required>
+            <input v-model="content.date_of_birth" type="number" class="form-control" id="publishYear" required>
           </div>
         </div>
         <div class="col-md-2">
@@ -67,9 +67,9 @@ export default {
     return {
       content: {
         title: '',
-        author: '',
+        prof_desc: '',
         number_of_pages: 0,
-        publish_year: 0,
+        date_of_birth: 0,
         price: 0,
         image: null,
         pdf: null,
@@ -100,8 +100,8 @@ export default {
           this.content = {
             image: contentDetails.image,
             title: contentDetails.title,
-            author: contentDetails.author,
-            publish_year: contentDetails.publish_year,
+            prof_desc: contentDetails.prof_desc,
+            date_of_birth: contentDetails.date_of_birth,
             price: contentDetails.price,
             pdf: contentDetails.pdf,
             pdf_file_name: contentDetails.pdf_file_name,
@@ -136,9 +136,9 @@ export default {
 
       const formData = new FormData();
       formData.append('title', this.content.title);
-      formData.append('author', this.content.author);
+      formData.append('prof_desc', this.content.prof_desc);
       formData.append('number_of_pages', this.content.number_of_pages);
-      formData.append('publish_year', this.content.publish_year);
+      formData.append('date_of_birth', this.content.date_of_birth);
       formData.append('price', this.content.price);
 
       if (!this.content.image && this.oldImage) {
