@@ -5,9 +5,9 @@
                 <h2 class="my2">{{ service.name }}</h2>
                 <h4 class="my3">Time required : {{ service.time }} hours</h4>
                 <h4 class="my3">Base Price : {{ service.baseprice }} Rs.</h4>
-                <div class="slider-content">
-                    <content-card v-for="content in filteredContents(service.id)" :key="content.id" :content="content"
-                        :decodedImage="content.decodedImage" :isRead="false"></content-card>
+                <div class="slider-professional">
+                    <professional-card v-for="professional in filteredProfessionals(service.id)" :key="professional.id" :professional="professional"
+                        :decodedImage="professional.decodedImage" :isRead="false"></professional-card>
                 </div>
             </div>
         </section>
@@ -15,67 +15,67 @@
 </template>
 
 <script>
-import ContentCard from './Mad2_ContentCard.vue';
+import ProfessionalCard from './Mad2_ProfessionalCard.vue';
 
 export default {
     components: {
-        ContentCard,
+        ProfessionalCard,
     },
     data() {
         return {
             InDemand: [],
-            contents: [],
+            professionals: [],
             services: [],
             selectedService: null,
-            selectedContent: null,
+            selectedProfessional: null,
             isCreatingService: true,
-            loadingServiceContent: false,
+            loadingServiceProfessional: false,
             cardWidthPercentage: 20,
         };
     },
     mounted() {
-        this.fetchInDemandContents();
+        this.fetchInDemandProfessionals();
         this.fetchServices();
-        this.fetchContents();
+        this.fetchProfessionals();
     },
     methods: {
-        filteredContents(serviceId) {
-            return this.contents
-                .filter(content => content.service === serviceId)
-                .map(content => ({
-                    ...content,
-                    decodedImage: this.getDecodedImage(content),
+        filteredProfessionals(serviceId) {
+            return this.professionals
+                .filter(professional => professional.service === serviceId)
+                .map(professional => ({
+                    ...professional,
+                    decodedImage: this.getDecodedImage(professional),
                 }));
         },
-        async fetchContents() {
+        async fetchProfessionals() {
             try {
-                const response = await this.$axios.get(`http://127.0.0.1:5000/fetch-content`);
-                this.contents = response.data.contents;
+                const response = await this.$axios.get(`http://127.0.0.1:5000/fetch-professional`);
+                this.professionals = response.data.professionals;
             } catch (error) {
-                console.error('Error fetching user contents:', error);
+                console.error('Error fetching user professionals:', error);
             }
         },
         async fetchServices() {
-            this.loadingServiceContent = true;
+            this.loadingServiceProfessional = true;
             try {
                 const response = await this.$axios.get('http://127.0.0.1:5000/fetch-services');
                 this.services = response.data.services;
             } catch (error) {
                 console.error('Error fetching services:', error);
             } finally {
-                this.loadingServiceContent = false;
+                this.loadingServiceProfessional = false;
             }
         },
-        async fetchInDemandContents() {
+        async fetchInDemandProfessionals() {
             try {
                 const response = await this.$axios.get(`http://127.0.0.1:5000/fetch-InDemand`);
-                this.InDemand = response.data.contents;
+                this.InDemand = response.data.professionals;
             } catch (error) {
-                console.error('Error fetching InDemand contents:', error);
+                console.error('Error fetching InDemand professionals:', error);
             }
         },
-        getDecodedImage(content) {
-            const decodedImage = `data:image/${content.imageType};base64, ${content.image}`;
+        getDecodedImage(professional) {
+            const decodedImage = `data:image/${professional.imageType};base64, ${professional.image}`;
             return decodedImage;
         },
     },
@@ -117,7 +117,7 @@ export default {
     border-bottom: 2px solid rgb(255, 251, 251);
 }
 
-.slider-content {
+.slider-professional {
     overflow-x: scroll;
     scroll-snap-type: x mandatory;
     display: flex;
@@ -126,7 +126,7 @@ export default {
     padding-bottom: 1rem;
 }
 
-.slider-content::-webkit-scrollbar {
+.slider-professional::-webkit-scrollbar {
     display: none;
     width: 0;
 }

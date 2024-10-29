@@ -27,7 +27,7 @@
                 <p><strong>DOB:</strong> {{ userDetails.date_of_birth }}</p>
             </div>
 
-            <div class="media-content">
+            <div class="media-professional">
                 <!-- Profile Image -->
                 <div v-if="userDetails.image" class="profile-image">
                     <img :src="getDecodedImage(userDetails)" alt="Professional Image"/>
@@ -35,7 +35,7 @@
 
                 <!-- Resume PDF -->
                 <div v-if="userDetails.pdf_file" class="pdf-button">
-                    <button class="btn btn-primary" @click="openContent(userDetails.cid)">
+                    <button class="btn btn-primary" @click="openProfessional(userDetails.cid)">
                         <i class="fa-brands fa-readme"></i> View Resume
                     </button>
                 </div>
@@ -78,9 +78,9 @@ export default {
                 console.error('Error fetching details:', error);
             }
         },
-        async openContent(contentId) {
+        async openProfessional(professionalId) {
             try {
-                const response = await fetch(`http://127.0.0.1:5000/get_pdf/${contentId}`, {
+                const response = await fetch(`http://127.0.0.1:5000/get_pdf/${professionalId}`, {
                     headers: {
                         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                     },
@@ -89,14 +89,14 @@ export default {
                 const pdfUrl = URL.createObjectURL(blob);
                 window.open(pdfUrl, '_blank');
             } catch (error) {
-                console.error('Error opening content:', error);
+                console.error('Error opening professional:', error);
             }
         },
         handleImageError(event) {
             console.error("Error loading image:", event);
         },
-        getDecodedImage(content) {
-            return `data:image/${content.imageType};base64,${content.image}`;
+        getDecodedImage(professional) {
+            return `data:image/${professional.imageType};base64,${professional.image}`;
         }
     },
     mounted() {
@@ -149,7 +149,7 @@ export default {
     font-size: 1.1rem;
 }
 
-.media-content {
+.media-professional {
     display: flex;
     flex-direction: column;
     align-items: center;

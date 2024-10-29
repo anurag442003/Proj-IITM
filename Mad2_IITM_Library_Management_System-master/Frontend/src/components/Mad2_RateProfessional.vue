@@ -2,7 +2,7 @@
     <div class="custom-container">
         <h2><u>Rate Professional</u></h2>
         <div class="stars">
-            <span v-for="star in 5" :key="star" @click="rateContent(star)" :class="{ 'rated': star <= selectedRating }">&#9733;</span>
+            <span v-for="star in 5" :key="star" @click="rateProfessional(star)" :class="{ 'rated': star <= selectedRating }">&#9733;</span>
         </div>
         <div>
             <textarea v-model="comment" placeholder="Add your comment" style="width: 500px; height: 100px;"></textarea>
@@ -21,18 +21,18 @@ export default {
         return {
             selectedRating: 0,
             comment: '-',
-            contentId: null
+            professionalId: null
         };
     },
     created() {
-        this.contentId = this.$route.params.contentId;
+        this.professionalId = this.$route.params.professionalId;
 
         //this.fetchPreviousRating();
     },
     methods: {
         async fetchPreviousRating() {
             try {
-                const response = await this.$axios.get(`http://127.0.0.1:5000/get_previous_rating/${this.contentId}`, {
+                const response = await this.$axios.get(`http://127.0.0.1:5000/get_previous_rating/${this.professionalId}`, {
                     headers: {
                         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                     },
@@ -45,12 +45,12 @@ export default {
                 console.error('Error fetching previous rating:', error);
             }
         },
-        rateContent(star) {
+        rateProfessional(star) {
             this.selectedRating = star;
         },
         async submitRating() {
             try {
-                await this.$axios.post(`http://127.0.0.1:5000/rate_content/${this.contentId}`, {
+                await this.$axios.post(`http://127.0.0.1:5000/rate_professional/${this.professionalId}`, {
                     rating: this.selectedRating,
                     comment: this.comment
                 }, {
@@ -61,7 +61,7 @@ export default {
                 this.$router.push({ name: 'ReaderHome' }); 
 
             } catch (error) {
-                console.error('Error rating content:', error);
+                console.error('Error rating professional:', error);
             }
         }
     }
@@ -90,7 +90,7 @@ export default {
 }
 
 .cus-btn {
-    justify-content: center;
+    justify-professional: center;
     column-gap: 2rem;
 }
 

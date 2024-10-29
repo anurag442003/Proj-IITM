@@ -20,17 +20,17 @@ export default {
     data() {
         return {
             userDetails: {},
-            contentId : null,
+            professionalId : null,
             userId: null
         }
     },
     methods: {
         async viewDetails() {
             try {
-                this.contentId = this.$route.params.contentId;
+                this.professionalId = this.$route.params.professionalId;
                 this.userId = this.$route.params.userId;
 
-                const response = await this.$axios.get(`http://127.0.0.1:5000/more_details/${this.contentId}/${this.userId}`, {
+                const response = await this.$axios.get(`http://127.0.0.1:5000/more_details/${this.professionalId}/${this.userId}`, {
                     headers: {
                         Authorization: `Bearer ${sessionStorage.getItem('token')}`
                     }
@@ -64,7 +64,7 @@ export default {
     padding-top: 2rem;
 }
 
-.modal-content {
+.modal-professional {
     background-color: #fefefe;
     margin: 10% auto;
     padding: 20px;

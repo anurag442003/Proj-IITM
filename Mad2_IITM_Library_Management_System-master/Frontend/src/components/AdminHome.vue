@@ -8,14 +8,14 @@
                     <h4 class="my3">  Base Price : {{ service.baseprice }} Rs.</h4>
                     <div class="service-btn">
                         <router-link :to="'/update-service/' + service.id" class="btn btn-sm btn-primary"><i class="fa-regular fa-pen-to-square"></i></router-link>
-                        <!-- <router-link :to="'/upload-content/' + service.id" class="btn btn-sm btn-success"><i class="fa-solid fa-plus"></i></router-link> -->
+                        <!-- <router-link :to="'/upload-professional/' + service.id" class="btn btn-sm btn-success"><i class="fa-solid fa-plus"></i></router-link> -->
                         <button @click="confirmDelete(service.id)" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>
-                <div class="slider-content">
-                    <admin-content-card v-for="content in filteredContents(service.id)" :key="content.id"
-                        :content="content" :decodedImage="content.decodedImage"
-                        @content-updated="updatedContent"></admin-content-card>
+                <div class="slider-professional">
+                    <admin-professional-card v-for="professional in filteredProfessionals(service.id)" :key="professional.id"
+                        :professional="professional" :decodedImage="professional.decodedImage"
+                        @professional-updated="updatedProfessional"></admin-professional-card>
                 </div>
             </div>
         </section>
@@ -25,43 +25,43 @@
 
 <script>
 import BottomNav from './Mad2_BottomNav.vue';
-import AdminContentCard from './Mad2_AdminContentCard.vue';
+import AdminProfessionalCard from './Mad2_AdminProfessionalCard.vue';
 
 export default {
     components: {
         BottomNav,
-        AdminContentCard,
+        AdminProfessionalCard,
     },
     data() {
         return {
-            contents: [],
+            professionals: [],
             services: [],
         };
     },
     created() {
-        this.fetchContents();
+        this.fetchProfessionals();
         this.fetchServices();
     },
     methods: {
-        updatedContent() {
-            this.fetchContents();
+        updatedProfessional() {
+            this.fetchProfessionals();
         },
-        fetchContents() {
-            fetch('http://127.0.0.1:5000/fetch-content')
+        fetchProfessionals() {
+            fetch('http://127.0.0.1:5000/fetch-professional')
                 .then(response => response.json())
                 .then(data => {
-                    this.contents = data.contents;
-                    this.contents.forEach(content => {
-                        if (content.isRead) {
-                            this.$store.dispatch('setContentRead', { contentId: content.id, isRead: true });
+                    this.professionals = data.professionals;
+                    this.professionals.forEach(professional => {
+                        if (professional.isRead) {
+                            this.$store.dispatch('setProfessionalRead', { professionalId: professional.id, isRead: true });
                         }
-                        // if (content.isWishlisted) {
-                        //     this.$store.dispatch('toggleContentWishlist', { contentId: content.id, isWishlisted: true });
+                        // if (professional.isWishlisted) {
+                        //     this.$store.dispatch('toggleProfessionalWishlist', { professionalId: professional.id, isWishlisted: true });
                         // }
                     });
                 })
                 .catch(error => {
-                    console.error('Error fetching user contents:', error);
+                    console.error('Error fetching user professionals:', error);
                 });
         },
         fetchServices() {
@@ -74,16 +74,16 @@ export default {
                     console.error('Error fetching services:', error);
                 });
         },
-        getDecodedImage(content) {
-            const decodedImage = `data:image/${content.imageType};base64, ${content.image}`;
+        getDecodedImage(professional) {
+            const decodedImage = `data:image/${professional.imageType};base64, ${professional.image}`;
             return decodedImage;
         },
-        filteredContents(serviceId) {
-            return this.contents
-                .filter(content => content.service === serviceId)
-                .map(content => ({
-                    ...content,
-                    decodedImage: this.getDecodedImage(content),
+        filteredProfessionals(serviceId) {
+            return this.professionals
+                .filter(professional => professional.service === serviceId)
+                .map(professional => ({
+                    ...professional,
+                    decodedImage: this.getDecodedImage(professional),
                 }));
         },
         deleteService(serviceId) {
@@ -156,14 +156,14 @@ export default {
     column-gap: 1rem;
 }
 
-.slider-content {
+.slider-professional {
     display: flex;
     overflow-x: auto;
     gap: 2rem;
     scroll-snap-type: x mandatory;
 }
 
-.slider-content::-webkit-scrollbar {
+.slider-professional::-webkit-scrollbar {
     display: none;
     width: 0;
 }

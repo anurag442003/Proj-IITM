@@ -1,7 +1,7 @@
 <template>
     <div class="custom-container">
-        <AlertTop v-if="content.showAlert" :message="content.alertMessage" type="error"
-            @close="content.showAlert = false"></AlertTop>
+        <AlertTop v-if="professional.showAlert" :message="professional.alertMessage" type="error"
+            @close="professional.showAlert = false"></AlertTop>
         <h2><b>Upload New Professional</b></h2>
         <form @submit.prevent="submitForm">
             <div class="row">
@@ -23,7 +23,7 @@
                 <div class="col-12">
                     <div class="form-group">
                         <label for="title">Title</label>
-                        <input v-model="content.title" type="text" class="form-control" id="title" required>
+                        <input v-model="professional.title" type="text" class="form-control" id="title" required>
                     </div>
                 </div>
             </div>
@@ -32,13 +32,13 @@
                 <div class="col-6">
                     <div class="form-group">
                         <label for="prof_desc">Author(s)</label>
-                        <input v-model="content.prof_desc" type="text" class="form-control" id="prof_desc" required>
+                        <input v-model="professional.prof_desc" type="text" class="form-control" id="prof_desc" required>
                     </div>
                 </div>
                 <div class="col-4">
                     <div class="form-group">
                         <label for="publishYear">Publish Year</label>
-                        <select v-model="content.date_of_birth" class="form-control" id="publishYear" required>
+                        <select v-model="professional.date_of_birth" class="form-control" id="publishYear" required>
                             <option disabled value="">Select year</option>
                             <option v-for="year in range(1900, 2025)" :key="year">{{ year }}</option>
                         </select>
@@ -47,16 +47,16 @@
                 <div class="col-2">
                     <div class="form-group">
                         <label for="price">Price (in Rs.)</label>
-                        <input v-model="content.price" type="number" class="form-control" id="price" required>
+                        <input v-model="professional.price" type="number" class="form-control" id="price" required>
                     </div>
                 </div>
             </div>
 
             <div class="row">
-                <div class="col-8 d-flex align-items-center justify-content-center px-4 mx-4">
+                <div class="col-8 d-flex align-items-center justify-professional-center px-4 mx-4">
                     <button type="submit" class="btn btn-primary">Upload</button>
                 </div>
-                <div class="col-3 d-flex align-items-center justify-content-center">
+                <div class="col-3 d-flex align-items-center justify-professional-center">
                     <router-link class="btn btn-danger" to="/librarian-home">Cancel</router-link>
                 </div>
             </div>
@@ -74,7 +74,7 @@ export default {
     },
     data() {
         return {
-            content: {
+            professional: {
                 title: "",
                 prof_desc: "",
                 number_of_pages: 0,
@@ -93,7 +93,7 @@ export default {
         },
         handlePdfChange() {
             const file = this.$refs.pdfInput.files[0];
-            this.content.pdf = file;
+            this.professional.pdf = file;
         },
         getUserIdFromToken() {
             const token = sessionStorage.getItem('token');
@@ -103,32 +103,32 @@ export default {
         },
         handleImageChange() {
             const file = this.$refs.imageInput.files[0];
-            this.content.image = file;
+            this.professional.image = file;
         },
         submitForm() {
-            if (!this.content.image || !this.content.pdf) {
-                this.content.alertMessage = 'Both image and PDF file are required.';
-                this.content.showAlert = true;
+            if (!this.professional.image || !this.professional.pdf) {
+                this.professional.alertMessage = 'Both image and PDF file are required.';
+                this.professional.showAlert = true;
                 setTimeout(() => {
-                    this.content.showAlert = false;
+                    this.professional.showAlert = false;
                 }, 3000);
                 return;
             }
 
             const formData = new FormData();
-            formData.append('title', this.content.title);
-            formData.append('prof_desc', this.content.prof_desc);
-            formData.append('number_of_pages', this.content.number_of_pages);
-            formData.append('date_of_birth', this.content.date_of_birth);
-            formData.append('image', this.content.image);
-            formData.append('price', this.content.price);
-            formData.append('pdf', this.content.pdf, this.content.pdf.name);
+            formData.append('title', this.professional.title);
+            formData.append('prof_desc', this.professional.prof_desc);
+            formData.append('number_of_pages', this.professional.number_of_pages);
+            formData.append('date_of_birth', this.professional.date_of_birth);
+            formData.append('image', this.professional.image);
+            formData.append('price', this.professional.price);
+            formData.append('pdf', this.professional.pdf, this.professional.pdf.name);
 
             const serviceId = this.$route.params.serviceId;
             const userId = this.getUserIdFromToken();
             const token = sessionStorage.getItem('token');
 
-            axios.post(`http://127.0.0.1:5000/add-content/${serviceId}/${userId}`, formData, {
+            axios.post(`http://127.0.0.1:5000/add-professional/${serviceId}/${userId}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${token}`
@@ -136,7 +136,7 @@ export default {
             })
                 .then(response => {
                     console.log(response.data);
-                    this.content = {
+                    this.professional = {
                         title: "",
                         prof_desc: "",
                         number_of_pages: 0,
@@ -149,7 +149,7 @@ export default {
                     this.$refs.pdfInput.value = null;
                 })
                 .catch(error => {
-                    this.content.showAlert = true;
+                    this.professional.showAlert = true;
                     console.error("Error:", error);
                 });
         }

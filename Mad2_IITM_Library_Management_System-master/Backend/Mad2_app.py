@@ -200,7 +200,7 @@ def create_csv():
 
         csv_output = excel.make_response_from_query_sets(
             tl, 
-            ['id', 'user_id', 'action', 'content_id', 'timestamp'], 
+            ['id', 'user_id', 'action', 'professional_id', 'timestamp'], 
             'csv'
         )
         
@@ -242,14 +242,14 @@ def login():
                     app.logger.info("Login Successfully!")
                     return jsonify({"message": "Login successful!", "token": access_token}), 200
 
-            content = {}
+            professional = {}
         
             app.logger.info(f"User found: {user.uname}")
             if user.is_active == True:
               
 
                 if user.role == 'LIBRARIAN':
-                    content = Professional.query.filter_by(uploaded_by_id=user.id).first()
+                    professional = Professional.query.filter_by(uploaded_by_id=user.id).first()
                       
                 if bcrypt.check_password_hash(user.password, data["password"]):
                     login = Login.query.filter_by(user_id=user.id).first()
@@ -275,7 +275,7 @@ def login():
                         identity=user.id, additional_claims=additional_claims
                     )
 
-                    if user.role == 'LIBRARIAN' and content.is_verified == False:
+                    if user.role == 'LIBRARIAN' and professional.is_verified == False:
                         print("not verif")
                         app.logger.warning("Professional hasnt been verfied yet")
                         return jsonify({"error": "Professional hasnt been verfied yet"}), 401
@@ -523,9 +523,9 @@ def create_service():
         return jsonify({"error": "New Service creation is failed", "Reasons": str(e)}), 500
 
 # 2. Professional
-@app.route("/add-content/<int:service_id>/<int:user_id>", methods=["POST"])
+@app.route("/add-professional/<int:service_id>/<int:user_id>", methods=["POST"])
 @jwt_required()
-def add_content(service_id, user_id):
+def add_professional(service_id, user_id):
 
     current_user_id = get_jwt_identity()
 
@@ -558,7 +558,7 @@ def add_content(service_id, user_id):
             app.logger.warn("Data Is Incomplete")
             return jsonify({"message": "Incomplete form data"}), 400
 
-        content = Professional(
+        professional = Professional(
             title=title,
             prof_desc=prof_desc,
             no_of_years=no_of_years,
@@ -574,8 +574,8 @@ def add_content(service_id, user_id):
                 filename = secure_filename(image.filename)
                 image_data = image.read()
                 image_type = imghdr.what(None, h=image_data)
-                content.image = image_data
-                content.imageType = image_type
+                professional.image = image_data
+                professional.imageType = image_type
 
         if "pdf" in request.files:
             pdf = request.files["pdf"]
@@ -592,17 +592,17 @@ def add_content(service_id, user_id):
                             400,
                         )
                     else:
-                        content.no_of_years = len(pdf_reader.pages)
+                        professional.no_of_years = len(pdf_reader.pages)
                 except Exception as e:
                     app.logger.error("Invalid PDF File")
                     return jsonify({"message": f"Invalid PDF file: {str(e)}"}), 400
 
-                content.pdf_file_name = filename
-                content.file = pdf_data
+                professional.pdf_file_name = filename
+                professional.file = pdf_data
         else:
-            content.file = None
+            professional.file = None
 
-        db.session.add(content)
+        db.session.add(professional)
         db.session.commit()
 
         app.logger.info("Professional Added Successfully")
@@ -610,30 +610,30 @@ def add_content(service_id, user_id):
 
     except Exception as e:
         app.logger.error("Error Adding Professional", str(e))
-        return jsonify({"message": f"Error adding content: {str(e)}"}), 500
+        return jsonify({"message": f"Error adding professional: {str(e)}"}), 500
 
 # 3. Wishlist
-# @app.route("/wishlist/add/<int:content_id>", methods=["POST"])
+# @app.route("/wishlist/add/<int:professional_id>", methods=["POST"])
 # @jwt_required()
-# def add_to_wishlist(content_id):
+# def add_to_wishlist(professional_id):
 #     try:
 #         current_user_id = get_jwt_identity()
 
 #         existing_wishlist_item = Wishlist.query.filter_by(
-#             content_id=content_id, user_id=current_user_id
+#             professional_id=professional_id, user_id=current_user_id
 #         ).first()
 
 #         if existing_wishlist_item:
 #             app.logger.warn("Professional Already In Wishlist")
 #             return jsonify({"error": "Professional is already in the wishlist"}), 400
 
-#         new_wishlist_item = Wishlist(content_id=content_id, user_id=current_user_id)
+#         new_wishlist_item = Wishlist(professional_id=professional_id, user_id=current_user_id)
 #         db.session.add(new_wishlist_item)
 
 #         new_transaction_log = TransactionsLog(
 #             user_id=current_user_id,
 #             action="+ Wishlist",
-#             content_id=content_id,
+#             professional_id=professional_id,
 #             timestamp=datetime.now(),
 #         )
 #         db.session.add(new_transaction_log)
@@ -645,7 +645,7 @@ def add_content(service_id, user_id):
 #     except Exception as e:
 #         app.logger.error("Professional Wishlisting Failed", str(e))
 #         return (
-#             jsonify({"error": "Failed to add content to wishlist", "details": str(e)}),
+#             jsonify({"error": "Failed to add professional to wishlist", "details": str(e)}),
 #             500,
 #         )
 
@@ -670,29 +670,29 @@ def get_all_services():
         return jsonify({"error": "Failed to fetch services", "Reasons": str(e)}), 500
 
 # 2. Professional
-@app.route("/fetch-content", methods=["GET"])
-def fetch_content():
+@app.route("/fetch-professional", methods=["GET"])
+def fetch_professional():
     try:
-        contents = Professional.query.all()
+        professionals = Professional.query.all()
         user = User.query.filter_by(is_active = 1, role = 'LIBRARIAN').all()
 
         userids = [u.id for u in user]
-        formatted_contents = []
-        for content in contents:
-            if content.uploaded_by_id in userids:
+        formatted_professionals = []
+        for professional in professionals:
+            if professional.uploaded_by_id in userids:
 
-                ratings = Review.query.filter_by(content_id=content.id).all()
+                ratings = Review.query.filter_by(professional_id=professional.id).all()
                 average_rating = round(sum(rating.rating for rating in ratings) / len(ratings), 2) if ratings else 0
 
-                formatted_content = {
-                    "id": content.id,
-                    "title": content.title,
-                    "prof_desc": content.prof_desc,
+                formatted_professional = {
+                    "id": professional.id,
+                    "title": professional.title,
+                    "prof_desc": professional.prof_desc,
                     "rating": average_rating,
-                    "service": content.service,
-                    "price": content.price,
-                    "imageType": content.imageType,
-                    "image": base64.b64encode(content.image).decode("utf-8"),
+                    "service": professional.service,
+                    "price": professional.price,
+                    "imageType": professional.imageType,
+                    "image": base64.b64encode(professional.image).decode("utf-8"),
                     "ratings": [
                         {
                             "id": rating.id,
@@ -703,22 +703,22 @@ def fetch_content():
                         for rating in ratings
                     ]
                 }
-                formatted_contents.append(formatted_content)
+                formatted_professionals.append(formatted_professional)
             else:
-                print("not in userids ",content.id)
+                print("not in userids ",professional.id)
 
         app.logger.info("Professional Fetched Successfully")
-        return jsonify({"contents": formatted_contents})
+        return jsonify({"professionals": formatted_professionals})
 
     except Exception as e:
         app.logger.error("Error Fetching Professional", str(e))
-        return jsonify({"error": "Failed to fetch content", "details": str(e)}), 500
+        return jsonify({"error": "Failed to fetch professional", "details": str(e)}), 500
 
 # 3. InDemand
 @app.route('/fetch-InDemand', methods=['GET'])
-def fetch_InDemand_contents():
+def fetch_InDemand_professionals():
     try:
-        InDemand_contents = db.session.query(Professional, func.avg(Review.rating).label('avg_rating')) \
+        InDemand_professionals = db.session.query(Professional, func.avg(Review.rating).label('avg_rating')) \
             .join(Review) \
             .group_by(Professional.id) \
             .order_by(func.avg(Review.rating).desc()) \
@@ -727,47 +727,47 @@ def fetch_InDemand_contents():
         user = User.query.filter_by(is_active = 1, role = 'LIBRARIAN').all()
 
         userids = [u.id for u in user]
-        serialized_contents = []
-        for content, avg_rating in InDemand_contents:
-            if content.uploaded_by_id in userids:
-                serialized_content = {
-                    'id': content.id,
-                    'title': content.title,
-                    'prof_desc': content.prof_desc,
+        serialized_professionals = []
+        for professional, avg_rating in InDemand_professionals:
+            if professional.uploaded_by_id in userids:
+                serialized_professional = {
+                    'id': professional.id,
+                    'title': professional.title,
+                    'prof_desc': professional.prof_desc,
                     'rating': round(avg_rating or 0, 2),
-                    'price' : content.price,
-                    'image': content.image,
-                    'imageType': content.imageType,
-                    "image": base64.b64encode(content.image).decode("utf-8"),
+                    'price' : professional.price,
+                    'image': professional.image,
+                    'imageType': professional.imageType,
+                    "image": base64.b64encode(professional.image).decode("utf-8"),
                     'average_rating': avg_rating
                 }
-                serialized_contents.append(serialized_content)
+                serialized_professionals.append(serialized_professional)
             else:
-                print("not in active userids ",content.id,content.title)
+                print("not in active userids ",professional.id,professional.title)
         
         app.logger.info("Fetched InDemand Professional Successfully")
-        return jsonify({'contents': serialized_contents}), 200
+        return jsonify({'professionals': serialized_professionals}), 200
     except Exception as e:
         app.logger.error("Error Fetching InDemand Professional", str(e))
         return jsonify({'error': str(e)}), 500
 
 # 4. User Professional
-@app.route("/user/fetch-content/<int:user_id>", methods=["GET"])
-def fetch_user_content(user_id):
+@app.route("/user/fetch-professional/<int:user_id>", methods=["GET"])
+def fetch_user_professional(user_id):
     try:
-        contents = (
+        professionals = (
             Professional.query.outerjoin(
                 Rendering,
-                (Rendering.content_id == Professional.id) & (Rendering.member_id == user_id),
+                (Rendering.professional_id == Professional.id) & (Rendering.member_id == user_id),
             )
             # .outerjoin(
             #     Wishlist,
-            #     (Wishlist.content_id == Professional.id) & (Wishlist.user_id == user_id),
+            #     (Wishlist.professional_id == Professional.id) & (Wishlist.user_id == user_id),
             # )
-            .outerjoin(Review, Review.content_id == Professional.id)
+            .outerjoin(Review, Review.professional_id == Professional.id)
             .outerjoin(
                 Requests,
-                (Requests.contentId == Professional.id) & (Requests.userId == user_id),
+                (Requests.professionalId == Professional.id) & (Requests.userId == user_id),
             )
             .add_columns(
                 Professional.id,
@@ -792,55 +792,55 @@ def fetch_user_content(user_id):
 
         userids = [u.id for u in user]
         print("userids ",userids)
-        formatted_contents = []
-        for content in contents:
-            if content.uploaded_by_id in userids:
+        formatted_professionals = []
+        for professional in professionals:
+            if professional.uploaded_by_id in userids:
 
                 fc = {
-                        "id": content.id,
-                        "title": content.title,
-                        "prof_desc": content.prof_desc,
-                        "service": content.service,
-                        "rating": round(content.rating or 0, 2),
-                        "price": content.price,
-                        "imageType": content.imageType,
-                        "image": base64.b64encode(content.image).decode("utf-8"),
-                        "isIssued": content.rendering_id is not None and not content.returned,
-                        # "isWishlisted": content.wishlist_id is not None,
-                        "isRead": content.rendering_id is not None,
-                        "isRequested": content.isRequested == 'Pending' if content.isRequested else False
+                        "id": professional.id,
+                        "title": professional.title,
+                        "prof_desc": professional.prof_desc,
+                        "service": professional.service,
+                        "rating": round(professional.rating or 0, 2),
+                        "price": professional.price,
+                        "imageType": professional.imageType,
+                        "image": base64.b64encode(professional.image).decode("utf-8"),
+                        "isIssued": professional.rendering_id is not None and not professional.returned,
+                        # "isWishlisted": professional.wishlist_id is not None,
+                        "isRead": professional.rendering_id is not None,
+                        "isRequested": professional.isRequested == 'Pending' if professional.isRequested else False
                     }
-                formatted_contents.append(fc)
+                formatted_professionals.append(fc)
                 app.logger.info("Professional Fetched by User-ID Successful")
             else:
-                print("not active ",content.id, content.title)
+                print("not active ",professional.id, professional.title)
 
-        return jsonify({"contents": formatted_contents})
+        return jsonify({"professionals": formatted_professionals})
 
     except Exception as e:
         app.logger.error("Professional Fetched by User-ID Failed: %s", str(e))
         return ( 
-            jsonify({"error": "Failed to fetch user content", "details": str(e)}),
+            jsonify({"error": "Failed to fetch user professional", "details": str(e)}),
             500,
         )
 
 # 5. Conent Details
-@app.route("/fetch-content-details/<int:content_id>", methods=["GET"])
+@app.route("/fetch-professional-details/<int:professional_id>", methods=["GET"])
 @jwt_required()
-def fetch_content_details(content_id):
-    content = Professional.query.get(content_id)
+def fetch_professional_details(professional_id):
+    professional = Professional.query.get(professional_id)
 
-    if content:
-        content_details = {
-            "image": base64.b64encode(content.image).decode("utf-8"),
-            "title": content.title,
-            "prof_desc": content.prof_desc,
-            "price": content.price,
-            "date_of_birth": content.date_of_birth,
+    if professional:
+        professional_details = {
+            "image": base64.b64encode(professional.image).decode("utf-8"),
+            "title": professional.title,
+            "prof_desc": professional.prof_desc,
+            "price": professional.price,
+            "date_of_birth": professional.date_of_birth,
         }
 
         app.logger.info("Professional Fetched by Professional-ID Successfully")
-        return jsonify(content_details)
+        return jsonify(professional_details)
     else:
         app.logger.error("Professional Fetched by Professional-ID Failed")
         return jsonify({"message": "Professional not found"}), 404
@@ -870,7 +870,7 @@ def delete_service(service_id):
             db.session.delete(service)
             db.session.commit()
             app.logger.info("Service Deleted Successfully!")
-            return jsonify({"message": "Service and associated contents deleted successfully!"}), 200
+            return jsonify({"message": "Service and associated professionals deleted successfully!"}), 200
         else:
             app.logger.warning("Failed Deleting Service")
             return jsonify({"error": "Service not found"}), 404
@@ -883,19 +883,19 @@ def delete_service(service_id):
         return jsonify({"error": "Service deletion failed", "Reasons": str(e)}), 500
 
 # 2. Professional
-# @app.route("/delete-content/<int:content_id>", methods=["DELETE"])
+# @app.route("/delete-professional/<int:professional_id>", methods=["DELETE"])
 # @jwt_required()
-# def delete_content(content_id):
+# def delete_professional(professional_id):
 #     try:
-#         content = Professional.query.get(content_id)
-#         if not content:
-#             app.logger.warning("Professional not found: %s", content_id)
+#         professional = Professional.query.get(professional_id)
+#         if not professional:
+#             app.logger.warning("Professional not found: %s", professional_id)
 #             return jsonify({"error": "Professional not found"}), 404
 
-#         app.logger.info("Professional found: %s", content_id)
+#         app.logger.info("Professional found: %s", professional_id)
 
 #         # try:
-#         #     related_wishlist_items = Wishlist.query.filter_by(content_id=content_id).all()
+#         #     related_wishlist_items = Wishlist.query.filter_by(professional_id=professional_id).all()
 #         #     app.logger.info("Found %d related wishlist items", len(related_wishlist_items))
 #         #     for wishlist_item in related_wishlist_items:
 #         #         db.session.delete(wishlist_item)
@@ -904,7 +904,7 @@ def delete_service(service_id):
 #         #     return jsonify({"error": "Failed to delete wishlist items", "details": str(e)}), 500
 
 #         try:
-#             related_review_items = Review.query.filter_by(content_id=content_id).all()
+#             related_review_items = Review.query.filter_by(professional_id=professional_id).all()
 #             app.logger.info("Found %d related review items", len(related_review_items))
 #             for review_item in related_review_items:
 #                 db.session.delete(review_item)
@@ -912,7 +912,7 @@ def delete_service(service_id):
 #             app.logger.error("Error deleting review items: %s", str(e))
 #             return jsonify({"error": "Failed to delete review items", "details": str(e)}), 500
 #         try:
-#             related_rendering_items = Rendering.query.filter_by(content_id=content_id).all()
+#             related_rendering_items = Rendering.query.filter_by(professional_id=professional_id).all()
 #             app.logger.info("Found %d related rendering items", len(related_rendering_items))
 #             for render_item in related_rendering_items:
 #                 db.session.delete(render_item)
@@ -921,11 +921,11 @@ def delete_service(service_id):
 #             return jsonify({"error": "Failed to delete rendering items", "details": str(e)}), 500
 
 #         try:
-#             db.session.delete(content)
+#             db.session.delete(professional)
 #             db.session.commit()
 #         except Exception as e:
-#             app.logger.error("Error deleting content: %s", str(e))
-#             return jsonify({"error": "Failed to delete content", "details": str(e)}), 500
+#             app.logger.error("Error deleting professional: %s", str(e))
+#             return jsonify({"error": "Failed to delete professional", "details": str(e)}), 500
 
 #         app.logger.info("Professional and related items deleted successfully")
 #         return jsonify({"message": "Professional and related items deleted successfully"}), 200
@@ -935,14 +935,14 @@ def delete_service(service_id):
 #         return jsonify({"error": "Professional deletion failed", "details": str(e)}), 500
 
 # 3. Wishlist
-# @app.route("/wishlist/remove/<int:content_id>", methods=["POST"])
+# @app.route("/wishlist/remove/<int:professional_id>", methods=["POST"])
 # @jwt_required()
-# def remove_from_wishlist(content_id):
+# def remove_from_wishlist(professional_id):
 #     try:
 #         current_user_id = get_jwt_identity()
 
 #         wishlist_item = Wishlist.query.filter_by(
-#             content_id=content_id, user_id=current_user_id
+#             professional_id=professional_id, user_id=current_user_id
 #         ).first()
 
 #         if not wishlist_item:
@@ -954,7 +954,7 @@ def delete_service(service_id):
 #         new_transaction_log = TransactionsLog(
 #             user_id=current_user_id,
 #             action="- Wishlist",
-#             content_id=content_id,
+#             professional_id=professional_id,
 #             timestamp=datetime.now(),
 #         )
 #         db.session.add(new_transaction_log)
@@ -967,7 +967,7 @@ def delete_service(service_id):
 #         app.logger.error("Error Removing Professional From Wishlist", str(e))
 #         return (
 #             jsonify(
-#                 {"error": "Failed to remove content from wishlist", "details": str(e)}
+#                 {"error": "Failed to remove professional from wishlist", "details": str(e)}
 #             ),
 #             500,
 #         )
@@ -997,14 +997,14 @@ def get_image_type(image_data):
         return None
     
 # 3. PDF    
-@app.route('/get_pdf/<int:content_id>')
+@app.route('/get_pdf/<int:professional_id>')
 @cache.cached(timeout=60)
 @jwt_required()
-def get_pdf(content_id):
+def get_pdf(professional_id):
     try:
-        content = Professional.query.get_or_404(content_id)
+        professional = Professional.query.get_or_404(professional_id)
 
-        pdf_blob = content.file
+        pdf_blob = professional.file
 
         pdf_bytes = BytesIO(pdf_blob)
 
@@ -1048,16 +1048,16 @@ def update_service(service_id):
     return jsonify({"message": "Service updated successfully"})
 
 # 2. Professional
-@app.route("/update-content/<int:content_id>/<int:user_id>", methods=["POST"])
+@app.route("/update-professional/<int:professional_id>/<int:user_id>", methods=["POST"])
 @jwt_required()
-def update_content(content_id, user_id):
+def update_professional(professional_id, user_id):
     current_user_id = get_jwt_identity()
     if current_user_id != user_id:
         app.logger.warn("User Is Unauthorized")
         return jsonify({"message": "Unauthorized"}), 401
 
     try:
-        content = Professional.query.get(content_id)
+        professional = Professional.query.get(professional_id)
 
         title = request.form.get("title")
         prof_desc = request.form.get("prof_desc")
@@ -1069,11 +1069,11 @@ def update_content(content_id, user_id):
             app.logger.warn("Incomplete Data")
             return jsonify({"message": "Incomplete form data"}), 400
 
-        content.title = title
-        content.prof_desc = prof_desc
-        content.no_of_years = no_of_years
-        content.date_of_birth = date_of_birth
-        content.price = price
+        professional.title = title
+        professional.prof_desc = prof_desc
+        professional.no_of_years = no_of_years
+        professional.date_of_birth = date_of_birth
+        professional.price = price
 
         if "image" in request.files:
             image = request.files["image"]
@@ -1084,8 +1084,8 @@ def update_content(content_id, user_id):
 
                 image_type = imghdr.what(None, h=image_data)
 
-                content.image = image_data
-                content.imageType = image_type
+                professional.image = image_data
+                professional.imageType = image_type
         
         if "pdf" in request.files:
             pdf = request.files["pdf"]
@@ -1100,14 +1100,14 @@ def update_content(content_id, user_id):
                             400,
                         )
                     else:
-                        content.no_of_years = len(pdf_reader.pages)
+                        professional.no_of_years = len(pdf_reader.pages)
                 except Exception as e:
                     app.logger.error("Invalid PDF File")
                     return jsonify({"message": f"Invalid PDF file: {str(e)}"}), 400
 
-                content.pdf_file_name = filename
+                professional.pdf_file_name = filename
 
-                content.file = pdf_data
+                professional.file = pdf_data
 
         
         db.session.commit()
@@ -1117,19 +1117,19 @@ def update_content(content_id, user_id):
 
     except Exception as e:
         app.logger.error("Error Updating Professional")
-        return jsonify({"message": "Error updating content"}), 500
+        return jsonify({"message": "Error updating professional"}), 500
 
 
 
 
 
-@app.route("/activity-data/<int:content_id>", methods=["GET"])
+@app.route("/activity-data/<int:professional_id>", methods=["GET"])
 @jwt_required()
-def get_activity_data(content_id):
+def get_activity_data(professional_id):
     try:
         query_result = (
             db.session.query(
-                Rendering.content_id,
+                Rendering.professional_id,
                 Professional.title,
                 User.uname,
                 Service.name.label("service_name"),
@@ -1139,16 +1139,16 @@ def get_activity_data(content_id):
                 User.id.label("user_id"),
             )
             .join(User, User.id == Rendering.member_id)
-            .join(Professional, Professional.id == Rendering.content_id)
+            .join(Professional, Professional.id == Rendering.professional_id)
             .join(Service, Service.id == Professional.service)
-            .filter(Rendering.content_id == content_id, Rendering.returned == False)
+            .filter(Rendering.professional_id == professional_id, Rendering.returned == False)
             .all()
         )
 
         result_data = [
             {
                 "user_id": row.user_id,
-                "content_id": row.content_id,
+                "professional_id": row.professional_id,
                 "title": row.title,
                 "username": row.uname,
                 "service_name": row.service_name,
@@ -1172,11 +1172,11 @@ def get_activity_data(content_id):
         return jsonify({"error": str(e)}), 500
     
 
-@app.route('/current-reader-count/<int:content_id>', methods=['GET'])
+@app.route('/current-reader-count/<int:professional_id>', methods=['GET'])
 @jwt_required()
-def current_reader_count(content_id):
+def current_reader_count(professional_id):
     try:
-        current_count = Rendering.query.filter_by(content_id=content_id, returned=False).distinct(Rendering.member_id).count()
+        current_count = Rendering.query.filter_by(professional_id=professional_id, returned=False).distinct(Rendering.member_id).count()
         app.logger.info("Current Reader Count Fetched")
         return jsonify({'currentReaderCount': current_count}), 200
     except Exception as e:
@@ -1184,11 +1184,11 @@ def current_reader_count(content_id):
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/total-reader-count/<int:content_id>', methods=['GET'])
+@app.route('/total-reader-count/<int:professional_id>', methods=['GET'])
 @jwt_required()
-def total_reader_count(content_id):
+def total_reader_count(professional_id):
     try:
-        total_count = Rendering.query.filter_by(content_id=content_id).distinct(Rendering.member_id).count()
+        total_count = Rendering.query.filter_by(professional_id=professional_id).distinct(Rendering.member_id).count()
         app.logger.info("Total Reader Count Fetched")
         return jsonify({'totalReaderCount': total_count}), 200
     except Exception as e:
@@ -1196,26 +1196,26 @@ def total_reader_count(content_id):
         return jsonify({'error': str(e)}), 500
 
 
-# @app.route('/wishlist-count/<int:content_id>', methods=['GET'])
+# @app.route('/wishlist-count/<int:professional_id>', methods=['GET'])
 # @jwt_required()
-# def wishlist_count(content_id):
+# def wishlist_count(professional_id):
 #     try:
-#         count = Wishlist.query.filter_by(content_id=content_id).count()
+#         count = Wishlist.query.filter_by(professional_id=professional_id).count()
 #         app.logger.info("Wishlist Count Fetched")
 #         return jsonify({'wishlistCount': count}), 200
 #     except Exception as e:
 #         app.logger.error("Error Fetching WC", str(e))
 #         return jsonify({'error': str(e)}), 500
 
-@app.route("/accept_request/<int:content_id>/<int:user_id>", methods=["POST"])
+@app.route("/accept_request/<int:professional_id>/<int:user_id>", methods=["POST"])
 @jwt_required()
-def accept_request(content_id, user_id):
+def accept_request(professional_id, user_id):
     try:
         current_user_id = user_id 
 
-        content = Professional.query.get(content_id)
+        professional = Professional.query.get(professional_id)
 
-        if not content:
+        if not professional:
             app.logger.warn("No Such Prof Found To Render")
             return jsonify({"error": "Professional not found"}), 404
 
@@ -1228,7 +1228,7 @@ def accept_request(content_id, user_id):
             return jsonify({"error": "User has reached rendering limit of 5."}), 400
 
         existing_rendering = Rendering.query.filter_by(
-            content_id=content_id, member_id=current_user_id, return_date=None
+            professional_id=professional_id, member_id=current_user_id, return_date=None
         ).first()
 
         if existing_rendering:
@@ -1236,24 +1236,24 @@ def accept_request(content_id, user_id):
             return jsonify({"error": "User has already rendered this Professional"}), 400
 
         new_rendering = Rendering(
-            content_id=content_id, member_id=current_user_id, render_date=datetime.now()
+            professional_id=professional_id, member_id=current_user_id, render_date=datetime.now()
         )
         
         db.session.add(new_rendering)
 
         new_rendering.last_return_date = new_rendering.render_date + timedelta(days=7)
 
-        requests = Requests.query.filter_by(contentId=content_id, userId=user_id).first()
+        requests = Requests.query.filter_by(professionalId=professional_id, userId=user_id).first()
         if requests:
             requests.response = "Accepted"
             db.session.commit()
         else:
-            app.logger.warn("Issue Request not found for the specified content and user")
+            app.logger.warn("Issue Request not found for the specified professional and user")
 
         new_transaction_log = TransactionsLog(
             user_id=current_user_id,
             action="Accepted Request for service",
-            content_id=content_id,
+            professional_id=professional_id,
             timestamp=datetime.now(),
         )
 
@@ -1265,15 +1265,15 @@ def accept_request(content_id, user_id):
         return jsonify({"message": "Professional issued successfully"}), 200
     except Exception as e:
         app.logger.error("Error Rendering Professional", str(e))
-        return jsonify({"error": "Issuing content failed", "details": str(e)}), 500
+        return jsonify({"error": "Issuing professional failed", "details": str(e)}), 500
 
-@app.route('/accept_approval/<int:content_id>', methods=['POST'])
+@app.route('/accept_approval/<int:professional_id>', methods=['POST'])
 @jwt_required()
-def accept_approval(content_id):
+def accept_approval(professional_id):
     try:
-        content = Professional.query.get(content_id)
-        if content:
-            content.is_verified = True
+        professional = Professional.query.get(professional_id)
+        if professional:
+            professional.is_verified = True
             db.session.commit()
         else:
             app.logger.warn("Professional not found to approve")
@@ -1322,17 +1322,17 @@ def deactivate_user(activate_id):
         app.logger.error("Error deactivating user", str(e))
         return jsonify({"error": "Deactivating User failed", "details": str(e)}), 500
 
-@app.route("/return_content/<int:content_id>", methods=["POST"])
+@app.route("/return_professional/<int:professional_id>", methods=["POST"])
 @jwt_required()
-def return_content(content_id):
+def return_professional(professional_id):
     try:
         current_user_id = get_jwt_identity()
 
         rendering = Rendering.query.filter_by(
-            content_id=content_id, member_id=current_user_id, returned=False
+            professional_id=professional_id, member_id=current_user_id, returned=False
         ).first()
 
-        print(content_id, current_user_id, rendering)
+        print(professional_id, current_user_id, rendering)
 
         if not rendering:
             app.logger.warn("Rendering Record Not Found / Already Returned")
@@ -1349,14 +1349,14 @@ def return_content(content_id):
         )
 
 
-        requests = Requests.query.filter_by(contentId=content_id, userId=current_user_id).first()
+        requests = Requests.query.filter_by(professionalId=professional_id, userId=current_user_id).first()
         if requests:
             db.session.delete(requests)
 
         new_transaction_log = TransactionsLog(
             user_id=current_user_id,
             action="End service",
-            content_id=rendering.content_id,
+            professional_id=rendering.professional_id,
             timestamp=datetime.now(),
         )
         db.session.add(new_transaction_log)
@@ -1367,7 +1367,7 @@ def return_content(content_id):
         return jsonify({"message": "Professional returned successfully"}), 200
     except Exception as e:
         app.logger.error("Error Returning Professional", str(e))
-        return jsonify({"error": "Returning content failed", "details": str(e)}), 500
+        return jsonify({"error": "Returning professional failed", "details": str(e)}), 500
 
 
 
@@ -1384,7 +1384,7 @@ def get_transaction_logs():
                 "id": log.id,
                 "user_id": log.user_id,
                 "action": log.action,
-                "content_id": log.content_id,
+                "professional_id": log.professional_id,
                 "timestamp": log.timestamp.isoformat(),
             }
             serialized_logs.append(serialized_log)
@@ -1404,41 +1404,41 @@ def get_transaction_logs():
 def revoke_access():
     data = request.get_json()
 
-    content_id = data.get("contentId")
+    professional_id = data.get("professionalId")
     user_id = data.get("userId")
 
     rendering_record = Rendering.query.filter_by(
-        content_id=content_id, member_id=user_id
+        professional_id=professional_id, member_id=user_id
     ).first()
 
     if rendering_record:
         rendering_record.returned = True
         rendering_record.return_date = datetime.now()
 
-        requests = Requests.query.filter_by(contentId=content_id, userId=user_id).first()
+        requests = Requests.query.filter_by(professionalId=professional_id, userId=user_id).first()
         if requests:
             db.session.delete(requests)
 
         new_transaction_log = TransactionsLog(
             user_id=user_id,
             action="Revoke service",
-            content_id=content_id,
+            professional_id=professional_id,
             timestamp=datetime.now(),
         )
 
         db.session.add(new_transaction_log)
         db.session.commit()
 
-        app.logger.info("Access Revoked Successfully For User: %s & Professional: %s", user_id, content_id)
+        app.logger.info("Access Revoked Successfully For User: %s & Professional: %s", user_id, professional_id)
         return jsonify({"message": "Access revoked successfully"})
     else:
         app.logger.error("Error Revoking Access")
         return jsonify({"error": "Rendering record not found"}), 404
     
 
-@app.route('/rate_content/<int:content_id>', methods=['POST'])
+@app.route('/rate_professional/<int:professional_id>', methods=['POST'])
 @jwt_required()
-def rate_content(content_id):
+def rate_professional(professional_id):
     try:
         data = request.json
         rating_value = data.get('rating')
@@ -1446,11 +1446,11 @@ def rate_content(content_id):
 
         user_id = get_jwt_identity()
 
-        rating = Review.query.filter_by(content_id=content_id, user_id=user_id).first()
+        rating = Review.query.filter_by(professional_id=professional_id, user_id=user_id).first()
         new_transaction_log = TransactionsLog(
                 user_id=user_id,
                 action="Service review",
-                content_id=content_id,
+                professional_id=professional_id,
                 timestamp=datetime.now(),
             )
 
@@ -1464,14 +1464,14 @@ def rate_content(content_id):
             new_transaction_log = TransactionsLog(
                 user_id=user_id,
                 action="Updated service review",
-                content_id=content_id,
+                professional_id=professional_id,
                 timestamp=datetime.now(),
             )
 
             db.session.add(new_transaction_log)
             db.session.commit()
         else:
-            rating = Review(content_id=content_id, user_id=user_id, rating=rating_value, comment=comment)
+            rating = Review(professional_id=professional_id, user_id=user_id, rating=rating_value, comment=comment)
             db.session.add(rating)
 
         db.session.commit()
@@ -1488,8 +1488,8 @@ def rate_content(content_id):
 @jwt_required()
 def get_all_comments(userid):
     try:
-        content=Professional.query.filter_by(uploaded_by_id=userid).first()
-        reviews = Review.query.filter_by(content_id=content.id).all()
+        professional=Professional.query.filter_by(uploaded_by_id=userid).first()
+        reviews = Review.query.filter_by(professional_id=professional.id).all()
         reviews_list = []
         for review in reviews:
             user = User.query.filter_by(id=review.user_id).first()
@@ -1508,13 +1508,13 @@ def get_all_comments(userid):
 
 
 
-@app.route('/get_previous_rating/<int:content_id>', methods=['GET'])
+@app.route('/get_previous_rating/<int:professional_id>', methods=['GET'])
 @jwt_required()
-def get_previous_rating(content_id):
+def get_previous_rating(professional_id):
     try:
         user_id = get_jwt_identity()
 
-        previous_rating = Review.query.filter_by(content_id=content_id, user_id=user_id).first()
+        previous_rating = Review.query.filter_by(professional_id=professional_id, user_id=user_id).first()
 
         if previous_rating:
             app.logger.info("Previous Rating Fetched")
@@ -1614,29 +1614,29 @@ def search_result():
 
     uploaded_by_ids = [user.id for user in librarian_users]
     
-    librarian_content_results = Professional.query.filter(Professional.uploaded_by_id.in_(uploaded_by_ids))
-    content_results = Professional.query.filter(Professional.title.ilike(f'%{query}%'))
-    results = librarian_content_results.union(content_results).all()
+    librarian_professional_results = Professional.query.filter(Professional.uploaded_by_id.in_(uploaded_by_ids))
+    professional_results = Professional.query.filter(Professional.title.ilike(f'%{query}%'))
+    results = librarian_professional_results.union(professional_results).all()
 
-    formatted_content_results = []
-    for content in results:
+    formatted_professional_results = []
+    for professional in results:
         result = {
-            'id': content.id,
-            'title': content.title,
-            'prof_desc': content.prof_desc,
-            'service': content.service,
-            'rating': db.session.query(func.avg(Review.rating)).filter(Review.content_id == content.id).scalar(),
-            'imageType': content.imageType,
-            'image': base64.b64encode(content.image).decode('utf-8') if content.image else None,
+            'id': professional.id,
+            'title': professional.title,
+            'prof_desc': professional.prof_desc,
+            'service': professional.service,
+            'rating': db.session.query(func.avg(Review.rating)).filter(Review.professional_id == professional.id).scalar(),
+            'imageType': professional.imageType,
+            'image': base64.b64encode(professional.image).decode('utf-8') if professional.image else None,
         }
 
         if current_user_role == 'ADMIN':
             result.update({
-                'uploaded_by': content.uploaded_by_id,
-                'date_of_birth': content.date_of_birth,
-                'price': content.price,
-                'no_of_years': content.no_of_years,
-                'is_verified': content.is_verified
+                'uploaded_by': professional.uploaded_by_id,
+                'date_of_birth': professional.date_of_birth,
+                'price': professional.price,
+                'no_of_years': professional.no_of_years,
+                'is_verified': professional.is_verified
             })
         else:
             is_issued = False
@@ -1645,7 +1645,7 @@ def search_result():
             
             if current_user_id:
                 rendering = Rendering.query.filter_by(
-                    content_id=content.id, 
+                    professional_id=professional.id, 
                     member_id=current_user_id, 
                     returned=False
                 ).first()
@@ -1653,7 +1653,7 @@ def search_result():
                 is_read = bool(rendering)
 
                 issueRequest = Requests.query.filter_by(
-                    contentId=content.id, 
+                    professionalId=professional.id, 
                     userId=current_user_id, 
                     response='Pending'
                 ).first()
@@ -1665,11 +1665,11 @@ def search_result():
                 'isRequested': is_requested
             })
 
-        formatted_content_results.append(result)
+        formatted_professional_results.append(result)
 
     app.logger.info("Search Result Fetched")
     return jsonify({
-        'results': formatted_content_results,
+        'results': formatted_professional_results,
         'userRole': current_user_role
     })
 # @app.route('/wishlist/<int:user_id>', methods=['GET'])
@@ -1682,38 +1682,38 @@ def search_result():
 #         wishlist = []
 
 #         for item in wishlist_items:
-#             content = Professional.query.get(item.content_id)
+#             professional = Professional.query.get(item.professional_id)
 
-#             image_data = content.image
+#             image_data = professional.image
 #             image_base64 = base64.b64encode(image_data).decode('utf-8') if image_data else None
 
 #             is_read = False
 #             if current_user_id:
-#                 rendering = Rendering.query.filter_by(content_id=content.id, member_id=current_user_id).first()
+#                 rendering = Rendering.query.filter_by(professional_id=professional.id, member_id=current_user_id).first()
 #                 is_read = bool(rendering)
 
 #             is_wishlisted = False
 #             if current_user_id:
-#                 wishlist_item = Wishlist.query.filter_by(user_id=current_user_id, content_id=content.id).first()
+#                 wishlist_item = Wishlist.query.filter_by(user_id=current_user_id, professional_id=professional.id).first()
 #                 is_wishlisted = bool(wishlist_item)
 
 #             is_issued = False
 #             if current_user_id:
-#                 issued = Rendering.query.filter_by(member_id=current_user_id, content_id=content.id, returned=False).first()
+#                 issued = Rendering.query.filter_by(member_id=current_user_id, professional_id=professional.id, returned=False).first()
 #                 is_issued = bool(issued)
 
 #             is_requested = False
 #             if current_user_id:
-#                 request = Requests.query.filter_by(contentId=content.id, userId=current_user_id, response='Pending').first()
+#                 request = Requests.query.filter_by(professionalId=professional.id, userId=current_user_id, response='Pending').first()
 #                 is_requested = bool(request)
 
 #             wishlist.append({
-#                 'id': content.id,
-#                 'title': content.title,
-#                 'prof_desc': content.prof_desc,
+#                 'id': professional.id,
+#                 'title': professional.title,
+#                 'prof_desc': professional.prof_desc,
 #                 'image': image_base64,
-#                 'number_of_pages': content.no_of_years,
-#                 'date_of_birth': content.date_of_birth,
+#                 'number_of_pages': professional.no_of_years,
+#                 'date_of_birth': professional.date_of_birth,
 #                 'isRead': is_read,
 #                 'isIssued': is_issued,
 #                 'isWishlisted': is_wishlisted,
@@ -1732,14 +1732,14 @@ def get_requests():
     try:
         current_user_id = get_jwt_identity()
         print("in fetch requests")
-        # Join Professional and Requests tables to get requests for content uploaded by current user
-        requests = db.session.query(Requests, Professional).join(Professional, Professional.id == Requests.contentId).filter(Professional.uploaded_by_id == current_user_id).filter(Requests.response == 'Pending').all()
+        # Join Professional and Requests tables to get requests for professional uploaded by current user
+        requests = db.session.query(Requests, Professional).join(Professional, Professional.id == Requests.professionalId).filter(Professional.uploaded_by_id == current_user_id).filter(Requests.response == 'Pending').all()
 
         print(requests)
         request_list = []
-        for request, content in requests:
+        for request, professional in requests:
             request_list.append({
-                'contentId': content.id,
+                'professionalId': professional.id,
                 'userId': request.userId
             })
 
@@ -1755,21 +1755,21 @@ def get_requests():
 def get_approvals():
     try:
 
-        contents = Professional.query.filter_by(is_verified=0).all()
+        professionals = Professional.query.filter_by(is_verified=0).all()
         
         approve_list = []
-        for content in contents:
+        for professional in professionals:
             approve_list.append({
-                'id': content.id,
-                'title': content.title,
-                'prof_desc': content.prof_desc,
-                'uploaded_by_id': content.uploaded_by_id,
-                'no_of_years': content.no_of_years,
-                'date_of_birth': content.date_of_birth,
-                'file': base64.b64encode(content.file).decode('utf-8') if content.file else None,
-                'pdf_file_name': content.pdf_file_name,
-                'price': content.price,
-                'service': content.service
+                'id': professional.id,
+                'title': professional.title,
+                'prof_desc': professional.prof_desc,
+                'uploaded_by_id': professional.uploaded_by_id,
+                'no_of_years': professional.no_of_years,
+                'date_of_birth': professional.date_of_birth,
+                'file': base64.b64encode(professional.file).decode('utf-8') if professional.file else None,
+                'pdf_file_name': professional.pdf_file_name,
+                'price': professional.price,
+                'service': professional.service
             })
         return jsonify(approve_list), 200
     except Exception as e:
@@ -1859,14 +1859,14 @@ def getUserFromToken(token):
         return None
 
 
-@app.route('/create_request/<int:contentId>', methods=['POST'])
+@app.route('/create_request/<int:professionalId>', methods=['POST'])
 @jwt_required()
-def create_requests(contentId):
+def create_requests(professionalId):
     try:
         current_user_id = get_jwt_identity()
         
         existing_requests = Requests.query.filter(
-        Requests.contentId == contentId,
+        Requests.professionalId == professionalId,
         Requests.userId == current_user_id,
         Requests.response != 'Accepted',
         Requests.response != 'Rejected',
@@ -1877,7 +1877,7 @@ def create_requests(contentId):
             return jsonify({'message': 'Issue request already exists'}), 400
 
 
-        new_requests = Requests(contentId=contentId, userId=current_user_id)
+        new_requests = Requests(professionalId=professionalId, userId=current_user_id)
         db.session.add(new_requests)
         db.session.commit()
         
@@ -1890,25 +1890,25 @@ def create_requests(contentId):
 
 
 
-@app.route('/detail_view/<int:content_id>/<int:user_id>', methods=["GET"])
+@app.route('/detail_view/<int:professional_id>/<int:user_id>', methods=["GET"])
 @jwt_required()
-def detailed_view(content_id, user_id):
+def detailed_view(professional_id, user_id):
     try:
         user = User.query.get(user_id)
-        content = Professional.query.get(content_id)
+        professional = Professional.query.get(professional_id)
         
-        if user is None or content is None:
-            return jsonify({'error': 'User or content not found'}), 404
+        if user is None or professional is None:
+            return jsonify({'error': 'User or professional not found'}), 404
 
         response_data = {
             'userid': user.id,
             'username': user.uname,
             'pin': user.pin,
             'phno': user.phNumber,
-            'serviceName': Service.query.get(content.service).name,
-            'experience': content.no_of_years,
-            'desc': content.prof_desc,
-            'additionalCharges': content.price
+            'serviceName': Service.query.get(professional.service).name,
+            'experience': professional.no_of_years,
+            'desc': professional.prof_desc,
+            'additionalCharges': professional.price
         }
         
         app.logger.info("Details fetched successfully")
@@ -1918,25 +1918,25 @@ def detailed_view(content_id, user_id):
         return jsonify({'error': 'Error fetching details'}), 500    
 
 
-@app.route('/more_details/<int:content_id>/<int:user_id>', methods=["GET"])
+@app.route('/more_details/<int:professional_id>/<int:user_id>', methods=["GET"])
 @jwt_required()
-def more_details(content_id, user_id):
+def more_details(professional_id, user_id):
     try:
         user = User.query.get(user_id)
-        content = Professional.query.get(content_id)
+        professional = Professional.query.get(professional_id)
         
-        if user is None or content is None:
-            return jsonify({'error': 'User or content not found'}), 404
+        if user is None or professional is None:
+            return jsonify({'error': 'User or professional not found'}), 404
 
         response_data = {
             'userid': user.id,
             'username': user.uname,
             'pin': user.pin,
             'phno': user.phNumber,
-            'serviceName': Service.query.get(content.service).name,
-            'experience': content.no_of_years,
-            'desc': content.prof_desc,
-            'additionalCharges': content.price
+            'serviceName': Service.query.get(professional.service).name,
+            'experience': professional.no_of_years,
+            'desc': professional.prof_desc,
+            'additionalCharges': professional.price
         }
         
         app.logger.info("Details fetched successfully")
@@ -1970,33 +1970,33 @@ def all_details(user_id):
         }
 
         print("role is",user.role)
-        # If the user is a librarian, fetch content details uploaded by this user
+        # If the user is a librarian, fetch professional details uploaded by this user
         if user.role == 'LIBRARIAN':
-            content = Professional.query.filter_by(uploaded_by_id=user.id).first()
-            print(content)
-            # Check if content exists for this user
-            if content:
-                service = Service.query.get(content.service)
+            professional = Professional.query.filter_by(uploaded_by_id=user.id).first()
+            print(professional)
+            # Check if professional exists for this user
+            if professional:
+                service = Service.query.get(professional.service)
                 service_name = service.name if service else "N/A"
 
-                image_base64 = base64.b64encode(content.image).decode('utf-8') if content.image else None
-                pdf_base64 = base64.b64encode(content.file).decode('utf-8') if content.file else None
-                # Add content-related fields to response data
+                image_base64 = base64.b64encode(professional.image).decode('utf-8') if professional.image else None
+                pdf_base64 = base64.b64encode(professional.file).decode('utf-8') if professional.file else None
+                # Add professional-related fields to response data
                 response_data.update({
-                    'cid':content.id,
+                    'cid':professional.id,
                     'service': service_name,
-                    'prof_desc': content.prof_desc,
-                    'price': content.price,
-                    'no_of_years': content.no_of_years,
+                    'prof_desc': professional.prof_desc,
+                    'price': professional.price,
+                    'no_of_years': professional.no_of_years,
                     'image':image_base64,
-                    'image_type':content.imageType,
+                    'image_type':professional.imageType,
                     'pdf_file':pdf_base64,
-                    'pdf_filename':content.pdf_file_name,
-                    'date_of_birth': content.date_of_birth
+                    'pdf_filename':professional.pdf_file_name,
+                    'date_of_birth': professional.date_of_birth
                 })
             else:
-                # If no content is found, include a message
-                response_data['content'] = 'No content found for this user'
+                # If no professional is found, include a message
+                response_data['professional'] = 'No professional found for this user'
 
         return jsonify(response_data), 200
     except Exception as e:
@@ -2004,67 +2004,67 @@ def all_details(user_id):
         return jsonify({'error': 'Error fetching details'}), 500    
 
 
-@app.route("/reject_request/<int:content_id>/<int:user_id>", methods=["GET", "POST"])
+@app.route("/reject_request/<int:professional_id>/<int:user_id>", methods=["GET", "POST"])
 @jwt_required()
-def reject_request(content_id, user_id):
+def reject_request(professional_id, user_id):
     try:
-        requests = Requests.query.filter_by(contentId=content_id, userId=user_id).first()
+        requests = Requests.query.filter_by(professionalId=professional_id, userId=user_id).first()
         if requests:
             # requests.response = "Rejected"
             db.session.delete(requests)
             db.session.commit()
             return jsonify({"message": "Issue request rejected successfully"}), 200
         else:
-            app.logger.warn("Issue Request not found for the specified content and user")
+            app.logger.warn("Issue Request not found for the specified professional and user")
             return jsonify({"error": "Issue request not found"}), 404
     except Exception as e:
         app.logger.error("Error rejecting issue request", str(e))
         return jsonify({"error": "Rejecting issue request failed", "details": str(e)}), 500
 
-@app.route("/reject_approval/<int:content_id>", methods=["GET", "POST"])
+@app.route("/reject_approval/<int:professional_id>", methods=["GET", "POST"])
 @jwt_required()
-def reject_approval(content_id):
+def reject_approval(professional_id):
     try:
-        content = Professional.query.get(content_id)
-        user = User.query.get(content.uploaded_by_id)
-        if content:
-            content.is_verified = False
+        professional = Professional.query.get(professional_id)
+        user = User.query.get(professional.uploaded_by_id)
+        if professional:
+            professional.is_verified = False
             
             db.session.delete(user)
-            db.session.delete(content)
+            db.session.delete(professional)
             db.session.commit()
             return jsonify({"message": "Approval rejected successfully"}), 200
         else:
-            app.logger.warn("Approval not found for the specified content and user")
+            app.logger.warn("Approval not found for the specified professional and user")
             return jsonify({"error": "Approval not found"}), 404
     except Exception as e:
         print("ex ",e)
         app.logger.error("Error rejecting approval", str(e))
         return jsonify({"error": "Rejecting approval failed", "details": str(e)}), 500
 
-# @app.route('/download_purchase/<int:contentId>', methods=['GET'])
+# @app.route('/download_purchase/<int:professionalId>', methods=['GET'])
 # @jwt_required()
-# def download_purchase(contentId):
+# def download_purchase(professionalId):
 
 #     current_user_id = get_jwt_identity()
 
-#     content = Professional.query.get(contentId)
-#     if content is None:
+#     professional = Professional.query.get(professionalId)
+#     if professional is None:
 #         return abort(404, description="Professional not found")
 
-#     content_amount = content.price
+#     professional_amount = professional.price
 
-#     pdf_blob = content.file
+#     pdf_blob = professional.file
 
 #     pdf_bytes = BytesIO(pdf_blob)
 
-#     purchase_data = Purchase.query.filter_by(user_id=current_user_id, content_id=contentId).first()
+#     purchase_data = Purchase.query.filter_by(user_id=current_user_id, professional_id=professionalId).first()
 #     if purchase_data:
 
 #         new_transaction_log = TransactionsLog(
 #             user_id=current_user_id,
 #             action="Re-Download",
-#             content_id=contentId,
+#             professional_id=professionalId,
 #             timestamp=datetime.now(),
 #         )
 
@@ -2076,19 +2076,19 @@ def reject_approval(content_id):
     
 #     if (purchase_data == None):
 #         user = User.query.get(current_user_id)
-#         if user.account < content.price:
+#         if user.account < professional.price:
 #             app.logger.warn("Insufficient Account account")
-#             return abort(400, description="Insufficient account to purchase content")
+#             return abort(400, description="Insufficient account to purchase professional")
 
-#         user.account -= content.price
-#         new_purchase = Purchase(user_id = current_user_id, content_id = contentId, amount=content_amount)
+#         user.account -= professional.price
+#         new_purchase = Purchase(user_id = current_user_id, professional_id = professionalId, amount=professional_amount)
 #         db.session.add(new_purchase)
 #         db.session.commit()
 
 #         new_transaction_log = TransactionsLog(
 #             user_id=current_user_id,
 #             action="Bought",
-#             content_id=contentId,
+#             professional_id=professionalId,
 #             timestamp=datetime.now(),
 #         )
 
@@ -2134,7 +2134,7 @@ user_parser.add_argument("account")
 review_parser = reqparse.RequestParser()
 review_parser.add_argument("rating")
 review_parser.add_argument("comment")
-review_parser.add_argument("content_id")
+review_parser.add_argument("professional_id")
 review_parser.add_argument("user_id")
 
 
@@ -2336,7 +2336,7 @@ class ReviewApi(Resource):
                 "review_id": entry.id,
                 "rating": entry.rating,
                 "comment": entry.comment,
-                "content_id": entry.content_id,
+                "professional_id": entry.professional_id,
                 "user_id": entry.user_id,
             }
             return jsonobj
@@ -2347,15 +2347,15 @@ class ReviewApi(Resource):
         args = review_parser.parse_args()
         rating_u = args.get("rating", None)
         comment_u = args.get("comment", None)
-        content_id_u = args.get("content_id", None)
+        professional_id_u = args.get("professional_id", None)
         user_id_u = args.get("user_id", None)
-        if not all([rating_u, comment_u, content_id_u, user_id_u]):
+        if not all([rating_u, comment_u, professional_id_u, user_id_u]):
             raise CourseNameError(status_code=400, error_code="REVIEW_ERROR", error_message="Sufficient data not found")
 
         new_review = Review(
             rating=rating_u,
             comment=comment_u,
-            content_id=content_id_u,
+            professional_id=professional_id_u,
             user_id=user_id_u,
         )
         db.session.add(new_review)
@@ -2364,7 +2364,7 @@ class ReviewApi(Resource):
             "review_id": new_review.id,
             "rating": new_review.rating,
             "comment": new_review.comment,
-            "content_id": new_review.content_id,
+            "professional_id": new_review.professional_id,
             "user_id": new_review.user_id,
         }
         return jsonobj, 201
@@ -2387,7 +2387,7 @@ class ReviewApi(Resource):
             "review_id": entry.id,
             "rating": entry.rating,
             "comment": entry.comment,
-            "content_id": entry.content_id,
+            "professional_id": entry.professional_id,
             "user_id": entry.user_id,
         }
         return jsonobj, 200

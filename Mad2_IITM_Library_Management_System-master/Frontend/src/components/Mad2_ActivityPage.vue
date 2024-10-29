@@ -1,6 +1,6 @@
 <template>
     <div class="custom-container">
-        <div class="data d-flex justify-content-between">
+        <div class="data d-flex justify-professional-between">
             <h2 style="color: black;">Ongoing Services: {{ currentReaderCount }}</h2>
             <h2 style="color: black;">Total Services rendered: {{ totalReaderCount }}</h2>
             <!--<h2>Wishlist Count: {{ wishlistCount }}</h2>-->
@@ -20,7 +20,7 @@
             </thead>
             <tbody>
                 <tr v-for="(row, index) in tableData" :key="index">
-                    <td>{{ row.content_id }}</td>
+                    <td>{{ row.professional_id }}</td>
                     <td>{{ row.title }}</td>
                     <td>{{ row.uname }}</td>
                     <td>{{ row.service_name }}</td>
@@ -28,7 +28,7 @@
                     <td>{{ row.returned }}</td>
                     <td>{{ row.last_return_date }}</td>
                     <td><button class="btn btn-danger btn-sm"
-                            @click="revokeAccess(row.content_id, row.user_id)">Revoke</button></td>
+                            @click="revokeAccess(row.professional_id, row.user_id)">Revoke</button></td>
                 </tr>
             </tbody>
         </table>
@@ -46,7 +46,7 @@ export default {
     },
     data() {
         return {
-            contentId: null,
+            professionalId: null,
             tableData: [],
             currentReaderCount: 0,
             totalReaderCount: 0,
@@ -58,8 +58,8 @@ export default {
         this.fetchCounts();
     },
     methods: {
-        revokeAccess(contentId, userId) {
-            axios.post('http://127.0.0.1:5000/revoke-access', { contentId, userId },{
+        revokeAccess(professionalId, userId) {
+            axios.post('http://127.0.0.1:5000/revoke-access', { professionalId, userId },{
                 headers:{
                     Authorization: `Bearer ${sessionStorage.getItem('token')}`
                 }
@@ -74,8 +74,8 @@ export default {
                 });
         },
         fetchData() {
-            const contentId = this.$route.params.contentId;
-            const apiUrl = `http://127.0.0.1:5000/activity-data/${contentId}`;
+            const professionalId = this.$route.params.professionalId;
+            const apiUrl = `http://127.0.0.1:5000/activity-data/${professionalId}`;
 
             axios.get(apiUrl, {
                 headers: {
@@ -90,9 +90,9 @@ export default {
                 });
         },
         fetchCounts() {
-            const contentId = this.$route.params.contentId;
+            const professionalId = this.$route.params.professionalId;
 
-            axios.get(`http://127.0.0.1:5000/current-reader-count/${contentId}`, {
+            axios.get(`http://127.0.0.1:5000/current-reader-count/${professionalId}`, {
                 headers: {
                     Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                 }
@@ -105,7 +105,7 @@ export default {
                 });
 
 
-            axios.get(`http://127.0.0.1:5000/total-reader-count/${contentId}`, {
+            axios.get(`http://127.0.0.1:5000/total-reader-count/${professionalId}`, {
                 headers: {
                     Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                 }
@@ -118,7 +118,7 @@ export default {
                 });
 
 
-            // axios.get(`http://127.0.0.1:5000/wishlist-count/${contentId}`, {
+            // axios.get(`http://127.0.0.1:5000/wishlist-count/${professionalId}`, {
             //     headers: {
             //         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
             //     }

@@ -1,24 +1,24 @@
 <template>
-    <div class="content-card">
+    <div class="professional-card">
         <img :src="decodedImage" alt="Professional Image" @error="handleImageError" />
-        <div class="content-body">
+        <div class="professional-body">
             <div class="title-service">
                 <!-- <p>Title</p> -->
-                <h3>{{ content.title }}</h3>
+                <h3>{{ professional.title }}</h3>
             </div>
             <div class="details-service">
-                <p>About me: {{ content.prof_desc }}</p>
-                <p>Service Charge: {{ content.price }} </p>
-                <p>Rating: {{ !content.rating || isNaN(content.rating) ? 'N/A' : `${content.rating.toFixed(2)} / 5` }}</p>
+                <p>About me: {{ professional.prof_desc }}</p>
+                <p>Service Charge: {{ professional.price }} </p>
+                <p>Rating: {{ !professional.rating || isNaN(professional.rating) ? 'N/A' : `${professional.rating.toFixed(2)} / 5` }}</p>
             </div>
             <div class="action-buttons">
-                <!-- <button class="btn btn-primary btn-sm" @click="editContent(content.id)">
+                <!-- <button class="btn btn-primary btn-sm" @click="editProfessional(professional.id)">
                     <i class="fa-solid fa-pen"></i> Edit
                 </button> -->
-                <router-link class="btn btn-success btn-sm" :to="'/activity-data/' + content.id">
+                <router-link class="btn btn-success btn-sm" :to="'/activity-data/' + professional.id">
                     <i class="fa-solid fa-chart-line"></i> View Activity
                 </router-link>
-                <!-- <button class="btn btn-danger btn-sm" @click="confirmDeletion(content.id)">
+                <!-- <button class="btn btn-danger btn-sm" @click="confirmDeletion(professional.id)">
                     <i class="fa-solid fa-trash"></i> Delete
                 </button> -->
             </div>
@@ -47,7 +47,7 @@ export default {
         };
     },
     props: {
-        content: {
+        professional: {
             type: Object,
             required: true,
         },
@@ -57,36 +57,36 @@ export default {
         },
     },
     methods: {
-        // confirmDeletion(contentId) {
-        //     if (confirm("Are you sure you want to delete this content?")) {
-        //         this.removeContent(contentId);
+        // confirmDeletion(professionalId) {
+        //     if (confirm("Are you sure you want to delete this professional?")) {
+        //         this.removeProfessional(professionalId);
         //     }
         // },
-        getDecodedImage(content) {
-            return `data:image/${content.imageType};base64,${content.image}`;
+        getDecodedImage(professional) {
+            return `data:image/${professional.imageType};base64,${professional.image}`;
         },
         handleImageError(event) {
             console.error("Image failed to load:", event);
         },
-        navigateToActivity(contentId) {
-            this.$router.push(`/activity-data/${contentId}`);
+        navigateToActivity(professionalId) {
+            this.$router.push(`/activity-data/${professionalId}`);
         },
-        filterContentsByService(serviceId) {
-            return this.contents
-                .filter(content => content.service === serviceId)
-                .map(content => ({
-                    ...content,
-                    decodedImage: this.getDecodedImage(content),
-                    rating: this.calculateAverageRating(content.id),
+        filterProfessionalsByService(serviceId) {
+            return this.professionals
+                .filter(professional => professional.service === serviceId)
+                .map(professional => ({
+                    ...professional,
+                    decodedImage: this.getDecodedImage(professional),
+                    rating: this.calculateAverageRating(professional.id),
                 }));
         },
-        editContent(contentId) {
-            this.$router.push({ name: 'UpdateContent', params: { contentId } });
+        editProfessional(professionalId) {
+            this.$router.push({ name: 'UpdateProfessional', params: { professionalId } });
         },
-        // removeContent(contentId) {
+        // removeProfessional(professionalId) {
         //     const token = sessionStorage.getItem('token');
 
-        //     fetch(`http://127.0.0.1:5000/delete-content/${contentId}`, {
+        //     fetch(`http://127.0.0.1:5000/delete-professional/${professionalId}`, {
         //         method: 'DELETE',
         //         headers: {
         //             'Content-Type': 'application/json',
@@ -100,11 +100,11 @@ export default {
         //                 this.alertMessage = 'Professional successfully deleted.';
         //                 return response.json();
         //             } else {
-        //                 throw new Error('Failed to delete content');
+        //                 throw new Error('Failed to delete professional');
         //             }
         //         })
         //         .then(data => {
-        //             this.$emit('contentUpdated');
+        //             this.$emit('professionalUpdated');
         //             console.log(data.message);
         //         })
         //         .catch(error => {
@@ -122,7 +122,7 @@ export default {
 </script>
 
 <style scoped>
-.content-card {
+.professional-card {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -134,13 +134,13 @@ export default {
     scroll-snap-align: start;
 }
 
-.content-card img {
+.professional-card img {
     height: 180px !important;
     border-radius: 0.5rem 0.5rem 0 0;
     width: auto;
 }
 
-.content-body {
+.professional-body {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -190,7 +190,7 @@ export default {
 
 .action-buttons {
     display: flex;
-    justify-content: center;
+    justify-professional: center;
     gap: 0.5rem;
     margin-top: auto;
 }

@@ -31,7 +31,7 @@
               </button>
             </td>
             <td>
-              <router-link :to="{ name: 'MoreDetails', params: { contentId: approval.id, userId: approval.uploaded_by_id } }"
+              <router-link :to="{ name: 'MoreDetails', params: { professionalId: approval.id, userId: approval.uploaded_by_id } }"
                 class="btn btn-action btn-warning">
                 <i class="fa-solid fa-eye"></i>
               </router-link>
@@ -50,11 +50,11 @@
       };
     },
     methods: {
-      async acceptApproval(contentId) {
+      async acceptApproval(professionalId) {
         console.log("trying to accept approval");
         try {
           await this.$axios.post(
-            `http://127.0.0.1:5000/accept_approval/${contentId}`,
+            `http://127.0.0.1:5000/accept_approval/${professionalId}`,
             null,
             {
               headers: {
@@ -66,13 +66,13 @@
           console.log("Approve Request Accepted");
         } catch (error) {
 
-          console.error("Error accepting content request:", error);
+          console.error("Error accepting professional request:", error);
         }
       },
-      async rejectApproval(contentId) {
+      async rejectApproval(professionalId) {
         try {
           await this.$axios.post(
-            `http://127.0.0.1:5000/reject_approval/${contentId}`,
+            `http://127.0.0.1:5000/reject_approval/${professionalId}`,
             null,
             {
               headers: {
@@ -83,7 +83,7 @@
           this.fetchApproveRequests();
           console.log("Issue Request Rejected");
         } catch (error) {
-          console.error("Error rejecting content request:", error);
+          console.error("Error rejecting professional request:", error);
         }
       },
       async fetchApproveRequests() {

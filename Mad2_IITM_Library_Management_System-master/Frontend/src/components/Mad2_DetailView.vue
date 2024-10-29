@@ -10,8 +10,8 @@
         <p><strong>Additional charges for service:</strong> {{ userDetails.additionalCharges }} Rs.</p>
         <p><strong>Description:</strong> {{ userDetails.desc }}</p>
         <div class="d-flex">
-            <button class="btn btn-success mx-4" @click="acceptRequest(contentId, userId)">Accept</button>
-            <button class="btn btn-danger mx-4" @click="rejectRequest(contentId, userId)">Reject</button>
+            <button class="btn btn-success mx-4" @click="acceptRequest(professionalId, userId)">Accept</button>
+            <button class="btn btn-danger mx-4" @click="rejectRequest(professionalId, userId)">Reject</button>
             <router-link :to="{ name: 'RequestList'}" class="btn btn-primary mx-4"><i class="fa-solid fa-angles-left"></i></router-link>
         </div>
     </div>
@@ -22,17 +22,17 @@ export default {
     data() {
         return {
             userDetails: {},
-            contentId: null,
+            professionalId: null,
             userId: null
         }
     },
     methods: {
         async viewDetails() {
             try {
-                this.contentId = this.$route.params.contentId;
+                this.professionalId = this.$route.params.professionalId;
                 this.userId = this.$route.params.userId;
 
-                const response = await this.$axios.get(`http://127.0.0.1:5000/detail_view/${this.contentId}/${this.userId}`, {
+                const response = await this.$axios.get(`http://127.0.0.1:5000/detail_view/${this.professionalId}/${this.userId}`, {
                     headers: {
                         Authorization: `Bearer ${sessionStorage.getItem('token')}`
                     }
@@ -44,12 +44,12 @@ export default {
                 console.error('Error fetching details:', error);
             }
         },
-        async acceptRequest(contentId, userId) {
+        async acceptRequest(professionalId, userId) {
             try {
-                this.contentId = this.$route.params.contentId;
+                this.professionalId = this.$route.params.professionalId;
                 this.userId = this.$route.params.userId;
 
-                await this.$axios.post(`http://127.0.0.1:5000/accept_request/${contentId}/${userId}`, null, {
+                await this.$axios.post(`http://127.0.0.1:5000/accept_request/${professionalId}/${userId}`, null, {
                     headers: {
                         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                     },
@@ -57,15 +57,15 @@ export default {
                 this.$router.push('/request-list')
                 console.log('Issue Request Accepted');
             } catch (error) {
-                console.error('Error issuing content:', error);
+                console.error('Error issuing professional:', error);
             }
         },
-        async rejectRequest(contentId, userId) {
+        async rejectRequest(professionalId, userId) {
             try {
-                this.contentId = this.$route.params.contentId;
+                this.professionalId = this.$route.params.professionalId;
                 this.userId = this.$route.params.userId;
 
-                await this.$axios.post(`http://127.0.0.1:5000/reject_request/${contentId}/${userId}`, null, {
+                await this.$axios.post(`http://127.0.0.1:5000/reject_request/${professionalId}/${userId}`, null, {
                     headers: {
                         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                     },
@@ -73,7 +73,7 @@ export default {
                 this.$router.push('/request-list')
                 console.log('Issue Request Rejected');
             } catch (error) {
-                console.error('Error issuing content:', error);
+                console.error('Error issuing professional:', error);
             }
         },
     },
@@ -98,7 +98,7 @@ export default {
     padding-top: 2rem;
 }
 
-.modal-content {
+.modal-professional {
     background-color: #fefefe;
     margin: 10% auto;
     padding: 20px;

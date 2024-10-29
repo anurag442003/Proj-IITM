@@ -5,15 +5,15 @@
                 <h2 class="my2">{{ service.name }}</h2>
                 <h4 class="my3">Time required : {{ service.time }} hours</h4>
                 <h4 class="my3">Base Price : {{ service.baseprice }} Rs.</h4>
-                <div class="slider-content"> <!-- :isRead="content.isRead" -->
-                    <content-card v-for="content in filteredContents(service.id)"
-                                  :key="content.id"
-                                  :content="content"
-                                  :decodedImage="content.decodedImage"
-                                  :price="content.price"
-                                  :isRequested="content.isRequested"
-                                  @content-updated="updatedContent">
-                    </content-card>
+                <div class="slider-professional"> <!-- :isRead="professional.isRead" -->
+                    <professional-card v-for="professional in filteredProfessionals(service.id)"
+                                  :key="professional.id"
+                                  :professional="professional"
+                                  :decodedImage="professional.decodedImage"
+                                  :price="professional.price"
+                                  :isRequested="professional.isRequested"
+                                  @professional-updated="updatedProfessional">
+                    </professional-card>
                     <!-- additional charge plus service.price has to be made -->
                 </div>
             </div>
@@ -22,60 +22,60 @@
 </template>
 
 <script>
-import ContentCard from './Mad2_ContentCard.vue';
+import ProfessionalCard from './Mad2_ProfessionalCard.vue';
 
 export default {
     components: {
-        ContentCard,
+        ProfessionalCard,
     },
     data() {
         return {
-            contents: [],
+            professionals: [],
             services: [],
-            loadingServiceContent: false,
+            loadingServiceProfessional: false,
         };
     },
     mounted() {
-        this.fetchContents();
+        this.fetchProfessionals();
         this.fetchServices();
     },
     methods: {
-        updatedContent() {
-            this.fetchContents();
+        updatedProfessional() {
+            this.fetchProfessionals();
         },
-        filteredContents(serviceId) {
-            return this.contents
-                .filter(content => content.service === serviceId)
-                .map(content => ({
-                    ...content,
-                    decodedImage: this.getDecodedImage(content)
+        filteredProfessionals(serviceId) {
+            return this.professionals
+                .filter(professional => professional.service === serviceId)
+                .map(professional => ({
+                    ...professional,
+                    decodedImage: this.getDecodedImage(professional)
                 }));
         },
-        async fetchContents() {
+        async fetchProfessionals() {
             const token = sessionStorage.getItem('token');
             const decodedToken = this.$jwtDecode(token);
             const userId = decodedToken.id;
             
             try {
-                const response = await this.$axios.get(`http://127.0.0.1:5000/user/fetch-content/${userId}`);
-                this.contents = response.data.contents;
+                const response = await this.$axios.get(`http://127.0.0.1:5000/user/fetch-professional/${userId}`);
+                this.professionals = response.data.professionals;
             } catch (error) {
-                console.error('Error fetching user contents:', error);
+                console.error('Error fetching user professionals:', error);
             }
         },
         async fetchServices() {
-            this.loadingServiceContent = true;
+            this.loadingServiceProfessional = true;
             try {
                 const response = await this.$axios.get('http://127.0.0.1:5000/fetch-services');
                 this.services = response.data.services;
             } catch (error) {
                 console.error('Error fetching services:', error);
             } finally {
-                this.loadingServiceContent = false;
+                this.loadingServiceProfessional = false;
             }
         },
-        getDecodedImage(content) {
-            return `data:image/${content.imageType};base64, ${content.image}`;
+        getDecodedImage(professional) {
+            return `data:image/${professional.imageType};base64, ${professional.image}`;
         },
         handleImageError(event) {
             console.error("Error loading image:", event);
@@ -119,7 +119,7 @@ export default {
     border-bottom: 2px solid lightgray;
 }
 
-.slider-content {
+.slider-professional {
     overflow-x: scroll;
     scroll-snap-type: x mandatory;
     display: flex;
@@ -128,7 +128,7 @@ export default {
     padding-bottom: 1rem;
 }
 
-.slider-content::-webkit-scrollbar {
+.slider-professional::-webkit-scrollbar {
     display: none;
     width: 0;
 }

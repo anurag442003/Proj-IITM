@@ -21,7 +21,7 @@
         <div class="col-12">
           <div class="form-group">
             <label for="title">Title</label>
-            <input v-model="content.title" type="text" class="form-control" id="title" required>
+            <input v-model="professional.title" type="text" class="form-control" id="title" required>
           </div>
         </div>
       </div>
@@ -30,28 +30,28 @@
         <div class="col-7">
           <div class="form-group">
             <label for="prof_desc">Author(s)</label>
-            <input v-model="content.prof_desc" type="text" class="form-control" id="prof_desc" required>
+            <input v-model="professional.prof_desc" type="text" class="form-control" id="prof_desc" required>
           </div>
         </div>
         <div class="col-md-3">
           <div class="form-group">
             <label for="publishYear">Publish Year</label>
-            <input v-model="content.date_of_birth" type="number" class="form-control" id="publishYear" required>
+            <input v-model="professional.date_of_birth" type="number" class="form-control" id="publishYear" required>
           </div>
         </div>
         <div class="col-md-2">
           <div class="form-group">
             <label for="price">Price (in Rs.)</label>
-            <input v-model="content.price" type="number" class="form-control" id="price" required>
+            <input v-model="professional.price" type="number" class="form-control" id="price" required>
           </div>
         </div>
       </div>
 
       <div class="row">
-        <div class="col-8 d-flex align-items-center justify-content-center px-4 mx-4">
+        <div class="col-8 d-flex align-items-center justify-professional-center px-4 mx-4">
           <button type="submit" class="btn btn-primary">Update</button>
         </div>
-        <div class="col-3 d-flex align-items-center justify-content-center">
+        <div class="col-3 d-flex align-items-center justify-professional-center">
           <router-link class="btn btn-danger" to="/admin-home">Cancel</router-link>
         </div>
       </div>
@@ -65,7 +65,7 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      content: {
+      professional: {
         title: '',
         prof_desc: '',
         number_of_pages: 0,
@@ -81,37 +81,37 @@ export default {
     };
   },
   mounted() {
-    const contentId = this.$route.params.contentId;
-    if (contentId) {
-      this.fetchContentDetails(contentId);
+    const professionalId = this.$route.params.professionalId;
+    if (professionalId) {
+      this.fetchProfessionalDetails(professionalId);
     }
   },
   methods: {
-    fetchContentDetails(contentId) {
+    fetchProfessionalDetails(professionalId) {
       const token = sessionStorage.getItem('token');
 
-      axios.get(`http://127.0.0.1:5000/fetch-content-details/${contentId}`, {
+      axios.get(`http://127.0.0.1:5000/fetch-professional-details/${professionalId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       })
         .then(response => {
-          const contentDetails = response.data;
-          this.content = {
-            image: contentDetails.image,
-            title: contentDetails.title,
-            prof_desc: contentDetails.prof_desc,
-            date_of_birth: contentDetails.date_of_birth,
-            price: contentDetails.price,
-            pdf: contentDetails.pdf,
-            pdf_file_name: contentDetails.pdf_file_name,
+          const professionalDetails = response.data;
+          this.professional = {
+            image: professionalDetails.image,
+            title: professionalDetails.title,
+            prof_desc: professionalDetails.prof_desc,
+            date_of_birth: professionalDetails.date_of_birth,
+            price: professionalDetails.price,
+            pdf: professionalDetails.pdf,
+            pdf_file_name: professionalDetails.pdf_file_name,
           };
-          this.existingService = contentDetails.service;
-          this.oldImage = contentDetails.image;
-          this.oldPdf = contentDetails.pdf;
+          this.existingService = professionalDetails.service;
+          this.oldImage = professionalDetails.image;
+          this.oldPdf = professionalDetails.pdf;
         })
         .catch(error => {
-          console.error('Error fetching content details:', error);
+          console.error('Error fetching professional details:', error);
         });
     },
     getUserIdFromToken() {
@@ -122,38 +122,38 @@ export default {
     },
     handlePdfChange() {
       const file = this.$refs.pdfInput.files[0];
-      this.content.pdf = file;
+      this.professional.pdf = file;
     },
     handleImageChange() {
       const file = this.$refs.imageInput.files[0];
-      this.content.image = file;
+      this.professional.image = file;
     },
     submitForm() {
       const token = sessionStorage.getItem('token');
-      const contentId = this.$route.params.contentId;
+      const professionalId = this.$route.params.professionalId;
 
       const userId = this.getUserIdFromToken();
 
       const formData = new FormData();
-      formData.append('title', this.content.title);
-      formData.append('prof_desc', this.content.prof_desc);
-      formData.append('number_of_pages', this.content.number_of_pages);
-      formData.append('date_of_birth', this.content.date_of_birth);
-      formData.append('price', this.content.price);
+      formData.append('title', this.professional.title);
+      formData.append('prof_desc', this.professional.prof_desc);
+      formData.append('number_of_pages', this.professional.number_of_pages);
+      formData.append('date_of_birth', this.professional.date_of_birth);
+      formData.append('price', this.professional.price);
 
-      if (!this.content.image && this.oldImage) {
+      if (!this.professional.image && this.oldImage) {
         formData.append('image', this.oldImage);
-      } else if (this.content.image) {
-        formData.append('image', this.content.image);
+      } else if (this.professional.image) {
+        formData.append('image', this.professional.image);
       }
 
-      if (!this.content.pdf && this.oldPdf) {
+      if (!this.professional.pdf && this.oldPdf) {
         formData.append('pdf', this.oldPdf);
-      } else if (this.content.pdf) {
-        formData.append('pdf', this.content.pdf);
+      } else if (this.professional.pdf) {
+        formData.append('pdf', this.professional.pdf);
       }
 
-      axios.post(`http://127.0.0.1:5000/update-content/${contentId}/${userId}`, formData, {
+      axios.post(`http://127.0.0.1:5000/update-professional/${professionalId}/${userId}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,

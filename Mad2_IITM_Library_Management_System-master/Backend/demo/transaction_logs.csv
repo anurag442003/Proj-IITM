@@ -1,4 +1,4 @@
-id,user_id,action,content_id,timestamp
+id,user_id,action,professional_id,timestamp
 123,8,Accepted Request for service,21,2024-10-29T02:10:10.345384
 124,8,End service,21,2024-10-29T02:10:31.725504
 125,8,Accepted Request for service,21,2024-10-29T02:12:57.955170

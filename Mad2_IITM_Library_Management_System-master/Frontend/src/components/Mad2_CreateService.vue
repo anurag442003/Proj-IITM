@@ -11,10 +11,10 @@
         <label for="desc" class="mx-3 mb-3">Description:</label>
         <input v-model="desc" type="text" id="desc" required>
         <div class="row">
-          <div class="col-6 d-flex align-items-center justify-content-center">
+          <div class="col-6 d-flex align-items-center justify-professional-center">
             <button class="mt-4 btn btn-secondary" type="submit">Add Service</button>
           </div>
-          <div class="col-6 d-flex align-items-center justify-content-center">
+          <div class="col-6 d-flex align-items-center justify-professional-center">
             <router-link class="btn btn-danger can" to="/admin-home">Cancel</router-link>
           </div>
         </div>

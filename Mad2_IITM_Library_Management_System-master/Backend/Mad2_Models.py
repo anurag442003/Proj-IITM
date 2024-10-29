@@ -56,7 +56,7 @@ class Review(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     rating = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.String(255), nullable=False)
-    content_id = db.Column(db.Integer, db.ForeignKey('content.id', ondelete='CASCADE'), nullable=False)
+    professional_id = db.Column(db.Integer, db.ForeignKey('professional.id', ondelete='CASCADE'), nullable=False)
     # profeshional_id = db.Column(db.Integer, db.ForeignKey('profeshionalsdetails.pid'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
@@ -75,7 +75,7 @@ class Professional(db.Model):
     image = db.Column(db.LargeBinary) #prof ka profile photo
     imageType = db.Column(db.String(10)) #idec
     uploaded_by_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False) # userid
-    ratings = db.relationship('Review', backref='content', lazy=True) #exists
+    ratings = db.relationship('Review', backref='professional', lazy=True) #exists
     no_of_years = db.Column(db.Integer, nullable=False) #experience no of years
     date_of_birth = db.Column(db.Integer, nullable=False) #birthday
     file = db.Column(db.LargeBinary, nullable=False) #resume
@@ -83,19 +83,19 @@ class Professional(db.Model):
     is_verified = db.Column(db.Boolean, default=False)
     price = db.Column(db.Float, nullable=False) #additional charge
     service = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False) #servicetype
-    renderings = db.relationship('Rendering', backref='rendered_content',  cascade="all, delete-orphan") #service request backref to request
-    # wishlists = db.relationship('Wishlist', backref='wishlisted_content',  cascade="all, delete-orphan") #not needed
+    renderings = db.relationship('Rendering', backref='rendered_professional',  cascade="all, delete-orphan") #service request backref to request
+    # wishlists = db.relationship('Wishlist', backref='wishlisted_professional',  cascade="all, delete-orphan") #not needed
 
 class TransactionsLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     action = db.Column(db.String(50), nullable=False)
-    content_id = db.Column(db.Integer)
+    professional_id = db.Column(db.Integer)
     timestamp = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
 class Rendering(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    content_id = db.Column(db.Integer, db.ForeignKey('content.id', ondelete='CASCADE'), nullable=False)
+    professional_id = db.Column(db.Integer, db.ForeignKey('professional.id', ondelete='CASCADE'), nullable=False)
     member_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     render_date = db.Column(db.DateTime, default=datetime.now, nullable=False)
     returned = db.Column(db.Boolean, default=False)
@@ -106,16 +106,16 @@ class Rendering(db.Model):
 
 class Requests(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    contentId = db.Column(db.Integer, db.ForeignKey('content.id', ondelete='CASCADE'), nullable=False)
+    professionalId = db.Column(db.Integer, db.ForeignKey('professional.id', ondelete='CASCADE'), nullable=False)
     userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     response = db.Column(db.String(10), default='Pending')
 
 # class Wishlist(db.Model): #not needed
 #     id = db.Column(db.Integer, primary_key=True)
 #     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-#     content_id = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)
+#     professional_id = db.Column(db.Integer, db.ForeignKey('professional.id'), nullable=False)
 #     user = db.relationship('User', backref='wishlist_items', lazy=True)
-#     content = db.relationship('Professional', back_populates='wishlists', lazy=True, overlaps="wishlisted_content")
+#     professional = db.relationship('Professional', back_populates='wishlists', lazy=True, overlaps="wishlisted_professional")
 
 class Login(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -126,4 +126,4 @@ class Login(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)
 #     amount = db.Column(db.Integer, nullable=False)
 #     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-#     content_id = db.Column(db.Integer, db.ForeignKey('content.id'), nullable=False)
+#     professional_id = db.Column(db.Integer, db.ForeignKey('professional.id'), nullable=False)

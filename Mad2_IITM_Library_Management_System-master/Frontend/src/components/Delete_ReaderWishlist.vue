@@ -3,16 +3,16 @@
     <section class="single-container">
       <!--<h3 class="mb-4">Wishlist</h3>
       <div v-if="wishlist.length > 0">
-        <div class="slider-content">
-          <content-card v-for="(result, index) in wishlist"
+        <div class="slider-professional">
+          <professional-card v-for="(result, index) in wishlist"
                         :key="index"
-                        :content="result"
+                        :professional="result"
                         :isRequested="result.isRequested"
                         :is-read="result.isRead"
                         :isIssued="result.isIssued"
                         :decodedImage="getDecodedImage(result)"
-                        @content-updated="updatedContent">
-          </content-card>
+                        @professional-updated="updatedProfessional">
+          </professional-card>
         </div>
       </div>
       <div v-else>
@@ -23,11 +23,11 @@
 </template>
 
 <script>
-import ContentCard from './Mad2_ContentCard.vue';
+import ProfessionalCard from './Mad2_ProfessionalCard.vue';
 
 export default {
   components: {
-    ContentCard,
+    ProfessionalCard,
   },
   data() {
     return {
@@ -39,7 +39,7 @@ export default {
     this.fetchUserWishlist(userId);
   },
   methods: {
-    updatedContent() {
+    updatedProfessional() {
       const userId = this.$route.params.userId;
       this.fetchUserWishlist(userId);
     },
@@ -56,8 +56,8 @@ export default {
         console.error('Error fetching wishlist:', error);
       }
     },
-    getDecodedImage(content) {
-      const decodedImage = `data:image/${content.imageType};base64, ${content.image}`;
+    getDecodedImage(professional) {
+      const decodedImage = `data:image/${professional.imageType};base64, ${professional.image}`;
       return decodedImage;
     },
   },
@@ -83,7 +83,7 @@ export default {
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 
-.slider-content {
+.slider-professional {
   overflow-x: scroll;
   scroll-snap-type: x mandatory;
   display: flex;
@@ -92,7 +92,7 @@ export default {
   padding-bottom: 1rem;
 }
 
-.slider-content::-webkit-scrollbar {
+.slider-professional::-webkit-scrollbar {
   display: none;
   width: 0;
 }

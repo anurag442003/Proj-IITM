@@ -1,6 +1,6 @@
 <template>
   <nav class="navbar navbar-expand-lg bg-white border-bottom border-body" data-bs-theme="light">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
+    <div class="container-fluid d-flex justify-professional-between align-items-center">
       <div class="d-flex align-items-center">
         <!-- <a class="navbar-brand" href="#">
           <img src="../assets/logo/Mad2_logo.png" class="logo" alt="Logo">
@@ -15,7 +15,7 @@
           <i class="fa-solid fa-house px-3 py-2 my-2 profile-link"></i>
         </router-link>
       </div>
-      <div class="d-flex justify-content-center search" v-if="loggedIn && (role === 'ADMIN' ||  role === 'READER')">
+      <div class="d-flex justify-professional-center search" v-if="loggedIn && (role === 'ADMIN' ||  role === 'READER')">
         <form class="d-flex" @submit.prevent="search">
           <div class="input-group position-relative">
             <input v-model="searchQuery" class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
@@ -33,7 +33,7 @@
           <router-link :to="{ name: 'Activate' }" v-if="loggedIn && role === 'ADMIN'">
             <i class="fa-solid fas fa-users px-3 py-2 profile-link"></i>
           </router-link>
-          <router-link :to="{ name: 'Comments', params: { contentId: userId } }" v-if="loggedIn && role === 'LIBRARIAN'">
+          <router-link :to="{ name: 'Comments', params: { professionalId: userId } }" v-if="loggedIn && role === 'LIBRARIAN'">
             <i class="fa-solid fas fa-users px-3 py-2 profile-link"></i>
           </router-link>
         </div>

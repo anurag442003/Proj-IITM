@@ -9,10 +9,10 @@
                 <label for="serviceBaseprice" class="my-4">Service Base Price:</label>
                 <input v-model="serviceBaseprice" type="text" id="serviceBaseprice" required>
                 <div class="row mt-4">
-                    <div class="col-6 d-flex align-items-center justify-content-center">
+                    <div class="col-6 d-flex align-items-center justify-professional-center">
                         <button class="btn btn-secondary" type="submit">Update</button>
                     </div>
-                    <div class="col-6 d-flex align-items-center justify-content-center">
+                    <div class="col-6 d-flex align-items-center justify-professional-center">
                         <router-link class="btn btn-danger" to="/admin-home">Cancel</router-link>
                     </div>
                 </div>

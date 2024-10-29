@@ -13,19 +13,19 @@
         <tbody>
           <tr v-for="request in issueRequests" :key="request.id">
             <td>{{ request.userId }}</td>
-            <td>{{ request.contentId }}</td>
+            <td>{{ request.professionalId }}</td>
             <td>
-              <button class="btn btn-action btn-success" @click="acceptRequest(request.contentId, request.userId)">
+              <button class="btn btn-action btn-success" @click="acceptRequest(request.professionalId, request.userId)">
                 Accept
               </button>
             </td>
             <td>
-              <button class="btn btn-action btn-danger" @click="rejectRequest(request.contentId, request.userId)">
+              <button class="btn btn-action btn-danger" @click="rejectRequest(request.professionalId, request.userId)">
                 Reject
               </button>
             </td>
             <td>
-              <router-link :to="{ name: 'DetailView', params: { contentId: request.contentId, userId: request.userId } }"
+              <router-link :to="{ name: 'DetailView', params: { professionalId: request.professionalId, userId: request.userId } }"
                 class="btn btn-action btn-warning">
                 <i class="fa-solid fa-eye"></i>
               </router-link>
@@ -44,10 +44,10 @@
       };
     },
     methods: {
-      async acceptRequest(contentId, userId) {
+      async acceptRequest(professionalId, userId) {
         try {
           await this.$axios.post(
-            `http://127.0.0.1:5000/accept_request/${contentId}/${userId}`,
+            `http://127.0.0.1:5000/accept_request/${professionalId}/${userId}`,
             null,
             {
               headers: {
@@ -58,13 +58,13 @@
           this.fetchIssueRequests();
           console.log("Issue Request Accepted");
         } catch (error) {
-          console.error("Error accepting content request:", error);
+          console.error("Error accepting professional request:", error);
         }
       },
-      async rejectRequest(contentId, userId) {
+      async rejectRequest(professionalId, userId) {
         try {
           await this.$axios.post(
-            `http://127.0.0.1:5000/reject_request/${contentId}/${userId}`,
+            `http://127.0.0.1:5000/reject_request/${professionalId}/${userId}`,
             null,
             {
               headers: {
@@ -75,7 +75,7 @@
           this.fetchIssueRequests();
           console.log("Issue Request Rejected");
         } catch (error) {
-          console.error("Error rejecting content request:", error);
+          console.error("Error rejecting professional request:", error);
         }
       },
       async fetchIssueRequests() {

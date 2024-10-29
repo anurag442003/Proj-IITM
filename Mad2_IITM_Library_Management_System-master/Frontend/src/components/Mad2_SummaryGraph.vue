@@ -78,7 +78,7 @@ export default {
     margin: 60px auto;
     color: rgba(13, 230, 129, 0.95);
     display: flex;
-    justify-content: center;
+    justify-professional: center;
     gap: 3rem;
     flex-wrap: wrap;
 }

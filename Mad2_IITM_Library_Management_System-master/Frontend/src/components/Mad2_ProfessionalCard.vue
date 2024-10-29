@@ -1,42 +1,42 @@
 <template>
-    <div class="content">
-        <!-- <button v-if="isLoggedIn()" class="btn btn-sm btn-light top-btn" @click="confirmPurchase(content.id)">
+    <div class="professional">
+        <!-- <button v-if="isLoggedIn()" class="btn btn-sm btn-light top-btn" @click="confirmPurchase(professional.id)">
             <i class="fa-solid fa-download"></i>
         </button> -->
         <img :src="decodedImage" alt="Professional Image" @error="handleImageError" />
         <div class="body">
             <div class="title-holder">
                 <!-- <p>Title</p> -->
-                <h3>{{ content.title }}</h3>
-                <p>About me: {{ content.prof_desc }}</p>
-                <p>Service Charge: {{ content.price }} </p>
+                <h3>{{ professional.title }}</h3>
+                <p>About me: {{ professional.prof_desc }}</p>
+                <p>Service Charge: {{ professional.price }} </p>
 
             </div>
             <div class="bottom-area">
-                <p>Rating: {{ !content.rating || isNaN(content.rating) ? 'N/A' : `${content.rating.toFixed(2)} / 5` }}</p>
+                <p>Rating: {{ !professional.rating || isNaN(professional.rating) ? 'N/A' : `${professional.rating.toFixed(2)} / 5` }}</p>
             </div>
-            <div class="text-center" v-if="content.isIssued">
-                <router-link :to="{ name: 'RateContent', params: { contentId: content.id } }" class="btn btn-warning btn-sm">
+            <div class="text-center" v-if="professional.isIssued">
+                <router-link :to="{ name: 'RateProfessional', params: { professionalId: professional.id } }" class="btn btn-warning btn-sm">
                     Rate <i class="fa-regular fa-star"></i>
                 </router-link>
             </div>
             <div class="button-grid">
-                <button v-if="!content.isIssued && !content.isRequested " class="btn btn-primary btn-sm" @click="createRequest(content.id)">
+                <button v-if="!professional.isIssued && !professional.isRequested " class="btn btn-primary btn-sm" @click="createRequest(professional.id)">
                     <i class="fa-solid fa-book"></i> Request
                 </button>
-                <div v-if="content.isRequested && !content.isIssued" class="btn btn-secondary btn-sm">
+                <div v-if="professional.isRequested && !professional.isIssued" class="btn btn-secondary btn-sm">
                     <i class="fa-solid fa-hourglass-start"></i> Waiting
                 </div>
-                <!-- <button v-show="content.isIssued" class="btn btn-primary btn-sm" @click="openContent(content.id)">
+                <!-- <button v-show="professional.isIssued" class="btn btn-primary btn-sm" @click="openProfessional(professional.id)">
                     <i class="fa-brands fa-readme"></i> Read
                 </button> -->
-                <button v-show="content.isIssued" class="btn btn-danger btn-sm" @click="returnContent(content.id)">
+                <button v-show="professional.isIssued" class="btn btn-danger btn-sm" @click="returnProfessional(professional.id)">
                     <i class="fa-solid fa-rotate-left"></i> End service
                 </button>
                 <!--<button class="btn btn-light btn-sm"
-                        @click="toggleWishlist(content.id, content.isWishlisted)"
-                        :class="{ 'btn-danger': content.isWishlisted, 'btn-warning': !content.isWishlisted }">
-                    <i class="fa-regular fa-heart" :class="{ 'fas': content.isWishlisted }"></i> Wishlist
+                        @click="toggleWishlist(professional.id, professional.isWishlisted)"
+                        :class="{ 'btn-danger': professional.isWishlisted, 'btn-warning': !professional.isWishlisted }">
+                    <i class="fa-regular fa-heart" :class="{ 'fas': professional.isWishlisted }"></i> Wishlist
                 </button>-->
             </div>
         </div>
@@ -46,7 +46,7 @@
 <script>
 export default {
     props: {
-        content: {
+        professional: {
             type: Object,
             required: true,
         },
@@ -56,32 +56,32 @@ export default {
         },
     },
     methods: {
-        // confirmPurchase(contentId) {
-        //     if (confirm("Are you sure you want to purchase/download this content?")) {
-        //         this.buyDownload(contentId);
+        // confirmPurchase(professionalId) {
+        //     if (confirm("Are you sure you want to purchase/download this professional?")) {
+        //         this.buyDownload(professionalId);
         //     }
         // },
-        async createRequest(contentId) {
+        async createRequest(professionalId) {
             if (!this.isLoggedIn()) {
                 this.$router.push('/login');
                 return;
             }
 
             try {
-                await this.$axios.post(`http://127.0.0.1:5000/create_request/${contentId}`, null, {
+                await this.$axios.post(`http://127.0.0.1:5000/create_request/${professionalId}`, null, {
                     headers: {
                         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                     },
                 });
-                this.$emit('contentUpdated');
+                this.$emit('professionalUpdated');
                 console.log('Request created successfully.');
             } catch (error) {
                 console.error('Error creating request:', error);
             }
         },
-        async openContent(contentId) {
+        async openProfessional(professionalId) {
             try {
-                const response = await fetch(`http://127.0.0.1:5000/get_pdf/${contentId}`, {
+                const response = await fetch(`http://127.0.0.1:5000/get_pdf/${professionalId}`, {
                     headers: {
                         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                     },
@@ -92,22 +92,22 @@ export default {
 
                 window.open(pdfUrl, '_blank');
             } catch (error) {
-                console.error('Error opening content:', error);
+                console.error('Error opening professional:', error);
             }
         },
-        async returnContent(contentId) {
+        async returnProfessional(professionalId) {
             try {
-                await this.$axios.post(`http://127.0.0.1:5000/return_content/${contentId}`, null, {
+                await this.$axios.post(`http://127.0.0.1:5000/return_professional/${professionalId}`, null, {
                     headers: {
                         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                     },
                 });
-                this.$emit('contentUpdated');
+                this.$emit('professionalUpdated');
             } catch (error) {
-                console.error('Error returning content:', error);
+                console.error('Error returning professional:', error);
             }
         },
-        // async toggleWishlist(contentId, isInWishlist) {
+        // async toggleWishlist(professionalId, isInWishlist) {
         //     if (!this.isLoggedIn()) {
         //         this.$router.push('/login');
         //         return;
@@ -115,27 +115,27 @@ export default {
 
         //     try {
         //         const endpoint = isInWishlist ? 'remove' : 'add';
-        //         const response = await this.$axios.post(`http://127.0.0.1:5000/wishlist/${endpoint}/${contentId}`, null, {
+        //         const response = await this.$axios.post(`http://127.0.0.1:5000/wishlist/${endpoint}/${professionalId}`, null, {
         //             headers: {
         //                 Authorization: `Bearer ${sessionStorage.getItem('token')}`,
         //             },
         //         });
 
-        //         this.$emit('contentUpdated');
+        //         this.$emit('professionalUpdated');
 
         //         console.log(response.data);
         //     } catch (error) {
         //         console.error('Error toggling wishlist:', error);
         //     }
         // },
-        // async buyDownload(contentId) {
+        // async buyDownload(professionalId) {
         //     if (!this.isLoggedIn()) {
         //         this.$router.push('/login');
         //         return;
         //     }
 
         //     try {
-        //         const response = await this.$axios.get(`http://127.0.0.1:5000/download_purchase/${contentId}`, {
+        //         const response = await this.$axios.get(`http://127.0.0.1:5000/download_purchase/${professionalId}`, {
         //             responseType: 'blob',
         //             headers: {
         //                 Authorization: `Bearer ${sessionStorage.getItem('token')}`,
@@ -147,14 +147,14 @@ export default {
 
         //         const link = document.createElement('a');
         //         link.href = url;
-        //         link.setAttribute('download', `${this.content.pdf_file_name}`);
+        //         link.setAttribute('download', `${this.professional.pdf_file_name}`);
         //         document.body.appendChild(link);
         //         link.click();
 
         //         window.URL.revokeObjectURL(url);
         //         document.body.removeChild(link);
         //     } catch (error) {
-        //         console.error('Error purchasing and downloading content:', error);
+        //         console.error('Error purchasing and downloading professional:', error);
         //     }
         // },
         handleImageError(event) {
@@ -168,7 +168,7 @@ export default {
 </script>
 
 <style scoped>
-.content {
+.professional {
     position: relative;
     display: flex;
     flex-direction: column;
@@ -182,13 +182,13 @@ export default {
     scroll-snap-align: start;
 }
 
-.content img {
+.professional img {
     height: 180px !important;
     border-radius: 0.5rem 0.5rem 0 0;
     width: auto;
 }
 
-.content .body {
+.professional .body {
     display: flex;
     flex-direction: column;
     row-gap: 0.5rem;
@@ -225,7 +225,7 @@ export default {
 .bottom-area {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
+    justify-professional: flex-start;
     row-gap: 0.25rem;
     width: 100%;
 }
@@ -240,7 +240,7 @@ export default {
 .button-grid {
     gap: 0.5rem;
     display: flex;
-    justify-content: center;
+    justify-professional: center;
     margin-top: auto;
 }
 

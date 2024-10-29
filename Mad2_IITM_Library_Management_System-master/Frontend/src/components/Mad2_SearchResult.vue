@@ -3,15 +3,15 @@
     <section class="single-container">
       <div v-if="searchResults && searchResults.length > 0">
         <h3 class="mb-4">Professional Results</h3>
-        <div class="slider-content">
+        <div class="slider-professional">
           <component 
-            :is="userRole === 'ADMIN' ? 'admin-content-card' : 'content-card'" 
+            :is="userRole === 'ADMIN' ? 'admin-professional-card' : 'professional-card'" 
             v-for="(result, index) in searchResults" 
             :key="index" 
-            :content="result"
+            :professional="result"
             :decodedImage="getDecodedImage(result)"
             v-bind="getComponentProps(result)"
-            @content-updated="updatedContent">
+            @professional-updated="updatedProfessional">
           </component>
         </div>
       </div>
@@ -23,12 +23,12 @@
 </template>
 
 <script>
-import ContentCard from './Mad2_ContentCard.vue'
-import AdminContentCard from './Mad2_AdminContentCard.vue'
+import ProfessionalCard from './Mad2_ProfessionalCard.vue'
+import AdminProfessionalCard from './Mad2_AdminProfessionalCard.vue'
 export default {
   components: {
-    ContentCard,
-    AdminContentCard,
+    ProfessionalCard,
+    AdminProfessionalCard,
   },
   data() {
     return {
@@ -52,7 +52,7 @@ export default {
     }
   },
   methods: {
-    updatedContent() {
+    updatedProfessional() {
       this.fetchSearchResults()
     },
     async fetchSearchResults() {
@@ -97,8 +97,8 @@ export default {
         isRead: result.isRead
       };
     },
-    getDecodedImage(content) {
-      const decodedImage = `data:image/${content.imageType};base64, ${content.image}`;
+    getDecodedImage(professional) {
+      const decodedImage = `data:image/${professional.imageType};base64, ${professional.image}`;
       return decodedImage;
     }
   }
@@ -124,7 +124,7 @@ export default {
   box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 
-.slider-content {
+.slider-professional {
   overflow-x: scroll;
   scroll-snap-type: x mandatory;
   display: flex;
@@ -133,7 +133,7 @@ export default {
   padding-bottom: 1rem;
 }
 
-.slider-content::-webkit-scrollbar {
+.slider-professional::-webkit-scrollbar {
   display: none;
   width: 0;
 }

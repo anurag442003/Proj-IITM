@@ -26,13 +26,13 @@ export default {
   data() {
     return {
       reviews: [],
-      contentId: null
+      professionalId: null
     };
   },
   methods: {
     async fetchAllComments() {
       try {
-        const response = await this.$axios.get(`http://127.0.0.1:5000/get_all_comments/${this.contentId}`, {
+        const response = await this.$axios.get(`http://127.0.0.1:5000/get_all_comments/${this.professionalId}`, {
           headers: {
             Authorization: `Bearer ${sessionStorage.getItem("token")}`
           }
@@ -44,7 +44,7 @@ export default {
     }
   },
   mounted() {
-    this.contentId = this.$route.params.contentId;
+    this.professionalId = this.$route.params.professionalId;
     this.fetchAllComments();
   }
 };

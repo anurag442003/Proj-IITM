@@ -17,7 +17,7 @@
                     <td>{{ log.user_id }}</td>
                     <td>{{ log.action }}</td>
                     <td>{{ formatDate(log.timestamp) }}</td>
-                    <td>{{ log.content_id }}</td>
+                    <td>{{ log.professional_id }}</td>
                 </tr>
             </tbody>
         </table>

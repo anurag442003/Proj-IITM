@@ -195,7 +195,7 @@ box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 
 .slider:before {
   position: absolute;
-  content: "";
+  professional: "";
   height: 14px;
   width: 14px;
   border-radius: 50%;
