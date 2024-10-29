@@ -3,7 +3,6 @@ import AboutUs from '../components/AboutUs.vue';
 import AdminHome from '../components/AdminHome.vue';
 import UsersHome from '../components/Mad2_UsersHome.vue';
 import ProfessionalsHome from '../components/Mad2_ProfessionalsHome.vue';
-import AddProf from '../components/Mad2_AddProf.vue';
 import RenderProf from '../components/Mad2_RenderProf.vue';
 import CreateService from '../components/Mad2_CreateService.vue';
 import LoginPage from '../components/Mad2_LoginPage.vue';
@@ -38,7 +37,6 @@ const routes = [
   { path: '/admin-home', name: 'AdminHome', component: AdminHome, meta: { requiresAuth: true } },
   { path: '/get_all_comments/:professionalId', name: 'Comments', component: Comments, meta: { requiresAuth: true } },
   { path: '/about', name: 'AboutUs', component: AboutUs },
-  { path: '/addprof', name: 'AddProf', component: AddProf, meta: { requiresAuth: true } },
   { path: '/renderprof', name: 'RenderProf', component: RenderProf, meta: { requiresAuth: true } },
   { path: '/activity-data/:professionalId', name: 'ActivityPage', component: ActivityPage, meta: { requiresAuth: true } },
   { path: '/request-list', name: 'RequestList', component: RequestList, meta: { requiresAuth: true } },
