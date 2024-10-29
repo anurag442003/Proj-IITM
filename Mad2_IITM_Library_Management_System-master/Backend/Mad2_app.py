@@ -336,7 +336,7 @@ def get_all_section_names():
 
 
         sections_list = [
-            {"id": section.id, "name": section.name} for section in sections
+            {"id": section.id, "name": section.name, "price":section.price} for section in sections
         ]
 
         app.logger.info("Fetched Section Names")

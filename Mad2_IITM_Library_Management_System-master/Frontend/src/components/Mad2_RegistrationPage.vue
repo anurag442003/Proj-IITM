@@ -124,7 +124,7 @@
             <label for="serviceType" class="form-label">Section:</label>
             <select v-model="userData.serviceType" class="form-select" required>
               <option v-for="section in sections" :key="section.id" :value="section.id">
-                {{ section.name }}
+                {{ section.name }} - ({{ section.price}}Rs.)
               </option>
             </select>
           </div>
