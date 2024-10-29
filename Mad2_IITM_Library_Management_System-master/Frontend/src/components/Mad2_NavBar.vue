@@ -5,10 +5,10 @@
         <!-- <a class="navbar-brand" href="#">
           <img src="../assets/logo/Mad2_logo.png" class="logo" alt="Logo">
         </a> -->
-        <router-link :to="{ name: 'RequestList' }" v-if="loggedIn && role === 'LIBRARIAN'">
+        <router-link :to="{ name: 'RequestList' }" v-if="loggedIn && role === 'PROFESSIONAL'">
           <i class="fa-solid fa-house px-3 py-2 my-2 profile-link"></i>
         </router-link>
-        <router-link :to="{ name: 'ReaderHome' }" v-if="loggedIn && role === 'READER'">
+        <router-link :to="{ name: 'UsersHome' }" v-if="loggedIn && role === 'READER'">
           <i class="fa-solid fa-house px-3 py-2 my-2 profile-link"></i>
         </router-link>
         <router-link :to="{ name: 'AdminHome' }" v-if="loggedIn && role === 'ADMIN'">
@@ -24,22 +24,19 @@
         </form>
       </div>
       <div class="profile d-flex">
-        <div class="librarian mx-4">
+        <div class="professionals mx-4">
           <router-link :to="{ name: 'Approve' }" v-if="loggedIn && role === 'ADMIN'">
             <i class="fa-solid fas fa-handshake px-3 py-2 profile-link"></i>
           </router-link>
         </div> 
-        <div class="librarian mx-4">
+        <div class="professionals mx-4">
           <router-link :to="{ name: 'Activate' }" v-if="loggedIn && role === 'ADMIN'">
             <i class="fa-solid fas fa-users px-3 py-2 profile-link"></i>
           </router-link>
-          <router-link :to="{ name: 'Comments', params: { professionalId: userId } }" v-if="loggedIn && role === 'LIBRARIAN'">
+          <router-link :to="{ name: 'Comments', params: { professionalId: userId } }" v-if="loggedIn && role === 'PROFESSIONAL'">
             <i class="fa-solid fas fa-users px-3 py-2 profile-link"></i>
           </router-link>
         </div>
-        <!-- <router-link :to="{ name: 'ReaderWishlist', params: { userId: userId } }" v-if="loggedIn && role === 'READER'">
-          <i class="fa-solid fa-clipboard-list px-3 py-2 profile-link"></i>
-        </router-link> -->
         <router-link :to="{ name: 'UserProfile', params: { userId: userId } }" v-if="loggedIn">
           <i class="fa-regular fa-user-circle mx-4 px-2 py-2 profile-link"></i>
         </router-link>

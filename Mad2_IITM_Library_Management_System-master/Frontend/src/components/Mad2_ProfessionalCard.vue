@@ -1,8 +1,5 @@
 <template>
     <div class="professional">
-        <!-- <button v-if="isLoggedIn()" class="btn btn-sm btn-light top-btn" @click="confirmPurchase(professional.id)">
-            <i class="fa-solid fa-download"></i>
-        </button> -->
         <img :src="decodedImage" alt="Professional Image" @error="handleImageError" />
         <div class="body">
             <div class="title-holder">
@@ -33,11 +30,6 @@
                 <button v-show="professional.isIssued" class="btn btn-danger btn-sm" @click="returnProfessional(professional.id)">
                     <i class="fa-solid fa-rotate-left"></i> End service
                 </button>
-                <!--<button class="btn btn-light btn-sm"
-                        @click="toggleWishlist(professional.id, professional.isWishlisted)"
-                        :class="{ 'btn-danger': professional.isWishlisted, 'btn-warning': !professional.isWishlisted }">
-                    <i class="fa-regular fa-heart" :class="{ 'fas': professional.isWishlisted }"></i> Wishlist
-                </button>-->
             </div>
         </div>
     </div>
@@ -56,11 +48,6 @@ export default {
         },
     },
     methods: {
-        // confirmPurchase(professionalId) {
-        //     if (confirm("Are you sure you want to purchase/download this professional?")) {
-        //         this.buyDownload(professionalId);
-        //     }
-        // },
         async createRequest(professionalId) {
             if (!this.isLoggedIn()) {
                 this.$router.push('/login');
@@ -107,56 +94,6 @@ export default {
                 console.error('Error returning professional:', error);
             }
         },
-        // async toggleWishlist(professionalId, isInWishlist) {
-        //     if (!this.isLoggedIn()) {
-        //         this.$router.push('/login');
-        //         return;
-        //     }
-
-        //     try {
-        //         const endpoint = isInWishlist ? 'remove' : 'add';
-        //         const response = await this.$axios.post(`http://127.0.0.1:5000/wishlist/${endpoint}/${professionalId}`, null, {
-        //             headers: {
-        //                 Authorization: `Bearer ${sessionStorage.getItem('token')}`,
-        //             },
-        //         });
-
-        //         this.$emit('professionalUpdated');
-
-        //         console.log(response.data);
-        //     } catch (error) {
-        //         console.error('Error toggling wishlist:', error);
-        //     }
-        // },
-        // async buyDownload(professionalId) {
-        //     if (!this.isLoggedIn()) {
-        //         this.$router.push('/login');
-        //         return;
-        //     }
-
-        //     try {
-        //         const response = await this.$axios.get(`http://127.0.0.1:5000/download_purchase/${professionalId}`, {
-        //             responseType: 'blob',
-        //             headers: {
-        //                 Authorization: `Bearer ${sessionStorage.getItem('token')}`,
-        //             },
-        //         });
-
-        //         const blob = new Blob([response.data], { type: 'application/pdf' });
-        //         const url = window.URL.createObjectURL(blob);
-
-        //         const link = document.createElement('a');
-        //         link.href = url;
-        //         link.setAttribute('download', `${this.professional.pdf_file_name}`);
-        //         document.body.appendChild(link);
-        //         link.click();
-
-        //         window.URL.revokeObjectURL(url);
-        //         document.body.removeChild(link);
-        //     } catch (error) {
-        //         console.error('Error purchasing and downloading professional:', error);
-        //     }
-        // },
         handleImageError(event) {
             console.error("Error loading image:", event);
         },

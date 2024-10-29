@@ -84,8 +84,7 @@ class Professional(db.Model):
     price = db.Column(db.Float, nullable=False) #additional charge
     service = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False) #servicetype
     renderings = db.relationship('Rendering', backref='rendered_professional',  cascade="all, delete-orphan") #service request backref to request
-    # wishlists = db.relationship('Wishlist', backref='wishlisted_professional',  cascade="all, delete-orphan") #not needed
-
+    
 class TransactionsLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -110,20 +109,9 @@ class Requests(db.Model):
     userId = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     response = db.Column(db.String(10), default='Pending')
 
-# class Wishlist(db.Model): #not needed
-#     id = db.Column(db.Integer, primary_key=True)
-#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-#     professional_id = db.Column(db.Integer, db.ForeignKey('professional.id'), nullable=False)
-#     user = db.relationship('User', backref='wishlist_items', lazy=True)
-#     professional = db.relationship('Professional', back_populates='wishlists', lazy=True, overlaps="wishlisted_professional")
 
 class Login(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     last_login_time = db.Column(db.DateTime, default=datetime.now, nullable=False)
 
-# class Purchase(db.Model): 
-#     id = db.Column(db.Integer, primary_key=True)
-#     amount = db.Column(db.Integer, nullable=False)
-#     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-#     professional_id = db.Column(db.Integer, db.ForeignKey('professional.id'), nullable=False)

@@ -9,7 +9,7 @@
         </div>
         <div class="row cus-btn mb-2">
             <button class="col-4 btn btn-success" @click="submitRating()">Submit Rating</button>
-            <router-link class="col-4 btn btn-danger" to="/reader-home">Cancel</router-link>
+            <router-link class="col-4 btn btn-danger" to="/users-home">Cancel</router-link>
         </div>
     </div>
 </template>
@@ -58,7 +58,7 @@ export default {
                         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                     },
                 });
-                this.$router.push({ name: 'ReaderHome' }); 
+                this.$router.push({ name: 'UsersHome' }); 
 
             } catch (error) {
                 console.error('Error rating professional:', error);

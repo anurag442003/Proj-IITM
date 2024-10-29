@@ -48,12 +48,12 @@ export default {
               this.$router.push("/admin-home").then(() => {
                 window.location.reload();
               });
-            } else if (user && user.role === "LIBRARIAN") {
+            } else if (user && user.role === "PROFESSIONAL") {
               this.$router.push("/request-list").then(() => {
                 window.location.reload();
               });
             } else if (user && user.role === "READER") {
-              this.$router.push("/reader-home").then(() => {
+              this.$router.push("/users-home").then(() => {
                 window.location.reload();
               });
             }

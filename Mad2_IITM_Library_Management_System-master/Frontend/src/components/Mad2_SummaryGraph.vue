@@ -2,7 +2,7 @@
     <div class="custom-container d-flex">
         <div class="graph">
             <h2>Services offered per type</h2>
-            <img ref="serviceChart" class="service-chart" alt="Service Reader Count">
+            <img ref="serviceChart" class="service-chart" alt="Service Users Count">
         </div>
         <div class="graph">
             <h2>Professional gender distribution</h2>
@@ -17,11 +17,11 @@ export default {
         return {
             serviceData: [],
             serviceNames: [],
-            readerCounts: [],
+            usersCounts: [],
         };
     },
     methods: {
-        async fetchReaderCountPerService() {
+        async fetchUsersCountPerService() {
             try {
                 const response = await fetch('http://127.0.0.1:5000/count_per_service', {
                     method: 'GET',
@@ -39,13 +39,13 @@ export default {
                 this.$refs.serviceChart.src = url;
                 console.log('Service Chart loaded');
                 setTimeout(() => {
-                    this.fetchReaderCountGender();
+                    this.fetchUsersCountGender();
                 }, 0);
             } catch (error) {
                 console.error('Error fetching data:', error);
             }
         },
-        async fetchReaderCountGender() {
+        async fetchUsersCountGender() {
             try {
                 const response = await fetch('http://127.0.0.1:5000/user_count_gender', {
                     method: 'GET',
@@ -68,7 +68,7 @@ export default {
         },
     },
     created() {
-        this.fetchReaderCountPerService();
+        this.fetchUsersCountPerService();
     },
 };
 </script>

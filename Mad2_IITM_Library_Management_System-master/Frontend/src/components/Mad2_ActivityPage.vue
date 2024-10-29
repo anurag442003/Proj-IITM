@@ -1,9 +1,8 @@
 <template>
     <div class="custom-container">
         <div class="data d-flex justify-professional-between">
-            <h2 style="color: black;">Ongoing Services: {{ currentReaderCount }}</h2>
-            <h2 style="color: black;">Total Services rendered: {{ totalReaderCount }}</h2>
-            <!--<h2>Wishlist Count: {{ wishlistCount }}</h2>-->
+            <h2 style="color: black;">Ongoing Services: {{ currentUsersCount }}</h2>
+            <h2 style="color: black;">Total Services rendered: {{ totalUsersCount }}</h2>
         </div>
         <table class="table table-striped table-bordered">
             <thead class="thead-dark">
@@ -48,9 +47,8 @@ export default {
         return {
             professionalId: null,
             tableData: [],
-            currentReaderCount: 0,
-            totalReaderCount: 0,
-            // wishlistCount: 0
+            currentUsersCount: 0,
+            totalUsersCount: 0,
         };
     },
     mounted() {
@@ -92,43 +90,33 @@ export default {
         fetchCounts() {
             const professionalId = this.$route.params.professionalId;
 
-            axios.get(`http://127.0.0.1:5000/current-reader-count/${professionalId}`, {
+            axios.get(`http://127.0.0.1:5000/current-users-count/${professionalId}`, {
                 headers: {
                     Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                 }
             })
                 .then(response => {
-                    this.currentReaderCount = response.data.currentReaderCount;
+                    this.currentUsersCount = response.data.currentUsersCount;
                 })
                 .catch(error => {
-                    console.error('Error fetching current reader count:', error);
+                    console.error('Error fetching current users count:', error);
                 });
 
 
-            axios.get(`http://127.0.0.1:5000/total-reader-count/${professionalId}`, {
+            axios.get(`http://127.0.0.1:5000/total-users-count/${professionalId}`, {
                 headers: {
                     Authorization: `Bearer ${sessionStorage.getItem('token')}`,
                 }
             })
                 .then(response => {
-                    this.totalReaderCount = response.data.totalReaderCount;
+                    this.totalUsersCount = response.data.totalUsersCount;
                 })
                 .catch(error => {
-                    console.error('Error fetching total reader count:', error);
+                    console.error('Error fetching total users count:', error);
                 });
 
 
-            // axios.get(`http://127.0.0.1:5000/wishlist-count/${professionalId}`, {
-            //     headers: {
-            //         Authorization: `Bearer ${sessionStorage.getItem('token')}`,
-            //     }
-            // })
-            //     .then(response => {
-            //         this.wishlistCount = response.data.wishlistCount;
-            //     })
-            //     .catch(error => {
-            //         console.error('Error fetching wishlist count:', error);
-            //     });
+            
         },
     },
 };

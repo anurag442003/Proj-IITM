@@ -1,8 +1,8 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import AboutUs from '../components/AboutUs.vue';
 import AdminHome from '../components/AdminHome.vue';
-import ReaderHome from '../components/Mad2_ReaderHome.vue';
-import LibrarianHome from '../components/Mad2_LibrarianHome.vue';
+import UsersHome from '../components/Mad2_UsersHome.vue';
+import ProfessionalsHome from '../components/Mad2_ProfessionalsHome.vue';
 import AddProf from '../components/Mad2_AddProf.vue';
 import RenderProf from '../components/Mad2_RenderProf.vue';
 import CreateService from '../components/Mad2_CreateService.vue';
@@ -15,7 +15,6 @@ import UpdateService from '../components/Mad2_UpdateService.vue';
 import UploadProfessional from '../components/Mad2_UploadProfessional.vue';
 import HomePage from '../components/Mad2_HomePage.vue';
 import UserProfile from '../components/Mad2_UserProfile.vue';
-// import ReaderWishlist from '../components/Mad2_ReaderWishlist.vue';
 import Approve from '../components/Mad2_Approve.vue';
 import Activate from '../components/Mad2_Activate.vue';
 import RateProfessional from '../components/Mad2_RateProfessional.vue';
@@ -31,14 +30,13 @@ const routes = [
   { path: '/', name: 'home', component: HomePage },
   { path: '/userprofile/:userId', name: 'UserProfile', component: UserProfile, meta: { requiresAuth: true } },
   { path: '/rate/:professionalId', name: 'RateProfessional', component: RateProfessional, props: true, meta: { requiresAuth: true } },
-  // { path: '/wishlist/:userId', name: 'ReaderWishlist', component: ReaderWishlist, meta: { requiresAuth: true } },
-  { path: '/reader-home', name: 'ReaderHome', component: ReaderHome, meta: { requiresAuth: true } },
+  { path: '/users-home', name: 'UsersHome', component: UsersHome, meta: { requiresAuth: true } },
   { path: '/approve', name: 'Approve', component: Approve, meta: { requiresAuth: true } },
   { path: '/activate', name: 'Activate', component: Activate, meta: { requiresAuth: true } },
   { path: '/detail_view/:professionalId/:userId', name: 'DetailView', component: DetailView, meta: { requiresAuth: true } },
   { path: '/all_details/:userId', name: 'AllDetails', component: AllDetails, meta: { requiresAuth: true } },
   { path: '/more_details/:professionalId/:userId', name: 'MoreDetails', component: MoreDetails, meta: { requiresAuth: true } },
-  { path: '/librarian-home', name: 'LibrarianHome', component: LibrarianHome, meta: { requiresAuth: true } },
+  { path: '/professionals-home', name: 'ProfessionalsHome', component: ProfessionalsHome, meta: { requiresAuth: true } },
   { path: '/admin-home', name: 'AdminHome', component: AdminHome, meta: { requiresAuth: true } },
   { path: '/get_all_comments/:professionalId', name: 'Comments', component: Comments, meta: { requiresAuth: true } },
   { path: '/about', name: 'AboutUs', component: AboutUs },

@@ -85,14 +85,14 @@
             <input v-model="userData.role" type="radio" class="btn-check" name="btnradio" id="btnradio1" value="READER">
             <label class="btn btn-outline-primary" for="btnradio1"><b>READER</b></label>
 
-            <input v-model="userData.role" type="radio" class="btn-check" name="btnradio" id="btnradio2" value="LIBRARIAN">
-            <label class="btn btn-outline-success" for="btnradio2"><b>LIBRARIAN</b></label>
+            <input v-model="userData.role" type="radio" class="btn-check" name="btnradio" id="btnradio2" value="PROFESSIONAL">
+            <label class="btn btn-outline-success" for="btnradio2"><b>PROFESSIONAL</b></label>
           </div>
         </div>
       </div>
 
-      <!-- Additional fields for Librarian -->
-      <div v-if="userData.role === 'LIBRARIAN'">
+      <!-- Additional fields for Professional -->
+      <div v-if="userData.role === 'PROFESSIONAL'">
         <div class="row">
           <div class="col-md-3 mb-3">
             <label for="experience" class="form-label">Experience (in years):</label>

@@ -57,7 +57,7 @@
                     <button type="submit" class="btn btn-primary">Upload</button>
                 </div>
                 <div class="col-3 d-flex align-items-center justify-professional-center">
-                    <router-link class="btn btn-danger" to="/librarian-home">Cancel</router-link>
+                    <router-link class="btn btn-danger" to="/professionals-home">Cancel</router-link>
                 </div>
             </div>
         </form>

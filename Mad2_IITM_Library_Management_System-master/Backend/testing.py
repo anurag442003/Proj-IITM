@@ -44,7 +44,7 @@ from Mad2_app import revoke_access, create_csv, monthly_report, deactivate_user
 
 class Config:
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///Mad2_TheWisdom.db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///Mad2_HHservice.db'
     JWT_SECRET_KEY = '22f1000362'
     JWT_ACCESS_TOKEN_EXPIRES = 7200
     JWT_BLACKLIST_ENABLED = True

@@ -161,7 +161,7 @@ export default {
       })
         .then(response => {
           console.log(response.data);
-          this.$router.push('/librarian-home');
+          this.$router.push('/professionals-home');
         })
         .catch(error => {
           console.error('Error:', error);

@@ -16,8 +16,8 @@
             <p class="role-tag"><strong>Role:</strong> {{ userDetails.role }}</p>
         </div>
 
-        <!-- Librarian Details -->
-        <div v-if="userDetails.role === 'LIBRARIAN'" class="details-card">
+        <!-- Professional Details -->
+        <div v-if="userDetails.role === 'PROFESSIONAL'" class="details-card">
             <h2 class="card-title">Professional Details</h2>
             <div class="info-grid">
                 <p><strong>Service Type:</strong> {{ userDetails.service }}</p>

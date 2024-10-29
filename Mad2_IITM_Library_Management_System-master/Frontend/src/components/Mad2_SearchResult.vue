@@ -41,8 +41,8 @@ export default {
     const token = sessionStorage.getItem('token');
     const user = this.$jwtDecode(token);
     const userRole = user.role;
-    if (userRole === 'LIBRARIAN') {
-      this.isLibrarian = true;
+    if (userRole === 'PROFESSIONAL') {
+      this.isProfessional = true;
     }
     await this.fetchSearchResults();
   },

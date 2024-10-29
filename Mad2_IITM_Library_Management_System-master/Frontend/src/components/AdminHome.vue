@@ -5,7 +5,7 @@
                 <div class="service-head">
                     <h2 class="my2">{{ service.name }}</h2>
                     <h4 class="my3">Time required : {{ service.time }} hours</h4>
-                    <h4 class="my3">  Base Price : {{ service.baseprice }} Rs.</h4>
+                    <h4 class="my3">  - Base Price : {{ service.baseprice }} Rs.</h4>
                     <div class="service-btn">
                         <router-link :to="'/update-service/' + service.id" class="btn btn-sm btn-primary"><i class="fa-regular fa-pen-to-square"></i></router-link>
                         <!-- <router-link :to="'/upload-professional/' + service.id" class="btn btn-sm btn-success"><i class="fa-solid fa-plus"></i></router-link> -->
@@ -55,9 +55,6 @@ export default {
                         if (professional.isRead) {
                             this.$store.dispatch('setProfessionalRead', { professionalId: professional.id, isRead: true });
                         }
-                        // if (professional.isWishlisted) {
-                        //     this.$store.dispatch('toggleProfessionalWishlist', { professionalId: professional.id, isWishlisted: true });
-                        // }
                     });
                 })
                 .catch(error => {

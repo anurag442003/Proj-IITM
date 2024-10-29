@@ -42,7 +42,7 @@ from celery.result import AsyncResult
 
 class Config:
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///Mad2_HHservices.db'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///Mad2_HHservice.db'
     JWT_SECRET_KEY = '22f1000362'
     JWT_ACCESS_TOKEN_EXPIRES = 7200
     JWT_BLACKLIST_ENABLED = True
@@ -106,10 +106,10 @@ celery = make_celery(app)
 celery.conf.broker_connection_retry_on_startup = True
 
 celery.conf.beat_schedule = {
-    # 'send_email-inactive': {
-    #     'task': 'send_email',
-    #     'schedule': crontab(minute="*/3"),
-    # },
+    'send_email-inactive': {
+        'task': 'send_email',
+        'schedule': crontab(minute="*/3"),
+    },
     'monthly_report': {
         'task': 'monthly_report',
         'schedule': crontab(minute="*/3")
@@ -124,24 +124,24 @@ celery.conf.beat_schedule = {
     }
 }
 
-# @celery.task(name="send_email")
-# def desert_user():
-#     print("trying to send mail")
-#     threshold_time = datetime.now() - timedelta(minutes=1)
-#     inactive_users = User.query.join(Login).filter(Login.last_login_time < threshold_time).all()
-#     print(inactive_users)
-#     for user in inactive_users:
-#         print("inactive users are ",user.email)
-#         subject = 'Reminder: Log in to HH Household Services App'
-#         body = f'Dear {user.fname},\n\nThis is a reminder to log in to HH Household Services App'
-#         sender = "noreply@hhapp.com"
-#         msg = Message(subject, sender=sender, recipients=[user.email], body=body)
-#         try:
-#             print("mail on the way")
-#             mail.send(msg)
-#         except Exception as e:
-#             print(f"Failed Sending Email: {e}")
-#             logging.error(f"Failed Sending Email to {user.email}: {e}")
+@celery.task(name="send_email")
+def desert_user():
+    print("trying to send mail")
+    threshold_time = datetime.now() - timedelta(minutes=1)
+    inactive_users = User.query.join(Login).filter(Login.last_login_time < threshold_time).all()
+    print(inactive_users)
+    for user in inactive_users:
+        print("inactive users are ",user.email)
+        subject = 'Reminder: Log in to HH Household Services App'
+        body = f'Dear {user.fname},\n\nThis is a reminder to log in to HH Household Services App'
+        sender = "noreply@hhapp.com"
+        msg = Message(subject, sender=sender, recipients=[user.email], body=body)
+        try:
+            print("mail on the way")
+            mail.send(msg)
+        except Exception as e:
+            print(f"Failed Sending Email: {e}")
+            logging.error(f"Failed Sending Email to {user.email}: {e}")
 
 @celery.task(name="monthly_report")
 def monthly_report():
@@ -248,7 +248,7 @@ def login():
             if user.is_active == True:
               
 
-                if user.role == 'LIBRARIAN':
+                if user.role == 'PROFESSIONAL':
                     professional = Professional.query.filter_by(uploaded_by_id=user.id).first()
                       
                 if bcrypt.check_password_hash(user.password, data["password"]):
@@ -275,7 +275,7 @@ def login():
                         identity=user.id, additional_claims=additional_claims
                     )
 
-                    if user.role == 'LIBRARIAN' and professional.is_verified == False:
+                    if user.role == 'PROFESSIONAL' and professional.is_verified == False:
                         print("not verif")
                         app.logger.warning("Professional hasnt been verfied yet")
                         return jsonify({"error": "Professional hasnt been verfied yet"}), 401
@@ -338,6 +338,7 @@ def get_all_service_names():
         services_list = [
             {"id": service.id, "name": service.name, "price":service.baseprice} for service in services
         ]
+        print("services lists is",services_list)
 
         app.logger.info("Fetched Service Names")
         return jsonify({"services": services_list})
@@ -383,7 +384,7 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
-        if data["role"] == 'LIBRARIAN':
+        if data["role"] == 'PROFESSIONAL':
             user_from_db = User.query.filter_by(uname=data["username"]).first()
             userid = user_from_db.id
 
@@ -612,44 +613,6 @@ def add_professional(service_id, user_id):
         app.logger.error("Error Adding Professional", str(e))
         return jsonify({"message": f"Error adding professional: {str(e)}"}), 500
 
-# 3. Wishlist
-# @app.route("/wishlist/add/<int:professional_id>", methods=["POST"])
-# @jwt_required()
-# def add_to_wishlist(professional_id):
-#     try:
-#         current_user_id = get_jwt_identity()
-
-#         existing_wishlist_item = Wishlist.query.filter_by(
-#             professional_id=professional_id, user_id=current_user_id
-#         ).first()
-
-#         if existing_wishlist_item:
-#             app.logger.warn("Professional Already In Wishlist")
-#             return jsonify({"error": "Professional is already in the wishlist"}), 400
-
-#         new_wishlist_item = Wishlist(professional_id=professional_id, user_id=current_user_id)
-#         db.session.add(new_wishlist_item)
-
-#         new_transaction_log = TransactionsLog(
-#             user_id=current_user_id,
-#             action="+ Wishlist",
-#             professional_id=professional_id,
-#             timestamp=datetime.now(),
-#         )
-#         db.session.add(new_transaction_log)
-
-#         db.session.commit()
-
-#         app.logger.info("Professional Wishlisted Successfully")
-#         return jsonify({"message": "Professional added to wishlist successfully"}), 200
-#     except Exception as e:
-#         app.logger.error("Professional Wishlisting Failed", str(e))
-#         return (
-#             jsonify({"error": "Failed to add professional to wishlist", "details": str(e)}),
-#             500,
-#         )
-
-
 
 #Fetch
 # 1. Services
@@ -674,7 +637,7 @@ def get_all_services():
 def fetch_professional():
     try:
         professionals = Professional.query.all()
-        user = User.query.filter_by(is_active = 1, role = 'LIBRARIAN').all()
+        user = User.query.filter_by(is_active = 1, role = 'PROFESSIONAL').all()
 
         userids = [u.id for u in user]
         formatted_professionals = []
@@ -724,7 +687,7 @@ def fetch_InDemand_professionals():
             .order_by(func.avg(Review.rating).desc()) \
             .limit(15) \
             .all()
-        user = User.query.filter_by(is_active = 1, role = 'LIBRARIAN').all()
+        user = User.query.filter_by(is_active = 1, role = 'PROFESSIONAL').all()
 
         userids = [u.id for u in user]
         serialized_professionals = []
@@ -760,10 +723,6 @@ def fetch_user_professional(user_id):
                 Rendering,
                 (Rendering.professional_id == Professional.id) & (Rendering.member_id == user_id),
             )
-            # .outerjoin(
-            #     Wishlist,
-            #     (Wishlist.professional_id == Professional.id) & (Wishlist.user_id == user_id),
-            # )
             .outerjoin(Review, Review.professional_id == Professional.id)
             .outerjoin(
                 Requests,
@@ -781,14 +740,13 @@ def fetch_user_professional(user_id):
                 Professional.image,
                 Rendering.returned.label("returned"),
                 Rendering.id.label("rendering_id"),
-                # Wishlist.id.label("wishlist_id"),
                 Requests.response.label("isRequested"),
             )
             .group_by(Professional.id)
             .all()
         )
 
-        user = User.query.filter_by(is_active = 1, role = 'LIBRARIAN').all()
+        user = User.query.filter_by(is_active = 1, role = 'PROFESSIONAL').all()
 
         userids = [u.id for u in user]
         print("userids ",userids)
@@ -806,7 +764,6 @@ def fetch_user_professional(user_id):
                         "imageType": professional.imageType,
                         "image": base64.b64encode(professional.image).decode("utf-8"),
                         "isIssued": professional.rendering_id is not None and not professional.returned,
-                        # "isWishlisted": professional.wishlist_id is not None,
                         "isRead": professional.rendering_id is not None,
                         "isRequested": professional.isRequested == 'Pending' if professional.isRequested else False
                     }
@@ -881,96 +838,6 @@ def delete_service(service_id):
     except Exception as e:
         app.logger.error("Error Deleting Service", str(e))
         return jsonify({"error": "Service deletion failed", "Reasons": str(e)}), 500
-
-# 2. Professional
-# @app.route("/delete-professional/<int:professional_id>", methods=["DELETE"])
-# @jwt_required()
-# def delete_professional(professional_id):
-#     try:
-#         professional = Professional.query.get(professional_id)
-#         if not professional:
-#             app.logger.warning("Professional not found: %s", professional_id)
-#             return jsonify({"error": "Professional not found"}), 404
-
-#         app.logger.info("Professional found: %s", professional_id)
-
-#         # try:
-#         #     related_wishlist_items = Wishlist.query.filter_by(professional_id=professional_id).all()
-#         #     app.logger.info("Found %d related wishlist items", len(related_wishlist_items))
-#         #     for wishlist_item in related_wishlist_items:
-#         #         db.session.delete(wishlist_item)
-#         # except Exception as e:
-#         #     app.logger.error("Error deleting wishlist items: %s", str(e))
-#         #     return jsonify({"error": "Failed to delete wishlist items", "details": str(e)}), 500
-
-#         try:
-#             related_review_items = Review.query.filter_by(professional_id=professional_id).all()
-#             app.logger.info("Found %d related review items", len(related_review_items))
-#             for review_item in related_review_items:
-#                 db.session.delete(review_item)
-#         except Exception as e:
-#             app.logger.error("Error deleting review items: %s", str(e))
-#             return jsonify({"error": "Failed to delete review items", "details": str(e)}), 500
-#         try:
-#             related_rendering_items = Rendering.query.filter_by(professional_id=professional_id).all()
-#             app.logger.info("Found %d related rendering items", len(related_rendering_items))
-#             for render_item in related_rendering_items:
-#                 db.session.delete(render_item)
-#         except Exception as e:
-#             app.logger.error("Error deleting rendering items: %s", str(e))
-#             return jsonify({"error": "Failed to delete rendering items", "details": str(e)}), 500
-
-#         try:
-#             db.session.delete(professional)
-#             db.session.commit()
-#         except Exception as e:
-#             app.logger.error("Error deleting professional: %s", str(e))
-#             return jsonify({"error": "Failed to delete professional", "details": str(e)}), 500
-
-#         app.logger.info("Professional and related items deleted successfully")
-#         return jsonify({"message": "Professional and related items deleted successfully"}), 200
-
-#     except Exception as e:
-#         app.logger.error("Unexpected error: %s", str(e))
-#         return jsonify({"error": "Professional deletion failed", "details": str(e)}), 500
-
-# 3. Wishlist
-# @app.route("/wishlist/remove/<int:professional_id>", methods=["POST"])
-# @jwt_required()
-# def remove_from_wishlist(professional_id):
-#     try:
-#         current_user_id = get_jwt_identity()
-
-#         wishlist_item = Wishlist.query.filter_by(
-#             professional_id=professional_id, user_id=current_user_id
-#         ).first()
-
-#         if not wishlist_item:
-#             app.logger.warn("Professional Not Found In Wishlisted")
-#             return jsonify({"error": "Professional not found in the wishlist"}), 404
-
-#         db.session.delete(wishlist_item)
-
-#         new_transaction_log = TransactionsLog(
-#             user_id=current_user_id,
-#             action="- Wishlist",
-#             professional_id=professional_id,
-#             timestamp=datetime.now(),
-#         )
-#         db.session.add(new_transaction_log)
-
-#         db.session.commit()
-
-#         app.logger.info("Professional Removed From Wishlist Successfully")
-#         return jsonify({"message": "Professional removed from wishlist successfully"}), 200
-#     except Exception as e:
-#         app.logger.error("Error Removing Professional From Wishlist", str(e))
-#         return (
-#             jsonify(
-#                 {"error": "Failed to remove professional from wishlist", "details": str(e)}
-#             ),
-#             500,
-#         )
 
 
 #GET
@@ -1172,40 +1039,30 @@ def get_activity_data(professional_id):
         return jsonify({"error": str(e)}), 500
     
 
-@app.route('/current-reader-count/<int:professional_id>', methods=['GET'])
+@app.route('/current-users-count/<int:professional_id>', methods=['GET'])
 @jwt_required()
-def current_reader_count(professional_id):
+def current_users_count(professional_id):
     try:
         current_count = Rendering.query.filter_by(professional_id=professional_id, returned=False).distinct(Rendering.member_id).count()
-        app.logger.info("Current Reader Count Fetched")
-        return jsonify({'currentReaderCount': current_count}), 200
+        app.logger.info("Current Users Count Fetched")
+        return jsonify({'currentUsersCount': current_count}), 200
     except Exception as e:
         app.logger.error("Error Fetching CRC", str(e))
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/total-reader-count/<int:professional_id>', methods=['GET'])
+@app.route('/total-users-count/<int:professional_id>', methods=['GET'])
 @jwt_required()
-def total_reader_count(professional_id):
+def total_users_count(professional_id):
     try:
         total_count = Rendering.query.filter_by(professional_id=professional_id).distinct(Rendering.member_id).count()
-        app.logger.info("Total Reader Count Fetched")
-        return jsonify({'totalReaderCount': total_count}), 200
+        app.logger.info("Total Users Count Fetched")
+        return jsonify({'totalUsersCount': total_count}), 200
     except Exception as e:
         app.logger.error("Error Fetching TRC", str(e))
         return jsonify({'error': str(e)}), 500
 
 
-# @app.route('/wishlist-count/<int:professional_id>', methods=['GET'])
-# @jwt_required()
-# def wishlist_count(professional_id):
-#     try:
-#         count = Wishlist.query.filter_by(professional_id=professional_id).count()
-#         app.logger.info("Wishlist Count Fetched")
-#         return jsonify({'wishlistCount': count}), 200
-#     except Exception as e:
-#         app.logger.error("Error Fetching WC", str(e))
-#         return jsonify({'error': str(e)}), 500
 
 @app.route("/accept_request/<int:professional_id>/<int:user_id>", methods=["POST"])
 @jwt_required()
@@ -1562,8 +1419,8 @@ def count_per_service():
 @jwt_required()
 def user_count_gender():
     
-    male_count = User.query.filter_by(role='LIBRARIAN', gender='male').count()
-    female_count = User.query.filter_by(role='LIBRARIAN', gender='female').count()
+    male_count = User.query.filter_by(role='PROFESSIONAL', gender='male').count()
+    female_count = User.query.filter_by(role='PROFESSIONAL', gender='female').count()
 
     # Check for zero counts to avoid issues with empty data
     if male_count == 0 and female_count == 0:
@@ -1585,7 +1442,7 @@ def user_count_gender():
     plt.clf()
     plt.close()
 
-    app.logger.info("Gender Based Reader Count Chart Fetched")
+    app.logger.info("Gender Based Users Count Chart Fetched")
     return send_file(buffer, mimetype='image/png')
     
 
@@ -1600,23 +1457,23 @@ def search_result():
         current_user = User.query.get(current_user_id)
         if current_user:
             current_user_role = current_user.role
-            if current_user_role == 'LIBRARIAN':
+            if current_user_role == 'PROFESSIONAL':
                 return jsonify({
                     'results': [],
                     'userRole': current_user_role
                 })
 
-    librarian_users = User.query.filter(
+    professionals_users = User.query.filter(
         User.is_active == 1, 
-        User.role == "LIBRARIAN",
+        User.role == "PROFESSIONAL",
         (User.city.ilike(f'%{query}%')) | (User.state.ilike(f'%{query}%'))
     ).all()
 
-    uploaded_by_ids = [user.id for user in librarian_users]
+    uploaded_by_ids = [user.id for user in professionals_users]
     
-    librarian_professional_results = Professional.query.filter(Professional.uploaded_by_id.in_(uploaded_by_ids))
+    professionals_professional_results = Professional.query.filter(Professional.uploaded_by_id.in_(uploaded_by_ids))
     professional_results = Professional.query.filter(Professional.title.ilike(f'%{query}%'))
-    results = librarian_professional_results.union(professional_results).all()
+    results = professionals_professional_results.union(professional_results).all()
 
     formatted_professional_results = []
     for professional in results:
@@ -1672,59 +1529,7 @@ def search_result():
         'results': formatted_professional_results,
         'userRole': current_user_role
     })
-# @app.route('/wishlist/<int:user_id>', methods=['GET'])
-# @jwt_required()
-# def get_user_wishlist(user_id):
-#     try:
-#         current_user_id = get_jwt_identity()
-        
-#         wishlist_items = Wishlist.query.filter_by(user_id=user_id).all()
-#         wishlist = []
 
-#         for item in wishlist_items:
-#             professional = Professional.query.get(item.professional_id)
-
-#             image_data = professional.image
-#             image_base64 = base64.b64encode(image_data).decode('utf-8') if image_data else None
-
-#             is_read = False
-#             if current_user_id:
-#                 rendering = Rendering.query.filter_by(professional_id=professional.id, member_id=current_user_id).first()
-#                 is_read = bool(rendering)
-
-#             is_wishlisted = False
-#             if current_user_id:
-#                 wishlist_item = Wishlist.query.filter_by(user_id=current_user_id, professional_id=professional.id).first()
-#                 is_wishlisted = bool(wishlist_item)
-
-#             is_issued = False
-#             if current_user_id:
-#                 issued = Rendering.query.filter_by(member_id=current_user_id, professional_id=professional.id, returned=False).first()
-#                 is_issued = bool(issued)
-
-#             is_requested = False
-#             if current_user_id:
-#                 request = Requests.query.filter_by(professionalId=professional.id, userId=current_user_id, response='Pending').first()
-#                 is_requested = bool(request)
-
-#             wishlist.append({
-#                 'id': professional.id,
-#                 'title': professional.title,
-#                 'prof_desc': professional.prof_desc,
-#                 'image': image_base64,
-#                 'number_of_pages': professional.no_of_years,
-#                 'date_of_birth': professional.date_of_birth,
-#                 'isRead': is_read,
-#                 'isIssued': is_issued,
-#                 'isWishlisted': is_wishlisted,
-#                 'isRequested': is_requested
-#             })
-
-#         app.logger.info("User Wishlist Fetched")
-#         return jsonify({'wishlist': wishlist}), 200
-#     except Exception as e:
-#         app.logger.error("Error Fetching User Wishlist: %s", str(e))
-#         return jsonify({'error': str(e)}), 500
 
 @app.route('/fetch_requests', methods=['GET'])
 @jwt_required()
@@ -1970,8 +1775,8 @@ def all_details(user_id):
         }
 
         print("role is",user.role)
-        # If the user is a librarian, fetch professional details uploaded by this user
-        if user.role == 'LIBRARIAN':
+        # If the user is a professionals, fetch professional details uploaded by this user
+        if user.role == 'PROFESSIONAL':
             professional = Professional.query.filter_by(uploaded_by_id=user.id).first()
             print(professional)
             # Check if professional exists for this user
@@ -2041,66 +1846,6 @@ def reject_approval(professional_id):
         print("ex ",e)
         app.logger.error("Error rejecting approval", str(e))
         return jsonify({"error": "Rejecting approval failed", "details": str(e)}), 500
-
-# @app.route('/download_purchase/<int:professionalId>', methods=['GET'])
-# @jwt_required()
-# def download_purchase(professionalId):
-
-#     current_user_id = get_jwt_identity()
-
-#     professional = Professional.query.get(professionalId)
-#     if professional is None:
-#         return abort(404, description="Professional not found")
-
-#     professional_amount = professional.price
-
-#     pdf_blob = professional.file
-
-#     pdf_bytes = BytesIO(pdf_blob)
-
-#     purchase_data = Purchase.query.filter_by(user_id=current_user_id, professional_id=professionalId).first()
-#     if purchase_data:
-
-#         new_transaction_log = TransactionsLog(
-#             user_id=current_user_id,
-#             action="Re-Download",
-#             professional_id=professionalId,
-#             timestamp=datetime.now(),
-#         )
-
-#         db.session.add(new_transaction_log)
-
-#         db.session.commit()
-#         app.logger.info("PDF File Sent For Download - Already Paid")
-#         return send_file(pdf_bytes, as_attachment=True, mimetype='application/pdf', download_name="Prof.pdf")
-    
-#     if (purchase_data == None):
-#         user = User.query.get(current_user_id)
-#         if user.account < professional.price:
-#             app.logger.warn("Insufficient Account account")
-#             return abort(400, description="Insufficient account to purchase professional")
-
-#         user.account -= professional.price
-#         new_purchase = Purchase(user_id = current_user_id, professional_id = professionalId, amount=professional_amount)
-#         db.session.add(new_purchase)
-#         db.session.commit()
-
-#         new_transaction_log = TransactionsLog(
-#             user_id=current_user_id,
-#             action="Bought",
-#             professional_id=professionalId,
-#             timestamp=datetime.now(),
-#         )
-
-#         db.session.add(new_transaction_log)
-
-#         db.session.commit()
-
-#         app.logger.info("PDF File Sent For Download - Paid Now")
-#         return send_file(pdf_bytes, as_attachment=True, mimetype='application/pdf', download_name="Prof.pdf")
-
-#     app.logger.error("Error Purchasing Professional")
-#     return abort(403, description="Professional not purchased")
 
 
 
