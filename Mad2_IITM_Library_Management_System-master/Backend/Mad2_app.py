@@ -42,15 +42,15 @@ from celery.result import AsyncResult
 
 class Config:
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///Mad2_TheWisdom.db'
-    JWT_SECRET_KEY = '23f1001674'
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///Mad2_HHservices.db'
+    JWT_SECRET_KEY = '22f1000362'
     JWT_ACCESS_TOKEN_EXPIRES = 7200
     JWT_BLACKLIST_ENABLED = True
     JWT_BLACKLIST_TOKEN_CHECKS = ['access', 'refresh']
     broker = 'redis://localhost:6379/0'
     result_backend = 'redis://localhost:6379/0'
     MAIL_SERVER = 'localhost'
-    MAIL_PORT = 25
+    MAIL_PORT = 1025
     MAIL_USE_TLS = False
     MAIL_USE_SSL = False
     MAIL_USERNAME = None
@@ -103,12 +103,13 @@ def make_celery(app):
     return celery
 
 celery = make_celery(app)
+celery.conf.broker_connection_retry_on_startup = True
 
 celery.conf.beat_schedule = {
-    'send_email-inactive': {
-        'task': 'send_email',
-        'schedule': crontab(minute="*/3"),
-    },
+    # 'send_email-inactive': {
+    #     'task': 'send_email',
+    #     'schedule': crontab(minute="*/3"),
+    # },
     'monthly_report': {
         'task': 'monthly_report',
         'schedule': crontab(minute="*/3")
@@ -117,29 +118,30 @@ celery.conf.beat_schedule = {
         'task': 'revoke_access',
         'schedule': crontab(minute="*/3")
     },
-    'delete_rej_issue': {
-        'task': 'delete_rejected_issue_requests',
+    'deactivated_user': {
+        'task': 'deactivated_user',
         'schedule': crontab(minute="*/3")
     }
 }
 
-@celery.task(name="send_email")
-def desert_user():
-    print("trying to send mail")
-    threshold_time = datetime.now() - timedelta(minutes=1)
-    inactive_users = User.query.join(Login).filter(Login.last_login_time < threshold_time).all()
-    print(inactive_users)
-    for user in inactive_users:
-        print("inactive users are ",user.email)
-        subject = 'Reminder: Log in to HH Household Services App'
-        body = f'Dear {user.fname},\n\nThis is a reminder to log in to HH Household Services App'
-        sender = "noreply@gmail.com"
-        msg = Message(subject, sender=sender, recipients=[user.email], body=body)
-        try:
-            print("mail on the way")
-            mail.send(msg)
-        except Exception as e:
-            print(f"Failed Sending Email: {e}")
+# @celery.task(name="send_email")
+# def desert_user():
+#     print("trying to send mail")
+#     threshold_time = datetime.now() - timedelta(minutes=1)
+#     inactive_users = User.query.join(Login).filter(Login.last_login_time < threshold_time).all()
+#     print(inactive_users)
+#     for user in inactive_users:
+#         print("inactive users are ",user.email)
+#         subject = 'Reminder: Log in to HH Household Services App'
+#         body = f'Dear {user.fname},\n\nThis is a reminder to log in to HH Household Services App'
+#         sender = "noreply@hhapp.com"
+#         msg = Message(subject, sender=sender, recipients=[user.email], body=body)
+#         try:
+#             print("mail on the way")
+#             mail.send(msg)
+#         except Exception as e:
+#             print(f"Failed Sending Email: {e}")
+#             logging.error(f"Failed Sending Email to {user.email}: {e}")
 
 @celery.task(name="monthly_report")
 def monthly_report():
@@ -147,8 +149,7 @@ def monthly_report():
         all_users = User.query.all()
         for user in all_users:
             active_services = Borrowing.query.filter_by(member_id=user.id, returned=False).count()
-            # wishlist_items_count = len(user.wishlist_items)
-            total_services = Borrowing.query.filter(member_id=user.id).count()
+            total_services = Borrowing.query.filter_by(member_id=user.id).count()
 
             pdf_buffer = BytesIO()
             c = canvas.Canvas(pdf_buffer)
@@ -156,6 +157,10 @@ def monthly_report():
             c.drawString(100, 730, "Active Services: {}".format(active_services))
             c.drawString(100, 710, "Total Services: {}".format(total_services))
             c.save()
+
+            pdf_file_path = os.path.join('C:\\Users\\agnel\\Downloads\\Proj-IITM\\Mad2_IITM_Library_Management_System-master\\Backend\\demo', f"monthly_report_{user.id}.pdf")
+            with open(pdf_file_path, 'wb') as f:
+                f.write(pdf_buffer.getvalue())
 
             sender = "noreply@hhapp.com"
             msg = Message("Monthly Report", sender=sender, recipients=[user.email])
@@ -174,21 +179,23 @@ def revoke_access():
         borrowing.is_read = True
     db.session.commit()
 
-@celery.task(name="delete_rejected_issue_requests")
-def delete_rejected_issue_requests():
+@celery.task(name="deactivated_user")
+def deactivated_user():
     try:
-        rejected_issue_requests = Requests.query.filter_by(response="Rejected").all()
-        for issue_request in rejected_issue_requests:
-            db.session.delete(issue_request)
-        db.session.commit()
+        users = User.query.filter_by(is_active=False).all()
+        for user in users:
+            sender = "noreply@hhapp.com"
+            msg = Message("You have been deactivated", sender=sender, recipients=[user.email])
+            msg.body = "Please note that you have been deactivated due to suspicious activity. Contact the admin at Admin@gmail.com for further assistance."
+            mail.send(msg)
     except Exception as e:
-        print(f"Failed to delete rejected issue requests: {e}")
+        print(f"Failed to send deactivation mail: {e}")
 
 @celery.task(name="create_csv")
 def create_csv():
     try:
         tl = TransactionsLog.query.all()
-        csv_file_path = 'transaction_logs.csv'
+        file_path = 'transaction_logs.csv'
         
 
         csv_output = excel.make_response_from_query_sets(
@@ -198,12 +205,14 @@ def create_csv():
         )
         
 
+        csv_file_path = os.path.join('C:\\Users\\agnel\\Downloads\\Proj-IITM\\Mad2_IITM_Library_Management_System-master\\Backend\\demo', file_path)
         with open(csv_file_path, 'wb') as f:
             f.write(csv_output.get_data())
+            
         
         return {'csv_file_path': csv_file_path}
     except Exception as e:
-        print(f"Failed to download csv issue requests: {e}")
+        print(f"Failed to download csv of transaction: {e}")
         return {'error': str(e)}
 
 
@@ -335,7 +344,7 @@ def get_all_section_names():
     except Exception as e:
         app.logger.error(e)
         return jsonify({"error": "Failed to fetch section names", "Reasons": str(e)}), 500
-        
+
 @app.route("/register", methods=["POST"])
 def register():
     try:
