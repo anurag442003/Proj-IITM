@@ -1,6 +1,6 @@
 <template>
     <div class="form-container">
-        <h2>Add a New Book or Document</h2>
+        <h2>Add a New Prof or Document</h2>
         <form @submit.prevent="handleSubmit">
             <div class="form-group">
                 <label for="title">Title</label>
@@ -26,7 +26,7 @@
                 <label for="quantityAvailable">Quantity in Stock</label>
                 <input v-model="quantityAvailable" type="number" class="form-control" id="quantityAvailable" required>
             </div>
-            <button type="submit" class="btn btn-primary">Add Book/Document</button>
+            <button type="submit" class="btn btn-primary">Add Prof/Document</button>
         </form>
     </div>
 </template>
@@ -46,7 +46,7 @@ export default {
     methods: {
         async handleSubmit() {
             try {
-                const response = await this.$axios.post('/add_books', {
+                const response = await this.$axios.post('/add_profs', {
                     title: this.title,
                     prof_desc: this.prof_desc,
                     category: this.category,
@@ -55,9 +55,9 @@ export default {
                     quantityAvailable: this.quantityAvailable,
                 });
 
-                console.log('Book added successfully:', response.data);
+                console.log('Prof added successfully:', response.data);
             } catch (error) {
-                console.error('Error adding book:', error.response.data);
+                console.error('Error adding prof:', error.response.data);
             }
         },
     },

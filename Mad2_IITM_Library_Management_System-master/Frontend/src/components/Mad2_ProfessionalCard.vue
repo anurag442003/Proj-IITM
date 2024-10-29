@@ -22,7 +22,7 @@
             </div>
             <div class="button-grid">
                 <button v-if="!professional.isIssued && !professional.isRequested " class="btn btn-primary btn-sm" @click="createRequest(professional.id)">
-                    <i class="fa-solid fa-book"></i> Request
+                    <i class="fa-solid fa-prof"></i> Request
                 </button>
                 <div v-if="professional.isRequested && !professional.isIssued" class="btn btn-secondary btn-sm">
                     <i class="fa-solid fa-hourglass-start"></i> Waiting

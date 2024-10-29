@@ -3,8 +3,8 @@ import AboutUs from '../components/AboutUs.vue';
 import AdminHome from '../components/AdminHome.vue';
 import ReaderHome from '../components/Mad2_ReaderHome.vue';
 import LibrarianHome from '../components/Mad2_LibrarianHome.vue';
-import AddBook from '../components/Mad2_AddBook.vue';
-import RenderBook from '../components/Mad2_RenderBook.vue';
+import AddProf from '../components/Mad2_AddProf.vue';
+import RenderProf from '../components/Mad2_RenderProf.vue';
 import CreateService from '../components/Mad2_CreateService.vue';
 import LoginPage from '../components/Mad2_LoginPage.vue';
 import RegistrationPage from '../components/Mad2_RegistrationPage.vue';
@@ -42,8 +42,8 @@ const routes = [
   { path: '/admin-home', name: 'AdminHome', component: AdminHome, meta: { requiresAuth: true } },
   { path: '/get_all_comments/:professionalId', name: 'Comments', component: Comments, meta: { requiresAuth: true } },
   { path: '/about', name: 'AboutUs', component: AboutUs },
-  { path: '/addbook', name: 'AddBook', component: AddBook, meta: { requiresAuth: true } },
-  { path: '/renderbook', name: 'RenderBook', component: RenderBook, meta: { requiresAuth: true } },
+  { path: '/addprof', name: 'AddProf', component: AddProf, meta: { requiresAuth: true } },
+  { path: '/renderprof', name: 'RenderProf', component: RenderProf, meta: { requiresAuth: true } },
   { path: '/activity-data/:professionalId', name: 'ActivityPage', component: ActivityPage, meta: { requiresAuth: true } },
   { path: '/request-list', name: 'RequestList', component: RequestList, meta: { requiresAuth: true } },
   { path: '/createcategory', name: 'CreateCategory', component: CreateService, meta: { requiresAuth: true } },

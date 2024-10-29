@@ -1,12 +1,12 @@
 <template>
-    <div class="render-book-container">
-        <h2>Render Book</h2>
+    <div class="render-prof-container">
+        <h2>Render Prof</h2>
         <form @submit.prevent="submitForm">
             <div class="form-group">
-                <label for="bookId">Book ID</label>
-                <input v-model.number="bookId" type="number" class="form-control" id="bookId" required>
+                <label for="profId">Prof ID</label>
+                <input v-model.number="profId" type="number" class="form-control" id="profId" required>
             </div>
-            <button type="submit" class="btn btn-primary">Render Book</button>
+            <button type="submit" class="btn btn-primary">Render Prof</button>
         </form>
     </div>
 </template>
@@ -15,15 +15,15 @@
 export default {
     data() {
         return {
-            bookId: null,
+            profId: null,
         };
     },
     methods: {
         async submitForm() {
             try {
-                const response = await this.$axios.post(`/render/${this.bookId}`);
+                const response = await this.$axios.post(`/render/${this.profId}`);
                 console.log(response.data);
-                this.bookId = null;
+                this.profId = null;
             } catch (error) {
                 console.error(error.response.data);
             }
@@ -33,7 +33,7 @@ export default {
 </script>
   
 <style scoped>
-.render-book-container {
+.render-prof-container {
     max-width: 400px;
     margin: auto;
     padding: 20px;

@@ -1224,7 +1224,7 @@ def accept_request(professional_id, user_id):
         ).count()
 
         if total_rendering == 5:
-            app.logger.warn("Rendering Limit Reached. Maximum 5 books can be rendered")
+            app.logger.warn("Rendering Limit Reached. Maximum 5 profs can be rendered")
             return jsonify({"error": "User has reached rendering limit of 5."}), 400
 
         existing_rendering = Rendering.query.filter_by(
@@ -2072,7 +2072,7 @@ def reject_approval(professional_id):
 
 #         db.session.commit()
 #         app.logger.info("PDF File Sent For Download - Already Paid")
-#         return send_file(pdf_bytes, as_attachment=True, mimetype='application/pdf', download_name="Book.pdf")
+#         return send_file(pdf_bytes, as_attachment=True, mimetype='application/pdf', download_name="Prof.pdf")
     
 #     if (purchase_data == None):
 #         user = User.query.get(current_user_id)
@@ -2097,7 +2097,7 @@ def reject_approval(professional_id):
 #         db.session.commit()
 
 #         app.logger.info("PDF File Sent For Download - Paid Now")
-#         return send_file(pdf_bytes, as_attachment=True, mimetype='application/pdf', download_name="Book.pdf")
+#         return send_file(pdf_bytes, as_attachment=True, mimetype='application/pdf', download_name="Prof.pdf")
 
 #     app.logger.error("Error Purchasing Professional")
 #     return abort(403, description="Professional not purchased")
@@ -2114,13 +2114,13 @@ class CourseNameError(HTTPException):
         self.response = make_response(json.dumps(message), status_code)
 
 
-book_parser = reqparse.RequestParser()
-book_parser.add_argument("title")
-book_parser.add_argument("prof_desc")
-book_parser.add_argument("date_of_birth")
-book_parser.add_argument("no_of_years")
-book_parser.add_argument("price")
-book_parser.add_argument("service_id")
+prof_parser = reqparse.RequestParser()
+prof_parser.add_argument("title")
+prof_parser.add_argument("prof_desc")
+prof_parser.add_argument("date_of_birth")
+prof_parser.add_argument("no_of_years")
+prof_parser.add_argument("price")
+prof_parser.add_argument("service_id")
 
 user_parser = reqparse.RequestParser()
 user_parser.add_argument("fname")
@@ -2139,12 +2139,12 @@ review_parser.add_argument("user_id")
 
 
 
-class BookApi(Resource):
+class ProfApi(Resource):
     def get(self, id):
         entry = Professional.query.get(id)
         if entry:
             jsonobj = {
-                "book_id": entry.id,
+                "prof_id": entry.id,
                 "title": entry.title,
                 "prof_desc": entry.prof_desc,
                 "date_of_birth": entry.date_of_birth,
@@ -2157,7 +2157,7 @@ class BookApi(Resource):
             raise NotFoundError(status_code=404)
         
     def post(self):
-        args = book_parser.parse_args()
+        args = prof_parser.parse_args()
         title_u = args.get("title", None)
         author_u = args.get("prof_desc", None)
         date_of_birth_u = args.get("date_of_birth", None)
@@ -2169,13 +2169,13 @@ class BookApi(Resource):
 
         entry = Professional.query.filter_by(title=title_u).first()
         if entry:
-            return "Book already exists", 409
+            return "Prof already exists", 409
 
         entry = Professional(title=title_u, prof_desc=author_u, date_of_birth=date_of_birth_u, no_of_years=no_of_years_u, price=price_u, service=service_id_u,image=None,imageType=None, file=None,pdf_file_name=None )
         db.session.add(entry)
         db.session.commit()
         jsonobj = {
-            "book_id": entry.id,
+            "prof_id": entry.id,
             "title": entry.title,
             "prof_desc": entry.prof_desc,
             "date_of_birth": entry.date_of_birth,
@@ -2190,7 +2190,7 @@ class BookApi(Resource):
         if not entry:
             raise NotFoundError(status_code=404)
         
-        args = book_parser.parse_args()
+        args = prof_parser.parse_args()
         title_u = args.get("title", None)
         author_u = args.get("prof_desc", None)
         date_of_birth_u = args.get("date_of_birth", None)
@@ -2208,7 +2208,7 @@ class BookApi(Resource):
         entry.service = service_id_u
         db.session.commit()
         jsonobj = {
-            "book_id": entry.id,
+            "prof_id": entry.id,
             "title": entry.title,
             "prof_desc": entry.prof_desc,
             "date_of_birth": entry.date_of_birth,
@@ -2402,7 +2402,7 @@ class ReviewApi(Resource):
             raise NotFoundError(status_code=404)
 
 
-api.add_resource(BookApi, "/api/book/<int:id>", "/api/book")
+api.add_resource(ProfApi, "/api/prof/<int:id>", "/api/prof")
 api.add_resource(UserApi, "/api/user/<int:id>", "/api/user")
 api.add_resource(ReviewApi, "/api/review/<int:id>", "/api/review")
 
