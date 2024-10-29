@@ -1,12 +1,12 @@
 <template>
     <div class="custom-container">
         <section class="single-container">
-            <div class="wrapper" v-for="section in sections" :key="section.id">
-                <h2 class="my2">{{ section.name }}</h2>
-                <h4 class="my3">Time required : {{ section.time }} hours</h4>
-                <h4 class="my3">Base Price : {{ section.baseprice }} Rs.</h4>
+            <div class="wrapper" v-for="service in services" :key="service.id">
+                <h2 class="my2">{{ service.name }}</h2>
+                <h4 class="my3">Time required : {{ service.time }} hours</h4>
+                <h4 class="my3">Base Price : {{ service.baseprice }} Rs.</h4>
                 <div class="slider-content"> <!-- :isRead="content.isRead" -->
-                    <content-card v-for="content in filteredContents(section.id)"
+                    <content-card v-for="content in filteredContents(service.id)"
                                   :key="content.id"
                                   :content="content"
                                   :decodedImage="content.decodedImage"
@@ -14,7 +14,7 @@
                                   :isRequested="content.isRequested"
                                   @content-updated="updatedContent">
                     </content-card>
-                    <!-- additional charge plus section.price has to be made -->
+                    <!-- additional charge plus service.price has to be made -->
                 </div>
             </div>
         </section>
@@ -31,21 +31,21 @@ export default {
     data() {
         return {
             contents: [],
-            sections: [],
-            loadingSectionContent: false,
+            services: [],
+            loadingServiceContent: false,
         };
     },
     mounted() {
         this.fetchContents();
-        this.fetchSections();
+        this.fetchServices();
     },
     methods: {
         updatedContent() {
             this.fetchContents();
         },
-        filteredContents(sectionId) {
+        filteredContents(serviceId) {
             return this.contents
-                .filter(content => content.section === sectionId)
+                .filter(content => content.service === serviceId)
                 .map(content => ({
                     ...content,
                     decodedImage: this.getDecodedImage(content)
@@ -63,15 +63,15 @@ export default {
                 console.error('Error fetching user contents:', error);
             }
         },
-        async fetchSections() {
-            this.loadingSectionContent = true;
+        async fetchServices() {
+            this.loadingServiceContent = true;
             try {
-                const response = await this.$axios.get('http://127.0.0.1:5000/fetch-sections');
-                this.sections = response.data.sections;
+                const response = await this.$axios.get('http://127.0.0.1:5000/fetch-services');
+                this.services = response.data.services;
             } catch (error) {
-                console.error('Error fetching sections:', error);
+                console.error('Error fetching services:', error);
             } finally {
-                this.loadingSectionContent = false;
+                this.loadingServiceContent = false;
             }
         },
         getDecodedImage(content) {

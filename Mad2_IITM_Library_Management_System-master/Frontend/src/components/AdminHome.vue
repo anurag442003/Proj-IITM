@@ -1,19 +1,19 @@
 <template>
     <div class="custom-container">
         <section class="single-container">
-            <div class="wrapper" v-for="section in sections" :key="section.id">
-                <div class="section-head">
-                    <h2 class="my2">{{ section.name }}</h2>
-                    <h4 class="my3">Time required : {{ section.time }} hours</h4>
-                    <h4 class="my3">  Base Price : {{ section.baseprice }} Rs.</h4>
-                    <div class="section-btn">
-                        <router-link :to="'/update-section/' + section.id" class="btn btn-sm btn-primary"><i class="fa-regular fa-pen-to-square"></i></router-link>
-                        <!-- <router-link :to="'/upload-content/' + section.id" class="btn btn-sm btn-success"><i class="fa-solid fa-plus"></i></router-link> -->
-                        <button @click="confirmDelete(section.id)" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
+            <div class="wrapper" v-for="service in services" :key="service.id">
+                <div class="service-head">
+                    <h2 class="my2">{{ service.name }}</h2>
+                    <h4 class="my3">Time required : {{ service.time }} hours</h4>
+                    <h4 class="my3">  Base Price : {{ service.baseprice }} Rs.</h4>
+                    <div class="service-btn">
+                        <router-link :to="'/update-service/' + service.id" class="btn btn-sm btn-primary"><i class="fa-regular fa-pen-to-square"></i></router-link>
+                        <!-- <router-link :to="'/upload-content/' + service.id" class="btn btn-sm btn-success"><i class="fa-solid fa-plus"></i></router-link> -->
+                        <button @click="confirmDelete(service.id)" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 </div>
                 <div class="slider-content">
-                    <admin-content-card v-for="content in filteredContents(section.id)" :key="content.id"
+                    <admin-content-card v-for="content in filteredContents(service.id)" :key="content.id"
                         :content="content" :decodedImage="content.decodedImage"
                         @content-updated="updatedContent"></admin-content-card>
                 </div>
@@ -35,12 +35,12 @@ export default {
     data() {
         return {
             contents: [],
-            sections: [],
+            services: [],
         };
     },
     created() {
         this.fetchContents();
-        this.fetchSections();
+        this.fetchServices();
     },
     methods: {
         updatedContent() {
@@ -64,31 +64,31 @@ export default {
                     console.error('Error fetching user contents:', error);
                 });
         },
-        fetchSections() {
-            fetch('http://127.0.0.1:5000/fetch-sections')
+        fetchServices() {
+            fetch('http://127.0.0.1:5000/fetch-services')
                 .then(response => response.json())
                 .then(data => {
-                    this.sections = data.sections;
+                    this.services = data.services;
                 })
                 .catch(error => {
-                    console.error('Error fetching sections:', error);
+                    console.error('Error fetching services:', error);
                 });
         },
         getDecodedImage(content) {
             const decodedImage = `data:image/${content.imageType};base64, ${content.image}`;
             return decodedImage;
         },
-        filteredContents(sectionId) {
+        filteredContents(serviceId) {
             return this.contents
-                .filter(content => content.section === sectionId)
+                .filter(content => content.service === serviceId)
                 .map(content => ({
                     ...content,
                     decodedImage: this.getDecodedImage(content),
                 }));
         },
-        deleteSection(sectionId) {
+        deleteService(serviceId) {
             const token = sessionStorage.getItem('token');
-            fetch(`http://127.0.0.1:5000/remove-section/${sectionId}`, {
+            fetch(`http://127.0.0.1:5000/remove-service/${serviceId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
@@ -97,22 +97,22 @@ export default {
             })
                 .then(response => {
                     if (response.ok) {
-                        this.sections = this.sections.filter(section => section.id !== sectionId);
+                        this.services = this.services.filter(service => service.id !== serviceId);
                         return response.json();
                     } else {
-                        throw new Error('Failed to delete section');
+                        throw new Error('Failed to delete service');
                     }
                 })
                 .then(data => {
                     console.log(data.message);
                 })
                 .catch(error => {
-                    console.error('Error deleting section:', error);
+                    console.error('Error deleting service:', error);
                 });
         },
-        confirmDelete(sectionId) {
-            if (confirm("Are you sure you want to delete this section?")) {
-                this.deleteSection(sectionId);
+        confirmDelete(serviceId) {
+            if (confirm("Are you sure you want to delete this service?")) {
+                this.deleteService(serviceId);
             }
         },
     },
@@ -137,12 +137,12 @@ export default {
     box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
 
-.section-head {
+.service-head {
     display: flex;
     align-items: center;
 }
 
-.section-head h2 {
+.service-head h2 {
     margin-right: 30px;
     color: white;
     font-size: 24px;
@@ -150,7 +150,7 @@ export default {
     border-bottom: 2px solid lightgray;
 }
 
-.section-btn {
+.service-btn {
     display: flex;
     align-items: center;
     column-gap: 1rem;

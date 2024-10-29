@@ -5,7 +5,7 @@
         <p><strong>Username:</strong> {{ userDetails.username }}</p>
         <p><strong>Phone Number:</strong> {{ userDetails.phno }}</p>
         <p><strong>Pincode:</strong> {{ userDetails.pin }}</p>
-        <p><strong>Service Name:</strong> {{ userDetails.sectionName }}</p>
+        <p><strong>Service Name:</strong> {{ userDetails.serviceName }}</p>
         <p><strong>Experience:</strong> {{ userDetails.experience }} years</p>
         <p><strong>Additional charges for service:</strong> {{ userDetails.additionalCharges }} Rs.</p>
         <p><strong>Description:</strong> {{ userDetails.desc }}</p>

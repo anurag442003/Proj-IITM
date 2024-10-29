@@ -1,13 +1,13 @@
 <template>
     <div class="custom-container">
-        <div class="add-section-form">
-            <form @submit.prevent="updateSection">
-                <label for="sectionName" class="my-4">Service Name:</label>
-                <input v-model="sectionName" type="text" id="sectionName" required>
-                <label for="sectionTime" class="my-4">Service Time:</label>
-                <input v-model="sectionTime" type="text" id="sectionTime" required>
-                <label for="sectionBaseprice" class="my-4">Service Base Price:</label>
-                <input v-model="sectionBaseprice" type="text" id="sectionBaseprice" required>
+        <div class="add-service-form">
+            <form @submit.prevent="updateService">
+                <label for="serviceName" class="my-4">Service Name:</label>
+                <input v-model="serviceName" type="text" id="serviceName" required>
+                <label for="serviceTime" class="my-4">Service Time:</label>
+                <input v-model="serviceTime" type="text" id="serviceTime" required>
+                <label for="serviceBaseprice" class="my-4">Service Base Price:</label>
+                <input v-model="serviceBaseprice" type="text" id="serviceBaseprice" required>
                 <div class="row mt-4">
                     <div class="col-6 d-flex align-items-center justify-content-center">
                         <button class="btn btn-secondary" type="submit">Update</button>
@@ -27,18 +27,18 @@ import axios from 'axios';
 export default {
     data() {
         return {
-            sectionName: '',
-            sectionBaseprice: 0.00,
-            sectionTime: 1
+            serviceName: '',
+            serviceBaseprice: 0.00,
+            serviceTime: 1
         };
     },
     mounted() {
-        this.fetchSection();
+        this.fetchService();
     },
     methods: {
-        async fetchSection() {
-            const sectionId = this.$route.params.sectionId;
-            const apiUrl = `http://127.0.0.1:5000/get-section/${sectionId}`;
+        async fetchService() {
+            const serviceId = this.$route.params.serviceId;
+            const apiUrl = `http://127.0.0.1:5000/get-service/${serviceId}`;
 
             try {
                 const response = await fetch(apiUrl, {
@@ -49,26 +49,26 @@ export default {
                 const data = await response.json();
 
                 if (response.ok) {
-                    this.sectionName = data.name;
-                    this.sectionTime = data.time;
-                    this.sectionBaseprice = data.baseprice;
+                    this.serviceName = data.name;
+                    this.serviceTime = data.time;
+                    this.serviceBaseprice = data.baseprice;
                 } else {
-                    console.error('Failed to fetch section data');
+                    console.error('Failed to fetch service data');
                 }
             } catch (error) {
-                console.error('Error fetching section data:', error);
+                console.error('Error fetching service data:', error);
             }
         },
-        updateSection() {
-            const sectionId = this.$route.params.sectionId;
+        updateService() {
+            const serviceId = this.$route.params.serviceId;
             const putData = {
-                name: this.sectionName,
-                time : this.sectionTime,
-                baseprice: this.sectionBaseprice
+                name: this.serviceName,
+                time : this.serviceTime,
+                baseprice: this.serviceBaseprice
             };
             const token = sessionStorage.getItem("token");
 
-            axios.put(`http://127.0.0.1:5000/update-section/${sectionId}`, putData, {
+            axios.put(`http://127.0.0.1:5000/update-service/${serviceId}`, putData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -78,7 +78,7 @@ export default {
                     this.$router.push('/admin-home');
                 })
                 .catch(error => {
-                    console.error('Error updating section:', error.response ? error.response.data : error.message);
+                    console.error('Error updating service:', error.response ? error.response.data : error.message);
                 });
         },
     },

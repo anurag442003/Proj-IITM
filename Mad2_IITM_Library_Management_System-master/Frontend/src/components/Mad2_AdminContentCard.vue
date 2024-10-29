@@ -2,11 +2,11 @@
     <div class="content-card">
         <img :src="decodedImage" alt="Content Image" @error="handleImageError" />
         <div class="content-body">
-            <div class="title-section">
+            <div class="title-service">
                 <!-- <p>Title</p> -->
                 <h3>{{ content.title }}</h3>
             </div>
-            <div class="details-section">
+            <div class="details-service">
                 <p>About me: {{ content.author }}</p>
                 <p>Service Charge: {{ content.price }} </p>
                 <p>Rating: {{ !content.rating || isNaN(content.rating) ? 'N/A' : `${content.rating.toFixed(2)} / 5` }}</p>
@@ -71,9 +71,9 @@ export default {
         navigateToActivity(contentId) {
             this.$router.push(`/activity-data/${contentId}`);
         },
-        filterContentsBySection(sectionId) {
+        filterContentsByService(serviceId) {
             return this.contents
-                .filter(content => content.section === sectionId)
+                .filter(content => content.service === serviceId)
                 .map(content => ({
                     ...content,
                     decodedImage: this.getDecodedImage(content),
@@ -148,7 +148,7 @@ export default {
     height: 100%;
 }
 
-.title-section {
+.title-service {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -156,14 +156,14 @@ export default {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-.title-section p {
+.title-service p {
     font-size: 14px;
     line-height: 18px;
     color: #333;
     margin: 0;
 }
 
-.title-section h3 {
+.title-service h3 {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -174,14 +174,14 @@ export default {
     width: 200px;
 }
 
-.details-section {
+.details-service {
     display: flex;
     flex-direction: column;
     gap: 0.25rem;
     width: 100%;
 }
 
-.details-section p {
+.details-service p {
     font-size: 14px;
     line-height: 18px;
     color: #333;

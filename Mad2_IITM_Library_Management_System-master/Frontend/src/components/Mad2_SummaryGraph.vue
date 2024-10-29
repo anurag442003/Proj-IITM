@@ -1,12 +1,12 @@
 <template>
     <div class="custom-container d-flex">
         <div class="graph">
-            <h2>Reader Count Per Section</h2>
-            <img ref="sectionChart" class="section-chart" alt="Section Reader Count">
+            <h2>Services offered per type</h2>
+            <img ref="serviceChart" class="service-chart" alt="Service Reader Count">
         </div>
         <div class="graph">
-            <h2>Reader Count Male vs Female</h2>
-            <img ref="genderChart" class="gender-chart" alt="Reader Count Male vs Female">
+            <h2>Professional gender distribution</h2>
+            <img ref="genderChart" class="gender-chart" alt="Professional gender distribution">
         </div>
     </div>
 </template>
@@ -15,15 +15,15 @@
 export default {
     data() {
         return {
-            sectionData: [],
-            sectionNames: [],
+            serviceData: [],
+            serviceNames: [],
             readerCounts: [],
         };
     },
     methods: {
-        async fetchReaderCountPerSection() {
+        async fetchReaderCountPerService() {
             try {
-                const response = await fetch('http://127.0.0.1:5000/reader_count_per_section', {
+                const response = await fetch('http://127.0.0.1:5000/count_per_service', {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${sessionStorage.getItem('token')}`,
@@ -36,8 +36,8 @@ export default {
 
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);
-                this.$refs.sectionChart.src = url;
-                console.log('Section Chart loaded');
+                this.$refs.serviceChart.src = url;
+                console.log('Service Chart loaded');
                 setTimeout(() => {
                     this.fetchReaderCountGender();
                 }, 0);
@@ -68,7 +68,7 @@ export default {
         },
     },
     created() {
-        this.fetchReaderCountPerSection();
+        this.fetchReaderCountPerService();
     },
 };
 </script>
@@ -89,7 +89,7 @@ h2 {
     text-align: center;
 }
 
-.section-chart,
+.service-chart,
 .gender-chart {
     border-radius: 5px;
     height: 400px;

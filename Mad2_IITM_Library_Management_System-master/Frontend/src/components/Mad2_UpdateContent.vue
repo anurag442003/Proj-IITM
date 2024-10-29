@@ -75,7 +75,7 @@ export default {
         pdf: null,
         pdf_file_name: null
       },
-      existingSection: '',
+      existingService: '',
       oldImage: null,
       oldPdf: null
     };
@@ -106,7 +106,7 @@ export default {
             pdf: contentDetails.pdf,
             pdf_file_name: contentDetails.pdf_file_name,
           };
-          this.existingSection = contentDetails.section;
+          this.existingService = contentDetails.service;
           this.oldImage = contentDetails.image;
           this.oldPdf = contentDetails.pdf;
         })

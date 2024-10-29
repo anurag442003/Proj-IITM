@@ -20,7 +20,7 @@
         <div v-if="userDetails.role === 'LIBRARIAN'" class="details-card">
             <h2 class="card-title">Content Details</h2>
             <div class="info-grid">
-                <p><strong>Service Type:</strong> {{ userDetails.section }}</p>
+                <p><strong>Service Type:</strong> {{ userDetails.service }}</p>
                 <p><strong>Description:</strong> {{ userDetails.author }}</p>
                 <p><strong>Charges:</strong> {{ userDetails.price }} Rs.</p>
                 <p><strong>Experience:</strong> {{ userDetails.no_of_pages }} years</p>

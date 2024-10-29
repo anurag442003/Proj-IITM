@@ -20,9 +20,9 @@ class User(db.Model):
     state = db.Column(db.String(50))
     pin = db.Column(db.String(10))
     role = db.Column(db.String(20), nullable=False)
-    balance_amt = db.Column(db.Float, default=1000.0)
+    account = db.Column(db.Float, default=1000.0)
     ratings = db.relationship('Review', backref='rater', lazy=True)
-    is_active = db.Column(db.Boolean, default=False)
+    active = db.Column(db.Boolean, default=False)
 
     def validate_username(self, uname):
         if len(uname) > 20:
@@ -60,7 +60,7 @@ class Review(db.Model):
     # profeshional_id = db.Column(db.Integer, db.ForeignKey('profeshionalsdetails.pid'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
-class Section(db.Model):
+class Service(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), unique=True, nullable=False)
     baseprice = db.Column(db.Float, nullable=False)
@@ -85,7 +85,7 @@ class Content(db.Model):
     pdf_file_name = db.Column(db.String(250), nullable=True) #not needed
     is_verified = db.Column(db.Boolean, default=False)
     price = db.Column(db.Float, nullable=False) #additional charge
-    section = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False) #servicetype
+    service = db.Column(db.Integer, db.ForeignKey('service.id'), nullable=False) #servicetype
     borrowings = db.relationship('Borrowing', backref='borrowed_content',  cascade="all, delete-orphan") #service request backref to request
     # wishlists = db.relationship('Wishlist', backref='wishlisted_content',  cascade="all, delete-orphan") #not needed
 

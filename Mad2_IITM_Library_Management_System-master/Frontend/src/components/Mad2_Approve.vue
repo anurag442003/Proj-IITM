@@ -18,7 +18,7 @@
           <tr v-for="approval in approveRequests" :key="approval.id">
             <td>{{ approval.id }}</td>
             <td>{{ approval.title }}</td>
-            <td>{{ approval.section }}</td>
+            <td>{{ approval.service }}</td>
             <td>{{ approval.price }}</td>
             <td>
               <button class="btn btn-action btn-success" @click="acceptApproval(approval.id)">

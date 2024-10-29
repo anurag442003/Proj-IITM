@@ -4,9 +4,15 @@
       <div v-if="searchResults && searchResults.length > 0">
         <h3 class="mb-4">Content Results</h3>
         <div class="slider-content">
-          <content-card v-for="(result, index) in searchResults" :key="index" :content="result"
-            :isIssued="result.isIssued" :isRequested="result.isRequested" :decodedImage="getDecodedImage(result)" :isRead="result.isRead"
-            @content-updated="updatedContent"></content-card>
+          <component 
+            :is="userRole === 'ADMIN' ? 'admin-content-card' : 'content-card'" 
+            v-for="(result, index) in searchResults" 
+            :key="index" 
+            :content="result"
+            :decodedImage="getDecodedImage(result)"
+            v-bind="getComponentProps(result)"
+            @content-updated="updatedContent">
+          </component>
         </div>
       </div>
       <div v-else class="center">
@@ -18,17 +24,26 @@
 
 <script>
 import ContentCard from './Mad2_ContentCard.vue'
+import AdminContentCard from './Mad2_AdminContentCard.vue'
 export default {
   components: {
     ContentCard,
+    AdminContentCard,
   },
   data() {
     return {
       searchResults: null,
+      userRole: null,
       results: [],
     };
   },
   async created() {
+    const token = sessionStorage.getItem('token');
+    const user = this.$jwtDecode(token);
+    const userRole = user.role;
+    if (userRole === 'LIBRARIAN') {
+      this.isLibrarian = true;
+    }
     await this.fetchSearchResults();
   },
   watch: {
@@ -52,9 +67,7 @@ export default {
         }
 
         const apiUrl = `http://127.0.0.1:5000/search-result?query=${query}`;
-        const response = await fetch(apiUrl, {
-          headers: headers,
-        });
+        const response = await fetch(apiUrl, { headers });
 
         if (!response.ok) {
           throw new Error(`Failed to fetch search results: ${response.status} ${response.statusText}`);
@@ -62,15 +75,33 @@ export default {
 
         const data = await response.json();
         this.searchResults = data.results;
+        this.userRole = data.userRole;
       } catch (error) {
         console.error("Error fetching search results:", error);
       }
     },
+    getComponentProps(result) {
+      // Return different props based on user role
+      if (this.userRole === 'ADMIN') {
+        return {
+          uploadedBy: result.uploaded_by,
+          publishYear: result.publish_year,
+          price: result.price,
+          noOfPages: result.no_of_pages,
+          isVerified: result.is_verified
+        };
+      }
+      return {
+        isIssued: result.isIssued,
+        isRequested: result.isRequested,
+        isRead: result.isRead
+      };
+    },
     getDecodedImage(content) {
       const decodedImage = `data:image/${content.imageType};base64, ${content.image}`;
       return decodedImage;
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -106,4 +137,4 @@ export default {
   display: none;
   width: 0;
 }
-</style>
+</style> 

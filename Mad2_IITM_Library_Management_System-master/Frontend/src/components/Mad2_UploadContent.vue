@@ -124,11 +124,11 @@ export default {
             formData.append('price', this.content.price);
             formData.append('pdf', this.content.pdf, this.content.pdf.name);
 
-            const sectionId = this.$route.params.sectionId;
+            const serviceId = this.$route.params.serviceId;
             const userId = this.getUserIdFromToken();
             const token = sessionStorage.getItem('token');
 
-            axios.post(`http://127.0.0.1:5000/add-content/${sectionId}/${userId}`, formData, {
+            axios.post(`http://127.0.0.1:5000/add-content/${serviceId}/${userId}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                     'Authorization': `Bearer ${token}`

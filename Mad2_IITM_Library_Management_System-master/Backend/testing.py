@@ -75,7 +75,7 @@ stream_handler.setFormatter(formatter)
 logging.getLogger().addHandler(stream_handler)
 
 
-from Mad2_Models import db, User, Section, Content, Borrowing, TransactionsLog, Review, Login, Requests
+from Mad2_Models import db, User, Service, Content, Borrowing, TransactionsLog, Review, Login, Requests
 db.init_app(app)
 api = Api(app)
 excel.init_excel(app)

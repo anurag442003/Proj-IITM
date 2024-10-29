@@ -7,7 +7,7 @@
             </button>
             <ul class="dropdown-menu">
                 <li>
-                    <router-link class="btn btn-sm btn-warning drop" to="/create-section">+ Section</router-link>
+                    <router-link class="btn btn-sm btn-warning drop" to="/create-service">+ Service</router-link>
                 </li>
                 <li>
                     <router-link class="btn btn-sm btn-warning drop" to="/transactionlogs">Transaction Logs</router-link>

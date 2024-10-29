@@ -1,8 +1,8 @@
 <template>
     <div class="custom-container">
         <div class="data d-flex justify-content-between">
-            <h2>Ongoing Services: {{ currentReaderCount }}</h2>
-            <h2>Total Services rendered: {{ totalReaderCount }}</h2>
+            <h2 style="color: black;">Ongoing Services: {{ currentReaderCount }}</h2>
+            <h2 style="color: black;">Total Services rendered: {{ totalReaderCount }}</h2>
             <!--<h2>Wishlist Count: {{ wishlistCount }}</h2>-->
         </div>
         <table class="table table-striped table-bordered">
@@ -11,7 +11,7 @@
                     <th>Content ID</th>
                     <th>Title</th>
                     <th>Username</th>
-                    <th>Section Name</th>
+                    <th>Service Name</th>
                     <th>Borrow Date</th>
                     <th>Returned</th>
                     <th>Return Date</th>
@@ -24,7 +24,7 @@
                     <td>{{ row.content_id }}</td>
                     <td>{{ row.title }}</td>
                     <td>{{ row.uname }}</td>
-                    <td>{{ row.section_name }}</td>
+                    <td>{{ row.service_name }}</td>
                     <td>{{ row.borrow_date }}</td>
                     <td>{{ row.returned }}</td>
                     <td>{{ row.last_return_date }}</td>
@@ -139,6 +139,7 @@ export default {
 <style scoped>
 .custom-container {
     margin: 20px;
+    color: black;
 }
 
 .table {

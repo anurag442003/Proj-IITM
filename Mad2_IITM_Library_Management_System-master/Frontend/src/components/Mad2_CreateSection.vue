@@ -1,12 +1,16 @@
 <template>
   <div>
-    <div class="add-section-form">
-      <form @submit.prevent="addSection">
-        <label for="sectionName" class="mx-3 mb-3">Section Name:</label>
-        <input v-model="sectionName" type="text" id="sectionName" required>
+    <div class="add-service-form">
+      <form @submit.prevent="addService">
+        <label for="serviceName" class="mx-3 mb-3">Service Name:</label>
+        <input v-model="serviceName" type="text" id="serviceName" required>
+        <label for="price" class="mx-3 mb-3">Base price in Rupees:</label>
+        <input v-model="price" type="text" id="price" required>
+        <label for="time" class="mx-3 mb-3">Service Time in hours:</label>
+        <input v-model="time" type="text" id="time" required>
         <div class="row">
           <div class="col-6 d-flex align-items-center justify-content-center">
-            <button class="mt-4 btn btn-secondary" type="submit">Add Section</button>
+            <button class="mt-4 btn btn-secondary" type="submit">Add Service</button>
           </div>
           <div class="col-6 d-flex align-items-center justify-content-center">
             <router-link class="btn btn-danger can" to="/admin-home">Cancel</router-link>
@@ -23,17 +27,22 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      sectionName: '',
+      serviceName: '',
+      price:0.00,
+      time:0
     };
   },
   methods: {
-    addSection() {
+    addService() {
       const postData = {
-        name: this.sectionName,
+        name: this.serviceName,
+        price: this.price,
+        time: this.time
+
       };
       const token = sessionStorage.getItem("token");
       
-      axios.post('http://127.0.0.1:5000/section', postData, {
+      axios.post('http://127.0.0.1:5000/service', postData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -43,7 +52,7 @@ export default {
           this.$router.push('/admin-home');
         })
         .catch(error => {
-          console.error('Error adding section:', error.response ? error.response.data : error.message);
+          console.error('Error adding service:', error.response ? error.response.data : error.message);
         });
     }
   },
@@ -51,7 +60,7 @@ export default {
 </script>
 
 <style scoped>
-.add-section-form {
+.add-service-form {
   border-radius: 1rem;
   width: 400px;
   color: white;

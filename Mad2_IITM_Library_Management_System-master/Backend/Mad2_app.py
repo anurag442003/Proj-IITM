@@ -73,7 +73,7 @@ stream_handler.setFormatter(formatter)
 logging.getLogger().addHandler(stream_handler)
 
 
-from Mad2_Models import db, User, Section, Content, Borrowing, TransactionsLog, Review, Login, Requests
+from Mad2_Models import db, User, Service, Content, Borrowing, TransactionsLog, Review, Login, Requests
 db.init_app(app)
 api = Api(app)
 excel.init_excel(app)
@@ -329,21 +329,21 @@ def logout():
         return jsonify({"error": "Logout failed", "Reasons": str(e)}), 500
 
 
-@app.route("/fetch-section_names", methods=["GET"])
-def get_all_section_names():
+@app.route("/fetch-service_names", methods=["GET"])
+def get_all_service_names():
     try:
-        sections = Section.query.all()
+        services = Service.query.all()
 
 
-        sections_list = [
-            {"id": section.id, "name": section.name, "price":section.price} for section in sections
+        services_list = [
+            {"id": service.id, "name": service.name, "price":service.baseprice} for service in services
         ]
 
-        app.logger.info("Fetched Section Names")
-        return jsonify({"sections": sections_list})
+        app.logger.info("Fetched Service Names")
+        return jsonify({"services": services_list})
     except Exception as e:
         app.logger.error(e)
-        return jsonify({"error": "Failed to fetch section names", "Reasons": str(e)}), 500
+        return jsonify({"error": "Failed to fetch service names", "Reasons": str(e)}), 500
 
 @app.route("/register", methods=["POST"])
 def register():
@@ -394,7 +394,7 @@ def register():
                 uploaded_by_id=userid,
                 publish_year=int(request.form.get('publish_year', 2024)),
                 price=float(request.form.get('additionalCharges', 0.0)),
-                section=int(request.form.get('serviceType', 1))
+                service=int(request.form.get('serviceType', 1))
             )
 
             if 'image' in request.files:
@@ -503,29 +503,29 @@ def get_csv(task_id):
 
 
 #ADD
-# 1. Section
-@app.route("/section", methods=["POST"])
+# 1. Service
+@app.route("/service", methods=["POST"])
 @jwt_required()
-def create_section():
+def create_service():
     try:
         data = request.get_json()
 
-        existing_Section = Section.query.filter_by(name=data["name"]).first()
-        if existing_Section:
-            return jsonify({"error": "Section already exists , Please add new Section"}), 400
+        existing_Service = Service.query.filter_by(name=data["name"]).first()
+        if existing_Service:
+            return jsonify({"error": "Service already exists , Please add new Service"}), 400
 
-        new_section = Section(name=data["name"])
-        db.session.add(new_section)
+        new_service = Service(name=data["name"],baseprice=data["price"],time=data["time"])
+        db.session.add(new_service)
         db.session.commit()
 
-        return jsonify({"message": "Section created successfully!!"}), 201
+        return jsonify({"message": "Service created successfully!!"}), 201
     except Exception as e:
-        return jsonify({"error": "New Section creation is failed", "Reasons": str(e)}), 500
+        return jsonify({"error": "New Service creation is failed", "Reasons": str(e)}), 500
 
 # 2. Content
-@app.route("/add-content/<int:section_id>/<int:user_id>", methods=["POST"])
+@app.route("/add-content/<int:service_id>/<int:user_id>", methods=["POST"])
 @jwt_required()
-def add_content(section_id, user_id):
+def add_content(service_id, user_id):
 
     current_user_id = get_jwt_identity()
 
@@ -533,10 +533,10 @@ def add_content(section_id, user_id):
         app.logger.error("User is unauthorized")
         return jsonify({"message": "Unauthorized"}), 401
 
-    section = Section.query.get(section_id)
-    if not section:
-        app.logger.error("Section Not Found")
-        return jsonify({"message": "Invalid section_id"}), 400
+    service = Service.query.get(service_id)
+    if not service:
+        app.logger.error("Service Not Found")
+        return jsonify({"message": "Invalid service_id"}), 400
     
 
     if 'image' not in request.files:
@@ -564,7 +564,7 @@ def add_content(section_id, user_id):
             no_of_pages=no_of_pages,
             publish_year=publish_year,
             price=price,
-            section=section_id,
+            service=service_id,
             uploaded_by_id=user_id,
         )
 
@@ -652,22 +652,22 @@ def add_content(section_id, user_id):
 
 
 #Fetch
-# 1. Sections
-@app.route("/fetch-sections", methods=["GET"])
-def get_all_sections():
+# 1. Services
+@app.route("/fetch-services", methods=["GET"])
+def get_all_services():
     try:
-        sections = Section.query.all()
+        services = Service.query.all()
 
 
-        sections_list = [
-            {"id": section.id, "name": section.name, "baseprice": section.baseprice, "time": section.time, "Desc": section.desc} for section in sections
+        services_list = [
+            {"id": service.id, "name": service.name, "baseprice": service.baseprice, "time": service.time, "Desc": service.desc} for service in services
         ]
 
-        app.logger.info("Fetched Sections")
-        return jsonify({"sections": sections_list})
+        app.logger.info("Fetched Services")
+        return jsonify({"services": services_list})
     except Exception as e:
         app.logger.error(e)
-        return jsonify({"error": "Failed to fetch sections", "Reasons": str(e)}), 500
+        return jsonify({"error": "Failed to fetch services", "Reasons": str(e)}), 500
 
 # 2. Content
 @app.route("/fetch-content", methods=["GET"])
@@ -689,7 +689,7 @@ def fetch_content():
                     "title": content.title,
                     "author": content.author,
                     "rating": average_rating,
-                    "section": content.section,
+                    "service": content.service,
                     "price": content.price,
                     "imageType": content.imageType,
                     "image": base64.b64encode(content.image).decode("utf-8"),
@@ -773,7 +773,7 @@ def fetch_user_content(user_id):
                 Content.id,
                 Content.title,
                 Content.author,
-                Content.section,
+                Content.service,
                 Content.price,
                 Content.uploaded_by_id,
                 func.avg(Review.rating).label("rating"),
@@ -800,7 +800,7 @@ def fetch_user_content(user_id):
                         "id": content.id,
                         "title": content.title,
                         "author": content.author,
-                        "section": content.section,
+                        "service": content.service,
                         "rating": round(content.rating or 0, 2),
                         "price": content.price,
                         "imageType": content.imageType,
@@ -847,40 +847,40 @@ def fetch_content_details(content_id):
 
 
 #DELETE
-# 1. Section
-@app.route("/remove-section/<int:section_id>", methods=["DELETE"])
+# 1. Service
+@app.route("/remove-service/<int:service_id>", methods=["DELETE"])
 @jwt_required()
-def delete_section(section_id):
+def delete_service(service_id):
     try:
-        section = Section.query.get(section_id)
+        service = Service.query.get(service_id)
 
-        if section:
+        if service:
             uploaded_by_ids = db.session.query(distinct(Content.uploaded_by_id)) \
-                        .filter_by(section=section_id) \
+                        .filter_by(service=service_id) \
                         .all()
     
             uploaded_by_ids = [user_id[0] for user_id in uploaded_by_ids]
-            Content.query.filter_by(section=section_id).delete()
+            Content.query.filter_by(service=service_id).delete()
             if uploaded_by_ids:
                 User.query.filter(User.id.in_(uploaded_by_ids)).delete(synchronize_session=False)
 
             
-            Content.query.filter_by(section=section_id).delete()
+            Content.query.filter_by(service=service_id).delete()
 
-            db.session.delete(section)
+            db.session.delete(service)
             db.session.commit()
-            app.logger.info("Section Deleted Successfully!")
-            return jsonify({"message": "Section and associated contents deleted successfully!"}), 200
+            app.logger.info("Service Deleted Successfully!")
+            return jsonify({"message": "Service and associated contents deleted successfully!"}), 200
         else:
-            app.logger.warning("Failed Deleting Section")
-            return jsonify({"error": "Section not found"}), 404
+            app.logger.warning("Failed Deleting Service")
+            return jsonify({"error": "Service not found"}), 404
     except IntegrityError:
         db.session.rollback()
-        app.logger.error("Error Deleting Section: IntegrityError")
-        return jsonify({"error": "Section deletion failed due to integrity error"}), 500
+        app.logger.error("Error Deleting Service: IntegrityError")
+        return jsonify({"error": "Service deletion failed due to integrity error"}), 500
     except Exception as e:
-        app.logger.error("Error Deleting Section", str(e))
-        return jsonify({"error": "Section deletion failed", "Reasons": str(e)}), 500
+        app.logger.error("Error Deleting Service", str(e))
+        return jsonify({"error": "Service deletion failed", "Reasons": str(e)}), 500
 
 # 2. Content
 # @app.route("/delete-content/<int:content_id>", methods=["DELETE"])
@@ -974,19 +974,19 @@ def delete_section(section_id):
 
 
 #GET
-# 1. Section
-@app.route("/get-section/<int:section_id>", methods=["GET"])
+# 1. Service
+@app.route("/get-service/<int:service_id>", methods=["GET"])
 @jwt_required()
-def get_section(section_id):
+def get_service(service_id):
     try:
-        section = Section.query.get(section_id)
+        service = Service.query.get(service_id)
 
-        if section:
-            return jsonify({"name": section.name, "time": section.time, "baseprice": section.baseprice}), 200
+        if service:
+            return jsonify({"name": service.name, "time": service.time, "baseprice": service.baseprice}), 200
         else:
-            return jsonify({"error": "Section not found"}), 404
+            return jsonify({"error": "Service not found"}), 404
     except Exception as e:
-        return jsonify({"error": "Failed to fetch section", "Reasons": str(e)}), 500
+        return jsonify({"error": "Failed to fetch service", "Reasons": str(e)}), 500
 # 2. Image
 def get_image_type(image_data):
     try:
@@ -1019,33 +1019,33 @@ def get_pdf(content_id):
 
 
 #UPDATE
-# 1. Section
-@app.route("/update-section/<int:section_id>", methods=["PUT"])
+# 1. Service
+@app.route("/update-service/<int:service_id>", methods=["PUT"])
 @jwt_required()
-def update_section(section_id):
-    section = Section.query.get(section_id)
+def update_service(service_id):
+    service = Service.query.get(service_id)
 
     data = request.get_json()
-    existing_Section = Section.query.filter_by(name=data["name"],baseprice=data["baseprice"],time=data["time"]).first()
-    if existing_Section:
-        app.logger.warning("Section Already Exist")
-        return jsonify({"error": "Section already exists"}), 400
+    existing_Service = Service.query.filter_by(name=data["name"],baseprice=data["baseprice"],time=data["time"]).first()
+    if existing_Service:
+        app.logger.warning("Service Already Exist")
+        return jsonify({"error": "Service already exists"}), 400
 
     new_name = data.get("name")
     new_time = data.get("time")
     new_baseprice = data.get("baseprice")
 
     if (not new_name) and (not new_time) and (not new_baseprice):
-        app.logger.error("Enter Section Details")
-        return jsonify({"error": "Section details are required"}), 400
+        app.logger.error("Enter Service Details")
+        return jsonify({"error": "Service details are required"}), 400
 
-    section.name = new_name
-    section.time = new_time
-    section.baseprice = new_baseprice
+    service.name = new_name
+    service.time = new_time
+    service.baseprice = new_baseprice
     db.session.commit()
 
-    app.logger.info("Section Updated to: ", new_name)
-    return jsonify({"message": "Section updated successfully"})
+    app.logger.info("Service Updated to: ", new_name)
+    return jsonify({"message": "Service updated successfully"})
 
 # 2. Content
 @app.route("/update-content/<int:content_id>/<int:user_id>", methods=["POST"])
@@ -1132,7 +1132,7 @@ def get_activity_data(content_id):
                 Borrowing.content_id,
                 Content.title,
                 User.uname,
-                Section.name.label("section_name"),
+                Service.name.label("service_name"),
                 Borrowing.borrow_date,
                 Borrowing.returned,
                 Borrowing.last_return_date,
@@ -1141,7 +1141,7 @@ def get_activity_data(content_id):
             )
             .join(User, User.id == Borrowing.member_id)
             .join(Content, Content.id == Borrowing.content_id)
-            .join(Section, Section.id == Content.section)
+            .join(Service, Service.id == Content.service)
             .filter(Borrowing.content_id == content_id, Borrowing.returned == False)
             .all()
         )
@@ -1152,7 +1152,7 @@ def get_activity_data(content_id):
                 "content_id": row.content_id,
                 "title": row.title,
                 "username": row.uname,
-                "section_name": row.section_name,
+                "service_name": row.service_name,
                 "borrow_date": row.borrow_date.strftime("%Y-%m-%d %H:%M:%S"),
                 "returned": row.returned,
                 "last_return_date": (
@@ -1535,42 +1535,42 @@ def get_previous_rating(content_id):
         return jsonify({'error': str(e)}), 500
     
 
-@app.route('/reader_count_per_section', methods=['GET'])
+@app.route('/count_per_service', methods=['GET'])
 @jwt_required()
-def reader_count_per_section():
-    reader_counts_per_section = db.session.query(
-        Section.name,
-        func.count(distinct(User.id))
-    ).join(Content, Content.section == Section.id).join(Borrowing, Borrowing.content_id == Content.id).join(User).filter(
-        Borrowing.returned == False
-    ).group_by(Section.name).all()
+def count_per_service():
+    professional_counts_per_service = db.session.query(
+        Service.name,
+        func.count(distinct(Content.id))
+    ).join(Content, Content.service == Service.id) \
+     .group_by(Service.name).all()
 
-    section_names = [row[0] for row in reader_counts_per_section]
-    reader_counts = [row[1] for row in reader_counts_per_section]
+    service_names = [row[0] for row in professional_counts_per_service]
+    professional_counts = [row[1] for row in professional_counts_per_service]
 
-    plt.bar(section_names, reader_counts)
-    plt.xlabel('Section')
-    plt.ylabel('Reader Count')
-    plt.title('Reader Count Per Section')
+    plt.bar(service_names, professional_counts)
+    plt.xlabel('Service')
+    plt.ylabel('Professional Count')
+    plt.title('Professional Count Per Service')
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.savefig('reader_count_per_section.png')
+    plt.savefig('professional_count_per_service.png')
     plt.close()
 
-    app.logger.info("Section Based Reader Count Chart Fetched")
-    return send_file('reader_count_per_section.png', mimetype='image/png')
+    app.logger.info("Service-Based Professional Count Chart Fetched")
+    return send_file('professional_count_per_service.png', mimetype='image/png')
 
 
 @app.route('/user_count_gender', methods=['GET'])
 @jwt_required()
-def user_count_gender_chart():
+def user_count_gender():
     
-    male_count = User.query.filter_by(gender='male').count()
-    female_count = User.query.filter_by(gender='female').count()
+    male_count = User.query.filter_by(role='LIBRARIAN', gender='male').count()
+    female_count = User.query.filter_by(role='LIBRARIAN', gender='female').count()
 
-    if np.isnan(male_count) or np.isnan(female_count):
-        app.logger.warn("Invalid Data For Pie Chart")
-        return "Error: Invalid data for pie chart"
+    # Check for zero counts to avoid issues with empty data
+    if male_count == 0 and female_count == 0:
+        app.logger.warn("No professional data available for pie chart")
+        return "Error: No data available for pie chart"
 
     labels = ['Male', 'Female']
     counts = [male_count, female_count]
@@ -1578,7 +1578,7 @@ def user_count_gender_chart():
     plt.figure(figsize=(8, 8))
     plt.pie(counts, labels=labels, autopct='%1.1f%%', startangle=140)
     plt.axis('equal')
-    plt.title('Male vs Female Users')
+    plt.title('Male vs Female Professionals')
 
     buffer = BytesIO()
     plt.savefig(buffer, format='png')
@@ -1595,68 +1595,85 @@ def user_count_gender_chart():
 @jwt_required(optional=True)
 def search_result():
     query = request.args.get('query')
-
     current_user_id = get_jwt_identity()
+    
+    current_user_role = None
+    if current_user_id:
+        current_user = User.query.get(current_user_id)
+        if current_user:
+            current_user_role = current_user.role
+            if current_user_role == 'LIBRARIAN':
+                return jsonify({
+                    'results': [],
+                    'userRole': current_user_role
+                })
 
-    librarian_users = User.query.filter(User.is_active == 1, User.role == "LIBRARIAN",(User.city.ilike(f'%{query}%')) | (User.state.ilike(f'%{query}%'))).all()
+    librarian_users = User.query.filter(
+        User.is_active == 1, 
+        User.role == "LIBRARIAN",
+        (User.city.ilike(f'%{query}%')) | (User.state.ilike(f'%{query}%'))
+    ).all()
 
     uploaded_by_ids = [user.id for user in librarian_users]
-
+    
     librarian_content_results = Content.query.filter(Content.uploaded_by_id.in_(uploaded_by_ids))
     content_results = Content.query.filter(Content.title.ilike(f'%{query}%'))
-
     results = librarian_content_results.union(content_results).all()
 
     formatted_content_results = []
-    for content in results:  
-        image_data = content.image
-        image_base64 = None
-        if image_data:
-            image_base64 = base64.b64encode(image_data).decode('utf-8')
-
-        is_issued = False
-        is_read = False
-        is_requested = False
-        # is_wishlisted = False
-        if current_user_id:
-            borrowing = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id, returned=False).first()
-            if borrowing:
-                is_issued = True
-
-            # wishlist_item = Wishlist.query.filter_by(content_id=content.id, user_id=current_user_id).first()
-            # if wishlist_item:
-            #     is_wishlisted = True
-
-            read = Borrowing.query.filter_by(content_id=content.id, member_id=current_user_id, returned=False).first()
-            if read:
-                is_read = True
-
-            issueRequest =Requests.query.filter_by(contentId=content.id, userId=current_user_id, response='Pending').first()
-            if issueRequest:
-                is_requested = True
-
-        
+    for content in results:
         result = {
             'id': content.id,
             'title': content.title,
             'author': content.author,
-            'section': content.section,
+            'service': content.service,
             'rating': db.session.query(func.avg(Review.rating)).filter(Review.content_id == content.id).scalar(),
             'imageType': content.imageType,
-            'image': image_base64,
-            'isRead': is_read,
-            'isIssued': is_issued,
-            # 'isWishlisted': is_wishlisted,
-            'isRequested': is_requested
+            'image': base64.b64encode(content.image).decode('utf-8') if content.image else None,
         }
+
+        if current_user_role == 'ADMIN':
+            result.update({
+                'uploaded_by': content.uploaded_by_id,
+                'publish_year': content.publish_year,
+                'price': content.price,
+                'no_of_pages': content.no_of_pages,
+                'is_verified': content.is_verified
+            })
+        else:
+            is_issued = False
+            is_read = False
+            is_requested = False
+            
+            if current_user_id:
+                borrowing = Borrowing.query.filter_by(
+                    content_id=content.id, 
+                    member_id=current_user_id, 
+                    returned=False
+                ).first()
+                is_issued = bool(borrowing)
+                is_read = bool(borrowing)
+
+                issueRequest = Requests.query.filter_by(
+                    contentId=content.id, 
+                    userId=current_user_id, 
+                    response='Pending'
+                ).first()
+                is_requested = bool(issueRequest)
+
+            result.update({
+                'isRead': is_read,
+                'isIssued': is_issued,
+                'isRequested': is_requested
+            })
 
         formatted_content_results.append(result)
 
-
     app.logger.info("Search Result Fetched")
-    return jsonify({'results': formatted_content_results})
-
-
+    return jsonify({
+        'results': formatted_content_results,
+        'userRole': current_user_role
+    })
 # @app.route('/wishlist/<int:user_id>', methods=['GET'])
 # @jwt_required()
 # def get_user_wishlist(user_id):
@@ -1754,7 +1771,7 @@ def get_approvals():
                 'file': base64.b64encode(content.file).decode('utf-8') if content.file else None,
                 'pdf_file_name': content.pdf_file_name,
                 'price': content.price,
-                'section': content.section
+                'service': content.service
             })
         return jsonify(approve_list), 200
     except Exception as e:
@@ -1890,7 +1907,7 @@ def detailed_view(content_id, user_id):
             'username': user.uname,
             'pin': user.pin,
             'phno': user.phNumber,
-            'sectionName': Section.query.get(content.section).name,
+            'serviceName': Service.query.get(content.service).name,
             'experience': content.no_of_pages,
             'desc': content.author,
             'additionalCharges': content.price
@@ -1918,7 +1935,7 @@ def more_details(content_id, user_id):
             'username': user.uname,
             'pin': user.pin,
             'phno': user.phNumber,
-            'sectionName': Section.query.get(content.section).name,
+            'serviceName': Service.query.get(content.service).name,
             'experience': content.no_of_pages,
             'desc': content.author,
             'additionalCharges': content.price
@@ -1961,15 +1978,15 @@ def all_details(user_id):
             print(content)
             # Check if content exists for this user
             if content:
-                section = Section.query.get(content.section)
-                section_name = section.name if section else "N/A"
+                service = Service.query.get(content.service)
+                service_name = service.name if service else "N/A"
 
                 image_base64 = base64.b64encode(content.image).decode('utf-8') if content.image else None
                 pdf_base64 = base64.b64encode(content.file).decode('utf-8') if content.file else None
                 # Add content-related fields to response data
                 response_data.update({
                     'cid':content.id,
-                    'section': section_name,
+                    'service': service_name,
                     'author': content.author,
                     'price': content.price,
                     'no_of_pages': content.no_of_pages,
@@ -2061,11 +2078,11 @@ def reject_approval(content_id):
     
 #     if (purchase_data == None):
 #         user = User.query.get(current_user_id)
-#         if user.balance_amt < content.price:
-#             app.logger.warn("Insufficient Account balance_amt")
-#             return abort(400, description="Insufficient balance_amt to purchase content")
+#         if user.account < content.price:
+#             app.logger.warn("Insufficient Account account")
+#             return abort(400, description="Insufficient account to purchase content")
 
-#         user.balance_amt -= content.price
+#         user.account -= content.price
 #         new_purchase = Purchase(user_id = current_user_id, content_id = contentId, amount=content_amount)
 #         db.session.add(new_purchase)
 #         db.session.commit()
@@ -2105,7 +2122,7 @@ book_parser.add_argument("author")
 book_parser.add_argument("publish_year")
 book_parser.add_argument("no_of_pages")
 book_parser.add_argument("price")
-book_parser.add_argument("section_id")
+book_parser.add_argument("service_id")
 
 user_parser = reqparse.RequestParser()
 user_parser.add_argument("fname")
@@ -2114,7 +2131,7 @@ user_parser.add_argument("uname")
 user_parser.add_argument("email")
 user_parser.add_argument("password")
 user_parser.add_argument("role")
-user_parser.add_argument("balance_amt")
+user_parser.add_argument("account")
 
 review_parser = reqparse.RequestParser()
 review_parser.add_argument("rating")
@@ -2135,7 +2152,7 @@ class BookApi(Resource):
                 "publish_year": entry.publish_year,
                 "no_of_pages": entry.no_of_pages,
                 "price": entry.price,
-                "section_id": entry.section,
+                "service_id": entry.service,
             }
             return jsonobj
         else:
@@ -2148,15 +2165,15 @@ class BookApi(Resource):
         publish_year_u = args.get("publish_year", None)
         no_of_pages_u = args.get("no_of_pages", None)
         price_u = args.get("price", None)
-        section_id_u = args.get("section_id", None)
-        if not all([title_u, author_u, publish_year_u, no_of_pages_u, price_u, section_id_u]):
+        service_id_u = args.get("service_id", None)
+        if not all([title_u, author_u, publish_year_u, no_of_pages_u, price_u, service_id_u]):
             raise CourseNameError(status_code=400, error_code="BOOK_ERROR", error_message="Sufficient data not found")
 
         entry = Content.query.filter_by(title=title_u).first()
         if entry:
             return "Book already exists", 409
 
-        entry = Content(title=title_u, author=author_u, publish_year=publish_year_u, no_of_pages=no_of_pages_u, price=price_u, section=section_id_u,image=None,imageType=None, file=None,pdf_file_name=None )
+        entry = Content(title=title_u, author=author_u, publish_year=publish_year_u, no_of_pages=no_of_pages_u, price=price_u, service=service_id_u,image=None,imageType=None, file=None,pdf_file_name=None )
         db.session.add(entry)
         db.session.commit()
         jsonobj = {
@@ -2166,7 +2183,7 @@ class BookApi(Resource):
             "publish_year": entry.publish_year,
             "no_of_pages": entry.no_of_pages,
             "price": entry.price,
-            "section_id": entry.section,
+            "service_id": entry.service,
         }
         return jsonobj, 201
 
@@ -2181,8 +2198,8 @@ class BookApi(Resource):
         publish_year_u = args.get("publish_year", None)
         no_of_pages_u = args.get("no_of_pages", None)
         price_u = args.get("price", None)
-        section_id_u = args.get("section_id", None)
-        if not all([title_u, author_u, publish_year_u, no_of_pages_u, price_u, section_id_u]):
+        service_id_u = args.get("service_id", None)
+        if not all([title_u, author_u, publish_year_u, no_of_pages_u, price_u, service_id_u]):
             raise CourseNameError(status_code=400, error_code="BOOK_ERROR", error_message="Sufficient data not found")
 
         entry.title = title_u
@@ -2190,7 +2207,7 @@ class BookApi(Resource):
         entry.publish_year = publish_year_u
         entry.no_of_pages = no_of_pages_u
         entry.price = price_u
-        entry.section = section_id_u
+        entry.service = service_id_u
         db.session.commit()
         jsonobj = {
             "book_id": entry.id,
@@ -2199,7 +2216,7 @@ class BookApi(Resource):
             "publish_year": entry.publish_year,
             "no_of_pages": entry.no_of_pages,
             "price": entry.price,
-            "section_id": entry.section,
+            "service_id": entry.service,
         }
         return jsonobj, 200
 
@@ -2224,7 +2241,7 @@ class UserApi(Resource):
                 "uname": entry.uname,
                 "email": entry.email,
                 "role": entry.role,
-                "balance_amt": entry.balance_amt,
+                "account": entry.account,
             }
             return jsonobj
         else:
@@ -2238,7 +2255,7 @@ class UserApi(Resource):
         email_u = args.get("email", None)
         password_u = args.get("password", None)
         role_u = args.get("role", None)
-        balance_amt_u = args.get("balance_amt", None)
+        account_u = args.get("account", None)
         if not all([fname_u, lname_u, uname_u, email_u, password_u, role_u]):
             raise CourseNameError(status_code=400, error_code="USER_ERROR", error_message="Sufficient data not found")
 
@@ -2253,7 +2270,7 @@ class UserApi(Resource):
             email=email_u,
             password=password_u,
             role=role_u,
-            balance_amt=balance_amt_u if balance_amt_u else 1000.0,
+            account=account_u if account_u else 1000.0,
         )
         db.session.add(new_user)
         db.session.commit()
@@ -2264,7 +2281,7 @@ class UserApi(Resource):
             "uname": new_user.uname,
             "email": new_user.email,
             "role": new_user.role,
-            "balance_amt": new_user.balance_amt,
+            "account": new_user.account,
         }
         return jsonobj, 201
 
@@ -2280,7 +2297,7 @@ class UserApi(Resource):
         email_u = args.get("email", None)
         password_u = args.get("password", None)
         role_u = args.get("role", None)
-        balance_amt_u = args.get("balance_amt", None)
+        account_u = args.get("account", None)
         if not all([fname_u, lname_u, uname_u, email_u, password_u, role_u]):
             raise CourseNameError(status_code=400, error_code="USER_ERROR", error_message="Sufficient data not found")
 
@@ -2290,7 +2307,7 @@ class UserApi(Resource):
         entry.email = email_u
         entry.password = password_u
         entry.role = role_u
-        entry.balance_amt = balance_amt_u if balance_amt_u else entry.balance_amt
+        entry.account = account_u if account_u else entry.account
         db.session.commit()
         jsonobj = {
             "user_id": entry.id,
@@ -2299,7 +2316,7 @@ class UserApi(Resource):
             "uname": entry.uname,
             "email": entry.email,
             "role": entry.role,
-            "balance_amt": entry.balance_amt,
+            "account": entry.account,
         }
         return jsonobj, 200
 
